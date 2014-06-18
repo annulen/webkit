@@ -90,6 +90,13 @@ RenderWidget* HTMLObjectElement::renderWidgetLoadingPlugin() const
     return renderWidget(); // This will return 0 if the renderer is not a RenderWidget.
 }
 
+#if PLATFORM(QT)
+static bool isQtPluginServiceType(const String& serviceType)
+{
+    return equalIgnoringCase(serviceType, "application/x-qt-plugin") || equalIgnoringCase(serviceType, "application/x-qt-styled-widget");
+}
+#endif
+
 bool HTMLObjectElement::isPresentationAttribute(const QualifiedName& name) const
 {
     if (name == borderAttr)
@@ -183,7 +190,12 @@ void HTMLObjectElement::parametersForPlugin(Vector<String>& paramNames, Vector<S
 
         // FIXME: url adjustment does not belong in this function.
         if (url.isEmpty() && urlParameter.isEmpty() && (equalIgnoringCase(name, "src") || equalIgnoringCase(name, "movie") || equalIgnoringCase(name, "code") || equalIgnoringCase(name, "url")))
+#if PLATFORM(QT)
+                && !isQtPluginServiceType(serviceType)
+#endif
+        {
             urlParameter = stripLeadingAndTrailingHTMLSpaces(param.value());
+        }
         // FIXME: serviceType calculation does not belong in this function.
         if (serviceType.isEmpty() && equalIgnoringCase(name, "type")) {
             serviceType = param.value();
@@ -223,6 +235,11 @@ void HTMLObjectElement::parametersForPlugin(Vector<String>& paramNames, Vector<S
     // if we know that resource points to a plug-in.
 #if PLATFORM(IOS)
     if (shouldNotPerformURLAdjustment())
+        return;
+#endif
+
+#if PLATFORM(QT)
+    if (isQtPluginServiceType(serviceType))
         return;
 #endif
 
@@ -273,7 +290,7 @@ bool HTMLObjectElement::shouldAllowQuickTimeClassIdQuirk()
 bool HTMLObjectElement::hasValidClassId()
 {
 #if PLATFORM(QT)
-    if (equalIgnoringCase(serviceType(), "application/x-qt-plugin") || equalIgnoringCase(serviceType(), "application/x-qt-styled-widget"))
+    if (isQtPluginServiceType(serviceType()))
         return true;
 #endif
 
