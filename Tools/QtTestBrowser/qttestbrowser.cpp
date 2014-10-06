@@ -31,9 +31,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "QtTestSupport.h"
+#include "config.h"
+
 #include "launcherwindow.h"
 #include "urlloader.h"
+
+#if HAVE(QTTESTSUPPORT)
+#include "QtTestSupport.h"
+#endif
 
 WindowOptions windowOptions;
 
@@ -147,7 +152,9 @@ void LauncherApplication::handleUserOptions()
              << "[-offline-storage-database-enabled]"
              << "[-offline-web-application-cache-enabled]"
              << "[-set-offline-storage-default-quota maxSize]"
+#if HAVE(QTTESTSUPPORT)
              << "[-use-test-fonts]"
+#endif
              << "[-print-loaded-urls]"
              << "URLs";
         appQuit(0);
@@ -240,8 +247,10 @@ void LauncherApplication::handleUserOptions()
     }
 #endif
 
+#if HAVE(QTTESTSUPPORT)
     if (args.contains("-use-test-fonts"))
         WebKit::QtTestSupport::initializeTestFonts();
+#endif
 
     if (args.contains("-print-loaded-urls"))
         windowOptions.printLoadedUrls = true;
