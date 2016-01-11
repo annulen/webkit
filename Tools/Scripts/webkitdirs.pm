@@ -126,6 +126,7 @@ my $iosVersion;
 my $generateDsym;
 my $isCMakeBuild;
 my $isGtk;
+my $isQt;
 my $isWinCairo;
 my $isWin64;
 my $isEfl;
@@ -440,6 +441,7 @@ sub argumentsForConfiguration()
     push(@args, '--64-bit') if (isWin64());
     push(@args, '--gtk') if isGtk();
     push(@args, '--efl') if isEfl();
+    push(@args, '--qt') if isQt();
     push(@args, '--wincairo') if isWinCairo();
     push(@args, '--inspector-frontend') if isInspectorFrontend();
     return @args;
@@ -636,7 +638,7 @@ sub executableProductDir
     my $productDirectory = productDir();
 
     my $binaryDirectory;
-    if (isEfl() || isGtk()) {
+    if (isEfl() || isGtk() || isQt()) {
         $binaryDirectory = "bin";
     } elsif (isAnyWindows()) {
         $binaryDirectory = isWin64() ? "bin64" : "bin32";
@@ -907,7 +909,7 @@ sub builtDylibPathForName
         my $extension = isDarwin() ? ".dylib" : ".so";
         return "$configurationProductDir/lib/libwebkit2gtk-4.0" . $extension;
     }
-    if (isEfl()) {
+    if (isEfl() || isQt()) {
         return "$configurationProductDir/lib/libewebkit2.so";
     }
     if (isIOSWebKit()) {
@@ -1047,6 +1049,18 @@ sub isGtk()
 {
     determineIsGtk();
     return $isGtk;
+}
+
+sub determineIsQt()
+{
+    return if defined($isQt);
+    $isQt = checkForArgumentAndRemoveFromARGV("--qt");
+}
+
+sub isQt()
+{
+    determineIsQt();
+    return $isQt;
 }
 
 # Determine if this is debian, ubuntu, linspire, or something similar.
@@ -1463,7 +1477,7 @@ sub relativeScriptsDir()
 sub launcherPath()
 {
     my $relativeScriptsPath = relativeScriptsDir();
-    if (isGtk() || isEfl()) {
+    if (isGtk() || isEfl() || isQt()) {
         return "$relativeScriptsPath/run-minibrowser";
     } elsif (isAppleWebKit()) {
         return "$relativeScriptsPath/run-safari";
@@ -1472,7 +1486,7 @@ sub launcherPath()
 
 sub launcherName()
 {
-    if (isGtk() || isEfl()) {
+    if (isGtk() || isEfl() || isQt()) {
         return "MiniBrowser";
     } elsif (isAppleMacWebKit()) {
         return "Safari";
@@ -1500,7 +1514,7 @@ sub checkRequiredSystemConfig
             print "most likely fail. The latest Xcode is available from the App Store.\n";
             print "*************************************************************\n";
         }
-    } elsif (isGtk() or isEfl() or isWindows() or isCygwin()) {
+    } elsif (isGtk() or isEfl() or isQt() or isWindows() or isCygwin()) {
         my @cmds = qw(bison gperf flex);
         my @missing = ();
         my $oldPath = $ENV{PATH};
@@ -1824,7 +1838,7 @@ sub isCachedArgumentfileOutOfDate($@)
 
 sub wrapperPrefixIfNeeded()
 {
-    if (isWindows() || isCygwin()) {
+    if (isWindows() || isCygwin() || isQt()) {
         return ();
     }
     if (isAppleMacWebKit()) {
@@ -1976,8 +1990,8 @@ sub generateBuildSystemFromCMakeProject
         push @args, '-G "Visual Studio 14 2015 Win64"';
     }
 
-    # GTK+ has a production mode, but build-webkit should always use developer mode.
-    push @args, "-DDEVELOPER_MODE=ON" if isEfl() || isGtk();
+    # Some ports have production mode, but build-webkit should always use developer mode.
+    push @args, "-DDEVELOPER_MODE=ON" if isEfl() || isGtk() || isQt();
 
     # Don't warn variables which aren't used by cmake ports.
     push @args, "--no-warn-unused-cli";
@@ -2017,7 +2031,7 @@ sub buildCMakeGeneratedProject($)
     push @args, ("--", $makeArgs) if $makeArgs;
 
     # GTK can use a build script to preserve colors and pretty-printing.
-    if (isGtk() && -e "$buildPath/build.sh") {
+    if ((isGtk() || isQt()) && -e "$buildPath/build.sh") {
         chdir "$buildPath" or die;
         $command = "$buildPath/build.sh";
         @args = ($makeArgs);
@@ -2079,6 +2093,7 @@ sub cmakeBasedPortName()
     return "Mac" if isAppleMacWebKit();
     return "WinCairo" if isWinCairo();
     return "AppleWin" if isAppleWinWebKit();
+    return "Qt" if isQt();
     return "";
 }
 
@@ -2090,7 +2105,7 @@ sub determineIsCMakeBuild()
 
 sub isCMakeBuild()
 {
-    if (isEfl() || isGtk() || isAnyWindows()) {
+    if (isEfl() || isGtk() || isQt() || isAnyWindows()) {
         return 1;
     }
     determineIsCMakeBuild();
