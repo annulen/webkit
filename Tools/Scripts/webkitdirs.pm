@@ -1210,7 +1210,7 @@ sub isAppleMacWebKit()
 
 sub isAppleWinWebKit()
 {
-    return (isCygwin() || isWindows()) && !isWinCairo() && !isGtk();
+    return (isCygwin() || isWindows()) && !isWinCairo() && !isGtk() && !isQt();
 }
 
 sub iOSSimulatorDevicesPath
