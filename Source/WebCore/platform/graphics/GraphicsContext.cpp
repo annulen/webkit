@@ -525,7 +525,7 @@ bool GraphicsContext::getShadow(FloatSize& offset, float& blur, Color& color) co
     return hasShadow();
 }
 
-#if USE(CAIRO)
+#if PLATFORM(QT) || USE(CAIRO)
 bool GraphicsContext::mustUseShadowBlur() const
 {
     // We can't avoid ShadowBlur if the shadow has blur.
@@ -879,7 +879,7 @@ void GraphicsContext::clipOutRoundedRect(const FloatRoundedRect& rect)
     clipOut(path);
 }
 
-#if !USE(CG) && !USE(CAIRO)
+#if !USE(CG) && !PLATFORM(QT) && !USE(CAIRO)
 IntRect GraphicsContext::clipBounds() const
 {
     ASSERT_NOT_REACHED();
@@ -947,7 +947,7 @@ void GraphicsContext::fillRoundedRect(const FloatRoundedRect& rect, const Color&
         fillRect(rect.rect(), color, compositeOperation(), blendMode);
 }
 
-#if !USE(CG) && !USE(CAIRO)
+#if !USE(CG) && !PLATFORM(QT) && !USE(CAIRO)
 void GraphicsContext::fillRectWithRoundedHole(const IntRect& rect, const FloatRoundedRect& roundedHoleRect, const Color& color)
 {
     if (paintingDisabled())
@@ -1009,7 +1009,7 @@ void GraphicsContext::setPlatformTextDrawingMode(TextDrawingModeFlags)
 }
 #endif
 
-#if !USE(CAIRO)
+#if !PLATFORM(QT) && !USE(CAIRO)
 void GraphicsContext::setPlatformStrokeStyle(StrokeStyle)
 {
 }

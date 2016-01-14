@@ -51,6 +51,10 @@
 #include "MediaStreamPrivate.h"
 #endif
 
+#if PLATFORM(QT)
+#include <QtGlobal>
+#endif
+
 #if USE(GSTREAMER)
 #include "MediaPlayerPrivateGStreamer.h"
 #define PlatformMediaEngineClassName MediaPlayerPrivateGStreamer
@@ -80,6 +84,10 @@
 
 #if PLATFORM(WIN) && USE(AVFOUNDATION) && !USE(GSTREAMER)
 #include "MediaPlayerPrivateAVFoundationCF.h"
+#elif PLATFORM(QT)
+#if USE(QT_MULTIMEDIA) && !USE(GSTREAMER)
+#include "MediaPlayerPrivateQt.h"
+#define PlatformMediaEngineClassName MediaPlayerPrivateQt
 #endif
 
 namespace WebCore {

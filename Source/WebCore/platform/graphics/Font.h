@@ -45,6 +45,13 @@
 #include <wtf/RetainPtr.h>
 #endif
 
+#if PLATFORM(QT)
+#include <QRawFont>
+QT_BEGIN_NAMESPACE
+class QTextLayout;
+QT_END_NAMESPACE
+#endif
+
 #if PLATFORM(WIN)
 #include <usp10.h>
 #endif
@@ -55,6 +62,10 @@
 
 #if USE(CG)
 #include <WebCore/CoreGraphicsSPI.h>
+#endif
+
+#if PLATFORM(QT)
+#include <QRawFont>
 #endif
 
 namespace WebCore {
@@ -211,7 +222,16 @@ public:
     bool canRenderCombiningCharacterSequence(const UChar*, size_t) const;
 #endif
 
+#if PLATFORM(QT)
+    QRawFont rawFont() const;
+    QFont syntheticFont() const;
+#endif
+
     bool applyTransforms(GlyphBufferGlyph*, GlyphBufferAdvance*, size_t glyphCount, bool enableKerning, bool requiresShaping) const;
+
+#if PLATFORM(QT)
+    QRawFont getQtRawFont() const { return m_platformData.rawFont(); }
+#endif
 
 #if PLATFORM(WIN)
     SCRIPT_FONTPROPERTIES* scriptFontProperties() const;
@@ -314,6 +334,10 @@ private:
 #if PLATFORM(WIN)
     mutable SCRIPT_CACHE m_scriptCache;
     mutable SCRIPT_FONTPROPERTIES* m_scriptFontProperties;
+#endif
+
+#if PLATFORM(QT)
+    void initFormatForTextLayout(QTextLayout*, const TextRun&) const;
 #endif
 
     unsigned m_treatAsFixedPitch : 1;
