@@ -171,6 +171,11 @@
 #include "Vibration.h"
 #endif
 
+#if PLATFORM(QT)
+#include "NetworkingContext.h"
+#include <QNetworkAccessManager>
+#endif
+
 #if ENABLE(MEDIA_STREAM)
 #include "MockRealtimeMediaSourceCenter.h"
 #include "RTCPeerConnection.h"
@@ -398,6 +403,13 @@ void Internals::resetToConsistentState(Page* page)
 #endif
 
     page->setShowAllPlugins(false);
+
+#if PLATFORM(QT)
+    if (NetworkingContext* context = page->mainFrame().loader().networkingContext()) {
+        if (QNetworkAccessManager* qnam = context->networkAccessManager())
+            qnam->clearAccessCache();
+    }
+#endif
 }
 
 Internals::Internals(Document* document)
