@@ -11,6 +11,9 @@ list(APPEND WebCore_INCLUDE_DIRECTORIES
 )
 
 list(APPEND WebCore_SOURCES
+    accessibility/qt/AccessibilityObjectQt.cpp
+    page/qt/DragControllerQt.cpp
+    page/qt/EventHandlerQt.cpp
     history/qt/HistoryItemQt.cpp
     platform/audio/qt/AudioBusQt.cpp
     platform/graphics/gpu/qt/DrawingBufferQt.cpp
