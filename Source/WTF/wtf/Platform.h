@@ -1064,7 +1064,9 @@
 #endif
 
 #if PLATFORM(QT)
+#ifdef __cplusplus
 #include <qglobal.h>
+#endif
 #if defined(QT_OPENGL_ES_2) && !defined(USE_OPENGL_ES_2)
 #define USE_OPENGL_ES_2 1
 #endif
