@@ -39,7 +39,7 @@ public:
     FontCustomPlatformData() { }
 
     FontPlatformData fontPlatformData(int size, bool bold, bool italic, FontOrientation = Horizontal,
-                                      FontWidthVariant = RegularWidth, FontRenderingMode = NormalRenderingMode);
+                                      FontWidthVariant = RegularWidth, FontRenderingMode = FontRenderingMode::Normal);
 
     static bool supportsFormat(const String&);
 
