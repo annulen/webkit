@@ -124,10 +124,12 @@ list(APPEND WebCore_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Gui_INCLUDES}
     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
     ${Qt5Network_INCLUDES}
+    ${Qt5Sql_INCLUDE_DIRS}
 )
 
 list(APPEND WebCore_LIBRARIES
     ${Qt5Core_LIBRARIES}
     ${Qt5Gui_LIBRARIES}
     ${Qt5Network_LIBRARIES}
+    ${Qt5Sql_LIBRARIES}
 )
