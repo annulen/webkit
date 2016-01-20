@@ -58,6 +58,7 @@ public:
     bool imageComplete() const { return m_imageComplete; }
 
     CachedImage* image() const { return m_image.get(); }
+    void setImage(CachedImage*);
     void clearImage(); // Cancels pending beforeload and load events, and doesn't dispatch new ones.
 
     void setLoadManually(bool loadManually) { m_loadManually = loadManually; }
