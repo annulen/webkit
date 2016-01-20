@@ -177,8 +177,9 @@ public:
     QVariant userData() const { return m_userData; }
     void setUserData(const QVariant& userData) { m_userData = userData; }
 
-    static PassRefPtr<HistoryItem> restoreState(QDataStream& buffer, int version);
-    QDataStream& saveState(QDataStream& out, int version) const;
+// FIXME: See in .cpp file
+//    static PassRefPtr<HistoryItem> restoreState(QDataStream& buffer, int version);
+//    QDataStream& saveState(QDataStream& out, int version) const;
 #endif
 
 #ifndef NDEBUG
