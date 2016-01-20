@@ -44,7 +44,7 @@
 #include <wtf/glib/GRefPtr.h>
 #elif PLATFORM(EFL)
 #include <DispatchQueueEfl.h>
-#elif PLATFORM(QT) && !OS(DARWIN)
+#elif PLATFORM(QT) && !OS(DARWIN) && !OS(WINDOWS)
 #include <QSocketNotifier>
 #elif OS(WINDOWS)
 #include <wtf/HashMap.h>
@@ -83,7 +83,7 @@ public:
     void unregisterSocketEventHandler(int);
 #elif OS(DARWIN)
     dispatch_queue_t dispatchQueue() const { return m_dispatchQueue; }
-#elif PLATFORM(QT)
+#elif PLATFORM(QT) && !OS(WINDOWS)
     QSocketNotifier* registerSocketEventHandler(int, QSocketNotifier::Type, std::function<void()>);
 #endif
 
@@ -118,7 +118,7 @@ private:
 #elif OS(DARWIN)
     static void executeFunction(void*);
     dispatch_queue_t m_dispatchQueue;
-#elif PLATFORM(QT)
+#elif PLATFORM(QT) && !OS(WINDOWS)
     class WorkItemQt;
     QThread* m_workThread;
     friend class WorkItemQt;

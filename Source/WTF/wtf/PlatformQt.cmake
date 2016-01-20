@@ -1,8 +1,16 @@
-list(APPEND WTF_SOURCES
-    qt/MainThreadQt.cpp
-    qt/RunLoopQt.cpp
-    qt/WorkQueueQt.cpp
-)
+if (WIN32)
+    list(APPEND WTF_SOURCES
+        win/MainThreadWin.cpp
+        win/WorkItemWin.cpp
+        win/WorkQueueWin.cpp
+    )
+else ()
+    list(APPEND WTF_SOURCES
+        qt/MainThreadQt.cpp
+        qt/RunLoopQt.cpp
+        qt/WorkQueueQt.cpp
+    )
+endif ()
 
 list(APPEND WTF_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Core_INCLUDES}
