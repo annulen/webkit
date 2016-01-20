@@ -89,6 +89,7 @@
 #include "MediaPlayerPrivateQt.h"
 #define PlatformMediaEngineClassName MediaPlayerPrivateQt
 #endif
+#endif
 
 namespace WebCore {
 
