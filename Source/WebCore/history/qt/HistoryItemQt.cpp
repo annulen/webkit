@@ -21,13 +21,15 @@
 #include "HistoryItem.h"
 
 #include "FormData.h"
-#include <wtf/Decoder.h>
-#include <wtf/Encoder.h>
 #include <wtf/text/CString.h>
 
 using namespace WTF;
 
 namespace WebCore {
+
+/*
+FIXME: Old HistoryItem encoding/decoding was removed https://bugs.webkit.org/show_bug.cgi?id=134564
+Find out how people do it nowadays.
 
 static QDataStream& operator<<(QDataStream& stream, const String& str)
 {
@@ -237,5 +239,7 @@ QDataStream& WebCore::HistoryItem::saveState(QDataStream& out, int version) cons
 
     return out;
 }
+
+*/
 
 } // namespace WebCore
