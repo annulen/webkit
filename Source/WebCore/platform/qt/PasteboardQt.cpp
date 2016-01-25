@@ -338,10 +338,12 @@ Vector<String> Pasteboard::readFilenames()
     return fileList;
 }
 
+#if ENABLE(DRAG_SUPPORT)
 void Pasteboard::setDragImage(DragImageRef, const IntPoint& hotSpot)
 {
     notImplemented();
 }
+#endif
 
 void Pasteboard::writePasteboard(const Pasteboard& sourcePasteboard)
 {
