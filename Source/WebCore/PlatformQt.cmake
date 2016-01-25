@@ -38,6 +38,7 @@ list(APPEND WebCore_SOURCES
     bridge/qt/qt_instance.cpp
     bridge/qt/qt_pixmapruntime.cpp
     bridge/qt/qt_runtime.cpp
+    editing/qt/EditorQt.cpp
     history/qt/HistoryItemQt.cpp
     page/qt/DragControllerQt.cpp
     page/qt/EventHandlerQt.cpp
