@@ -118,11 +118,6 @@ void ResourceHandle::cancel()
     }
 }
 
-bool ResourceHandle::loadsBlocked()
-{
-    return false;
-}
-
 void ResourceHandle::platformLoadResourceSynchronously(NetworkingContext* context, const ResourceRequest& request, StoredCredentials /*storedCredentials*/, ResourceError& error, ResourceResponse& response, Vector<char>& data)
 {
     WebCoreSynchronousLoader syncLoader(error, response, data);
