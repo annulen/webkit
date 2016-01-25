@@ -45,18 +45,20 @@ namespace WebKit {
 
 void QtTestSupport::clearMemoryCaches()
 {
-    if (!memoryCache()->disabled()) {
-        memoryCache()->setDisabled(true);
-        memoryCache()->setDisabled(false);
+    auto& memoryCache = MemoryCache::singleton();
+    if (!memoryCache.disabled()) {
+        memoryCache.setDisabled(true);
+        memoryCache.setDisabled(false);
     }
 
-    int pageCapacity = WebCore::pageCache()->capacity();
-    WebCore::pageCache()->setCapacity(0);
-    WebCore::pageCache()->setCapacity(pageCapacity);
+    auto& pageCache = PageCache::singleton();
+    int pageCacheMaxSize = pageCache.maxSize();
+    pageCache.setMaxSize(0);
+    pageCache.setMaxSize(pageCacheMaxSize);
 
-    WebCore::fontCache()->invalidate();
+    FontCache::singleton().invalidate();
 
-    WebCore::CrossOriginPreflightResultCache::shared().empty();
+    WebCore::CrossOriginPreflightResultCache::singleton().empty();
 }
 
 void QtTestSupport::initializeTestFonts()
