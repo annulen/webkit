@@ -138,7 +138,7 @@ const double ForceAtForceClick = 2;
 #endif
     };
 
-#if PLATFORM(WIN)
+#if COMPILER(MSVC)
     // These methods are necessary to work around the fact that MSVC will not find a most-specific
     // operator== to use after implicitly converting MouseButton to an unsigned short.
     bool operator==(unsigned short a, MouseButton b);
