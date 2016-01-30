@@ -33,12 +33,12 @@ class QGraphicsWidgetPluginImpl : public QtPluginWidgetAdapter {
 public:
     QGraphicsWidgetPluginImpl(QGraphicsWidget *w) : m_graphicsWidget(w) { }
     virtual ~QGraphicsWidgetPluginImpl();
-    virtual void update(const QRect &) OVERRIDE;
-    virtual void setGeometryAndClip(const QRect&, const QRect&, bool) OVERRIDE;
+    virtual void update(const QRect &) override;
+    virtual void setGeometryAndClip(const QRect&, const QRect&, bool) override;
     virtual void setVisible(bool);
-    virtual void setStyleSheet(const QString&) OVERRIDE { }
-    virtual void setWidgetParent(QObject*) OVERRIDE;
-    virtual QObject* handle() const OVERRIDE;
+    virtual void setStyleSheet(const QString&) override { }
+    virtual void setWidgetParent(QObject*) override;
+    virtual QObject* handle() const override;
 private:
     QGraphicsWidget *m_graphicsWidget;
 };

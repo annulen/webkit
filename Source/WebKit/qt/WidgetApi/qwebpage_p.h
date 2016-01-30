@@ -75,69 +75,69 @@ public:
     static WebCore::Page* core(const QWebPage*);
 
     // Adapter implementation
-    virtual void show() OVERRIDE;
-    virtual void setFocus() OVERRIDE;
-    virtual void unfocus() OVERRIDE;
-    virtual void setWindowRect(const QRect &) OVERRIDE;
-    virtual QSize viewportSize() const OVERRIDE;
-    virtual QWebPageAdapter* createWindow(bool /*dialog*/) OVERRIDE;
-    virtual QObject* handle() OVERRIDE { return q; }
-    virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID) OVERRIDE;
-    virtual void javaScriptAlert(QWebFrameAdapter*, const QString& msg) OVERRIDE;
-    virtual bool javaScriptConfirm(QWebFrameAdapter*, const QString& msg) OVERRIDE;
-    virtual bool javaScriptPrompt(QWebFrameAdapter*, const QString& msg, const QString& defaultValue, QString* result) OVERRIDE;
-    virtual bool shouldInterruptJavaScript() OVERRIDE;
-    virtual void printRequested(QWebFrameAdapter*) OVERRIDE;
-    virtual void databaseQuotaExceeded(QWebFrameAdapter*, const QString& databaseName) OVERRIDE;
-    virtual void applicationCacheQuotaExceeded(QWebSecurityOrigin*, quint64 defaultOriginQuota, quint64 totalSpaceNeeded) OVERRIDE;
-    virtual void setToolTip(const QString&) OVERRIDE;
+    virtual void show() override;
+    virtual void setFocus() override;
+    virtual void unfocus() override;
+    virtual void setWindowRect(const QRect &) override;
+    virtual QSize viewportSize() const override;
+    virtual QWebPageAdapter* createWindow(bool /*dialog*/) override;
+    virtual QObject* handle() override { return q; }
+    virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID) override;
+    virtual void javaScriptAlert(QWebFrameAdapter*, const QString& msg) override;
+    virtual bool javaScriptConfirm(QWebFrameAdapter*, const QString& msg) override;
+    virtual bool javaScriptPrompt(QWebFrameAdapter*, const QString& msg, const QString& defaultValue, QString* result) override;
+    virtual bool shouldInterruptJavaScript() override;
+    virtual void printRequested(QWebFrameAdapter*) override;
+    virtual void databaseQuotaExceeded(QWebFrameAdapter*, const QString& databaseName) override;
+    virtual void applicationCacheQuotaExceeded(QWebSecurityOrigin*, quint64 defaultOriginQuota, quint64 totalSpaceNeeded) override;
+    virtual void setToolTip(const QString&) override;
 #if USE(QT_MULTIMEDIA)
-    virtual QWebFullScreenVideoHandler* createFullScreenVideoHandler() OVERRIDE;
+    virtual QWebFullScreenVideoHandler* createFullScreenVideoHandler() override;
 #endif
-    virtual QWebFrameAdapter* mainFrameAdapter() OVERRIDE;
-    virtual QStringList chooseFiles(QWebFrameAdapter*, bool allowMultiple, const QStringList& suggestedFileNames) OVERRIDE;
-    virtual QColor colorSelectionRequested(const QColor& selectedColor) OVERRIDE;
-    virtual QWebSelectMethod* createSelectPopup() OVERRIDE;
-    virtual QRect viewRectRelativeToWindow() OVERRIDE;
-    virtual void geolocationPermissionRequested(QWebFrameAdapter*) OVERRIDE;
-    virtual void geolocationPermissionRequestCancelled(QWebFrameAdapter*) OVERRIDE;
-    virtual void notificationsPermissionRequested(QWebFrameAdapter*) OVERRIDE;
-    virtual void notificationsPermissionRequestCancelled(QWebFrameAdapter*) OVERRIDE;
+    virtual QWebFrameAdapter* mainFrameAdapter() override;
+    virtual QStringList chooseFiles(QWebFrameAdapter*, bool allowMultiple, const QStringList& suggestedFileNames) override;
+    virtual QColor colorSelectionRequested(const QColor& selectedColor) override;
+    virtual QWebSelectMethod* createSelectPopup() override;
+    virtual QRect viewRectRelativeToWindow() override;
+    virtual void geolocationPermissionRequested(QWebFrameAdapter*) override;
+    virtual void geolocationPermissionRequestCancelled(QWebFrameAdapter*) override;
+    virtual void notificationsPermissionRequested(QWebFrameAdapter*) override;
+    virtual void notificationsPermissionRequestCancelled(QWebFrameAdapter*) override;
 
-    virtual void respondToChangedContents() OVERRIDE;
-    virtual void respondToChangedSelection() OVERRIDE;
-    virtual void microFocusChanged() OVERRIDE;
-    virtual void triggerCopyAction() OVERRIDE;
-    virtual void triggerActionForKeyEvent(QKeyEvent*) OVERRIDE;
-    virtual void clearUndoStack() OVERRIDE;
-    virtual bool canUndo() const OVERRIDE;
-    virtual bool canRedo() const OVERRIDE;
-    virtual void undo() OVERRIDE;
-    virtual void redo() OVERRIDE;
-    virtual void createUndoStep(QSharedPointer<UndoStepQt>) OVERRIDE;
-    virtual const char* editorCommandForKeyEvent(QKeyEvent*) OVERRIDE;
+    virtual void respondToChangedContents() override;
+    virtual void respondToChangedSelection() override;
+    virtual void microFocusChanged() override;
+    virtual void triggerCopyAction() override;
+    virtual void triggerActionForKeyEvent(QKeyEvent*) override;
+    virtual void clearUndoStack() override;
+    virtual bool canUndo() const override;
+    virtual bool canRedo() const override;
+    virtual void undo() override;
+    virtual void redo() override;
+    virtual void createUndoStep(QSharedPointer<UndoStepQt>) override;
+    virtual const char* editorCommandForKeyEvent(QKeyEvent*) override;
 
-    void updateNavigationActions() OVERRIDE;
+    void updateNavigationActions() override;
 
-    virtual QObject* inspectorHandle() OVERRIDE;
-    virtual void setInspectorFrontend(QObject*) OVERRIDE;
-    virtual void setInspectorWindowTitle(const QString&) OVERRIDE;
-    virtual void createWebInspector(QObject** inspectorView, QWebPageAdapter** inspectorPage) OVERRIDE;
-    virtual QStringList menuActionsAsText() OVERRIDE;
-    virtual void emitViewportChangeRequested() OVERRIDE;
-    virtual bool acceptNavigationRequest(QWebFrameAdapter*, const QNetworkRequest&, int type) OVERRIDE;
-    virtual void emitRestoreFrameStateRequested(QWebFrameAdapter*) OVERRIDE;
-    virtual void emitSaveFrameStateRequested(QWebFrameAdapter*, QWebHistoryItem*) OVERRIDE;
-    virtual void emitDownloadRequested(const QNetworkRequest&) OVERRIDE;
-    virtual void emitFrameCreated(QWebFrameAdapter*) OVERRIDE;
-    virtual QString userAgentForUrl(const QUrl &url) const OVERRIDE { return q->userAgentForUrl(url); }
-    virtual bool supportsErrorPageExtension() const OVERRIDE { return q->supportsExtension(QWebPage::ErrorPageExtension); }
-    virtual bool errorPageExtension(ErrorPageOption *, ErrorPageReturn *) OVERRIDE;
-    virtual QtPluginWidgetAdapter* createPlugin(const QString &, const QUrl &, const QStringList &, const QStringList &) OVERRIDE;
-    virtual QtPluginWidgetAdapter* adapterForWidget(QObject *) const OVERRIDE;
-    virtual bool requestSoftwareInputPanel() const OVERRIDE;
-    virtual void createAndSetCurrentContextMenu(const QList<MenuItemDescription>&, QBitArray*) OVERRIDE;
-    virtual bool handleScrollbarContextMenuEvent(QContextMenuEvent*, bool, ScrollDirection*, ScrollGranularity*) OVERRIDE;
+    virtual QObject* inspectorHandle() override;
+    virtual void setInspectorFrontend(QObject*) override;
+    virtual void setInspectorWindowTitle(const QString&) override;
+    virtual void createWebInspector(QObject** inspectorView, QWebPageAdapter** inspectorPage) override;
+    virtual QStringList menuActionsAsText() override;
+    virtual void emitViewportChangeRequested() override;
+    virtual bool acceptNavigationRequest(QWebFrameAdapter*, const QNetworkRequest&, int type) override;
+    virtual void emitRestoreFrameStateRequested(QWebFrameAdapter*) override;
+    virtual void emitSaveFrameStateRequested(QWebFrameAdapter*, QWebHistoryItem*) override;
+    virtual void emitDownloadRequested(const QNetworkRequest&) override;
+    virtual void emitFrameCreated(QWebFrameAdapter*) override;
+    virtual QString userAgentForUrl(const QUrl &url) const override { return q->userAgentForUrl(url); }
+    virtual bool supportsErrorPageExtension() const override { return q->supportsExtension(QWebPage::ErrorPageExtension); }
+    virtual bool errorPageExtension(ErrorPageOption *, ErrorPageReturn *) override;
+    virtual QtPluginWidgetAdapter* createPlugin(const QString &, const QUrl &, const QStringList &, const QStringList &) override;
+    virtual QtPluginWidgetAdapter* adapterForWidget(QObject *) const override;
+    virtual bool requestSoftwareInputPanel() const override;
+    virtual void createAndSetCurrentContextMenu(const QList<MenuItemDescription>&, QBitArray*) override;
+    virtual bool handleScrollbarContextMenuEvent(QContextMenuEvent*, bool, ScrollDirection*, ScrollGranularity*) override;
 
 
     void createMainFrame();
