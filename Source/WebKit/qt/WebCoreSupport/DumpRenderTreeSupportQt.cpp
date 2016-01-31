@@ -165,7 +165,7 @@ static QVariant convertJSValueToNodeVariant(JSC::JSObject* object, int *distance
 {
     if (!object || !object->inherits(JSNode::info()))
         return QVariant();
-    return QVariant::fromValue<QDRTNode>(QtDRTNodeRuntime::create((static_cast<JSNode*>(object))->impl()));
+    return QVariant::fromValue<QDRTNode>(QtDRTNodeRuntime::create(JSNode::toWrapped(object));
 }
 
 static JSC::JSValue convertNodeVariantToJSValue(JSC::ExecState* exec, WebCore::JSDOMGlobalObject* globalObject, const QVariant& variant)
