@@ -65,11 +65,6 @@ CookiesStrategy* PlatformStrategiesQt::createCookiesStrategy()
     return this;
 }
 
-DatabaseStrategy* PlatformStrategiesQt::createDatabaseStrategy()
-{
-    return this;
-}
-
 LoaderStrategy* PlatformStrategiesQt::createLoaderStrategy()
 {
     return this;
@@ -81,21 +76,6 @@ PasteboardStrategy* PlatformStrategiesQt::createPasteboardStrategy()
 }
 
 PluginStrategy* PlatformStrategiesQt::createPluginStrategy()
-{
-    return this;
-}
-
-SharedWorkerStrategy* PlatformStrategiesQt::createSharedWorkerStrategy()
-{
-    return this;
-}
-
-StorageStrategy* PlatformStrategiesQt::createStorageStrategy()
-{
-    return this;
-}
-
-VisitedLinkStrategy* PlatformStrategiesQt::createVisitedLinkStrategy()
 {
     return this;
 }
@@ -194,6 +174,7 @@ void PlatformStrategiesQt::getPluginInfo(const WebCore::Page* page, Vector<WebCo
 
 }
 
+#if 0
 // VisitedLinkStrategy
 
 bool PlatformStrategiesQt::isLinkVisited(Page* page, LinkHash hash, const URL& baseURL, const AtomicString& attributeURL)
@@ -216,3 +197,4 @@ void PlatformStrategiesQt::addVisitedLink(Page* page, LinkHash hash)
 {
     page->group().addVisitedLinkHash(hash);
 }
+#endif
