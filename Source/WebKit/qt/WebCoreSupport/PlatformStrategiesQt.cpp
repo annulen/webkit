@@ -50,7 +50,7 @@ using namespace WebCore;
 
 void PlatformStrategiesQt::initialize()
 {
-    DEFINE_STATIC_LOCAL(PlatformStrategiesQt, platformStrategies, ());
+    DEPRECATED_DEFINE_STATIC_LOCAL(PlatformStrategiesQt, platformStrategies, ());
     Q_UNUSED(platformStrategies);
 }
 
