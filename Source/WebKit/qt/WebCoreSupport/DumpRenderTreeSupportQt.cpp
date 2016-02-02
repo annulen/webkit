@@ -289,12 +289,12 @@ int DumpRenderTreeSupportQt::javaScriptObjectsCount()
 
 void DumpRenderTreeSupportQt::garbageCollectorCollect()
 {
-    gcController().garbageCollectNow();
+    GCController::singleton().garbageCollectNow();
 }
 
 void DumpRenderTreeSupportQt::garbageCollectorCollectOnAlternateThread(bool waitUntilDone)
 {
-    gcController().garbageCollectOnAlternateThreadForDebugging(waitUntilDone);
+    GCController::singleton().garbageCollectOnAlternateThreadForDebugging(waitUntilDone);
 }
 
 void DumpRenderTreeSupportQt::whiteListAccessFromOrigin(const QString& sourceOrigin, const QString& destinationProtocol, const QString& destinationHost, bool allowDestinationSubdomains)
@@ -389,8 +389,9 @@ void DumpRenderTreeSupportQt::setWindowsBehaviorAsEditingBehavior(QWebPageAdapte
 
 void DumpRenderTreeSupportQt::clearAllApplicationCaches()
 {
-    WebCore::cacheStorage().empty();
-    WebCore::cacheStorage().vacuumDatabaseFile();
+    auto& applicationCacheStorage = ApplicationCacheStorage::singleton();
+    applicationCacheStorage.empty();
+    applicationCacheStorage.vacuumDatabaseFile();
 }
 
 void DumpRenderTreeSupportQt::dumpFrameLoader(bool b)
