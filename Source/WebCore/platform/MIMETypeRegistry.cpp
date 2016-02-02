@@ -45,6 +45,11 @@
 #include <wtf/RetainPtr.h>
 #endif
 
+#if PLATFORM(QT)
+#include <QImageReader>
+#include <QImageWriter>
+#endif
+
 #if ENABLE(WEB_ARCHIVE) || ENABLE(MHTML)
 #include "ArchiveFactory.h"
 #endif
@@ -238,6 +243,18 @@ static void initializeSupportedImageMIMETypes()
     supportedImageResourceMIMETypes->add("image/webp");
 #endif
 
+#if PLATFORM(QT)
+    QList<QByteArray> mimeTypes = QImageReader::supportedMimeTypes();
+    Q_FOREACH(const QByteArray& mimeType, mimeTypes) {
+        supportedImageMIMETypes->add(mimeType.constData());
+        supportedImageResourceMIMETypes->add(mimeType.constData());
+    }
+#if ENABLE(SVG)
+    // Do not treat SVG as images directly if WebKit can handle them.
+    supportedImageMIMETypes->remove("image/svg+xml");
+    supportedImageResourceMIMETypes->remove("image/svg+xml");
+#endif
+#endif // PLATFORM(QT)
 #endif // USE(CG)
 }
 
@@ -262,6 +279,11 @@ static void initializeSupportedImageMIMETypesForEncoding()
     supportedImageMIMETypesForEncoding->add("image/jpeg");
     supportedImageMIMETypesForEncoding->add("image/gif");
 #endif
+#elif PLATFORM(QT)
+    QList<QByteArray> mimeTypes = QImageWriter::supportedMimeTypes();
+    Q_FOREACH(const QByteArray& mimeType, mimeTypes) {
+        supportedImageMIMETypesForEncoding->add(mimeType.constData());
+    }
 #elif PLATFORM(GTK)
     supportedImageMIMETypesForEncoding->add("image/png");
     supportedImageMIMETypesForEncoding->add("image/jpeg");
@@ -467,6 +489,7 @@ static void initializeMIMETypeRegistry()
     initializeUnsupportedTextMIMETypes();
 }
 
+#if !PLATFORM(QT)
 String MIMETypeRegistry::getMIMETypeForPath(const String& path)
 {
     size_t pos = path.reverseFind('.');
@@ -478,6 +501,7 @@ String MIMETypeRegistry::getMIMETypeForPath(const String& path)
     }
     return defaultMIMEType();
 }
+#endif
 
 bool MIMETypeRegistry::isSupportedImageMIMEType(const String& mimeType)
 {
@@ -647,7 +671,7 @@ const String& defaultMIMEType()
     return defaultMIMEType;
 }
 
-#if !USE(CURL)
+#if !PLATFORM(QT) && !USE(CURL)
 String MIMETypeRegistry::getNormalizedMIMEType(const String& mimeType)
 {
     return mimeType;

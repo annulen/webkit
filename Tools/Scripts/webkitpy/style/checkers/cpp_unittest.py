@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2011 Google Inc. All rights reserved.
 # Copyright (C) 2009 Torch Mobile Inc.
-# Copyright (C) 2009, 2013 Apple Inc. All rights reserved.
+# Copyright (C) 2009 Apple Inc. All rights reserved.
 # Copyright (C) 2010 Chris Jerdonek (cjerdonek@webkit.org)
 #
 # Redistribution and use in source and binary forms, with or without
@@ -1676,12 +1676,17 @@ class CppStyleTest(CppStyleTestBase):
                          '  [whitespace/parens] [5]')
         self.assert_lint('for (foo; bar; ) {', '')
         self.assert_lint('for ((foo); (bar); ) {', '')
+        self.assert_lint('foreach (foo, foos ) {', 'Extra space before ) in foreach'
+                         '  [whitespace/parens] [5]')
+        self.assert_lint('foreach ( foo, foos) {', 'Extra space after ( in foreach'
+                         '  [whitespace/parens] [5]')
         self.assert_lint('while (  foo) {', 'Extra space after ( in while'
                          '  [whitespace/parens] [5]')
 
     def test_spacing_for_fncall(self):
         self.assert_lint('if (foo) {', '')
         self.assert_lint('for (foo;bar;baz) {', '')
+        self.assert_lint('foreach (foo, foos) {', '')
         self.assert_lint('while (foo) {', '')
         self.assert_lint('switch (foo) {', '')
         self.assert_lint('new (RenderArena()) RenderInline(document())', '')
@@ -2987,6 +2992,14 @@ class OrderOfIncludesTest(CppStyleTestBase):
                          classify_include('PrefixFooCustom.cpp',
                                           'Foo.h',
                                           False, include_state))
+        self.assertEqual(cpp_style._MOC_HEADER,
+                         classify_include('foo.cpp',
+                                          'foo.moc',
+                                          False, include_state))
+        self.assertEqual(cpp_style._MOC_HEADER,
+                         classify_include('foo.cpp',
+                                          'moc_foo.cpp',
+                                          False, include_state))
         # <public/foo.h> must be considered as primary even if is_system is True.
         self.assertEqual(cpp_style._PRIMARY_HEADER,
                          classify_include('foo/foo.cpp',
@@ -3003,6 +3016,11 @@ class OrderOfIncludesTest(CppStyleTestBase):
         self.assertEqual(cpp_style._SOFT_LINK_HEADER,
                          classify_include('foo.cpp',
                                           'BarSoftLink.h',
+                                          False, include_state))
+        # Qt private APIs use _p.h suffix.
+        self.assertEqual(cpp_style._PRIMARY_HEADER,
+                         classify_include('foo.cpp',
+                                          'foo_p.h',
                                           False, include_state))
         # Tricky example where both includes might be classified as primary.
         self.assert_language_rules_check('ScrollbarThemeWince.cpp',
@@ -4331,6 +4349,12 @@ class WebKitStyleTest(CppStyleTestBase):
             '}\n',
             'This { should be at the end of the previous line  [whitespace/braces] [4]')
         self.assert_multi_line_lint(
+            'foreach (Foo* foo, foos)\n'
+            '{\n'
+            '    int bar;\n'
+            '}\n',
+            'This { should be at the end of the previous line  [whitespace/braces] [4]')
+        self.assert_multi_line_lint(
             'switch (type)\n'
             '{\n'
             'case foo: return;\n'
@@ -4403,6 +4427,12 @@ class WebKitStyleTest(CppStyleTestBase):
         self.assert_multi_line_lint(
             'for (; foo; bar) {\n'
             '    int foo;\n'
+            '}\n',
+            'One line control clauses should not use braces.  [whitespace/braces] [4]')
+
+        self.assert_multi_line_lint(
+            'foreach (foo, foos) {\n'
+            '    int bar;\n'
             '}\n',
             'One line control clauses should not use braces.  [whitespace/braces] [4]')
 
@@ -4985,6 +5015,12 @@ class WebKitStyleTest(CppStyleTestBase):
 
         # There is an exception for some unit tests that begin with "tst_".
         self.assert_lint('void tst_QWebFrame::arrayObjectEnumerable(int var1, int var2)', '')
+
+        # The Qt API uses names that begin with "qt_" or "_q_".
+        self.assert_lint('void QTFrame::qt_drt_is_awesome(int var1, int var2)', '')
+        self.assert_lint('void QTFrame::_q_drt_is_awesome(int var1, int var2)', '')
+        self.assert_lint('void qt_drt_is_awesome(int var1, int var2);', '')
+        self.assert_lint('void _q_drt_is_awesome(int var1, int var2);', '')
 
         # Cairo forward-declarations should not be a failure.
         self.assert_lint('typedef struct _cairo cairo_t;', '')

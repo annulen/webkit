@@ -45,6 +45,12 @@
 typedef struct objc_object* id;
 #endif
 
+#if PLATFORM(QT)
+#include <QVariant>
+#include <QByteArray>
+#include <QDataStream>
+#endif
+
 namespace WebCore {
 
 class CachedPage;
@@ -167,6 +173,15 @@ public:
     WEBCORE_EXPORT void setTransientProperty(const String&, id);
 #endif
 
+#if PLATFORM(QT)
+    QVariant userData() const { return m_userData; }
+    void setUserData(const QVariant& userData) { m_userData = userData; }
+
+// FIXME: See in .cpp file
+//    static PassRefPtr<HistoryItem> restoreState(QDataStream& buffer, int version);
+//    QDataStream& saveState(QDataStream& out, int version) const;
+#endif
+
 #ifndef NDEBUG
     int showTree() const;
     int showTreeWithIndent(unsigned indentLevel) const;
@@ -272,6 +287,10 @@ private:
 #if PLATFORM(COCOA)
     RetainPtr<id> m_viewState;
     std::unique_ptr<HashMap<String, RetainPtr<id>>> m_transientProperties;
+#endif
+
+#if PLATFORM(QT)
+    QVariant m_userData;
 #endif
 }; //class HistoryItem
 
