@@ -188,8 +188,8 @@ public:
     virtual bool selectItemWritingDirectionIsNatural();
     virtual bool selectItemAlignmentFollowsMenuWritingDirection();
     virtual bool hasOpenedPopup() const;
-    virtual PassRefPtr<PopupMenu> createPopupMenu(PopupMenuClient*) const;
-    virtual PassRefPtr<SearchPopupMenu> createSearchPopupMenu(PopupMenuClient*) const;
+    virtual RefPtr<PopupMenu> createPopupMenu(PopupMenuClient*) const;
+    virtual RefPtr<SearchPopupMenu> createSearchPopupMenu(PopupMenuClient*) const;
     virtual void populateVisitedLinks();
 
     std::unique_ptr<QWebSelectMethod> createSelectPopup() const;

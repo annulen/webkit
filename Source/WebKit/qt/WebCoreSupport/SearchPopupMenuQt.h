@@ -27,12 +27,12 @@ namespace WebCore {
 
 class SearchPopupMenuQt : public SearchPopupMenu {
 public:
-    SearchPopupMenuQt(PassRefPtr<PopupMenu>);
+    SearchPopupMenuQt(RefPtr<WebCore::PopupMenu>&&);
 
     virtual PopupMenu* popupMenu();
-    virtual void saveRecentSearches(const AtomicString& name, const Vector<String>& searchItems);
-    virtual void loadRecentSearches(const AtomicString& name, Vector<String>& searchItems);
-    virtual bool enabled();
+    virtual void saveRecentSearches(const AtomicString& name, const Vector<RecentSearch>& searchItems) override;
+    virtual void loadRecentSearches(const AtomicString& name, Vector<RecentSearch>& searchItems) override;
+    virtual bool enabled() override;
 
 private:
     RefPtr<PopupMenu> m_popup;
