@@ -90,6 +90,12 @@ set(CMAKE_AUTOMOC ON)
 
 # TODO: figure out if we can run automoc only on Qt sources
 
+# Don't warn about missing override keywords
+# TODO: Remove it later
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override")
+endif ()
+
 # From OptionsEfl.cmake
 # Optimize binary size for release builds by removing dead sections on unix/gcc.
 if (CMAKE_COMPILER_IS_GNUCC AND UNIX AND NOT APPLE)
