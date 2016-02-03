@@ -41,7 +41,9 @@
 #include <Page.h>
 #include <PageGroup.h>
 #include <PlatformCookieJar.h>
+#if !PLUGIN_VIEW_IS_BROKEN
 #include <PluginDatabase.h>
+#endif
 #include <QCoreApplication>
 #include <QLocale>
 #include <wtf/MathExtras.h>
@@ -75,10 +77,12 @@ PasteboardStrategy* PlatformStrategiesQt::createPasteboardStrategy()
     return 0;
 }
 
+#if 0
 PluginStrategy* PlatformStrategiesQt::createPluginStrategy()
 {
     return this;
 }
+#endif
 
 String PlatformStrategiesQt::cookiesForDOM(const NetworkStorageSession& session, const URL& firstParty, const URL& url)
 {
@@ -110,6 +114,7 @@ void PlatformStrategiesQt::deleteCookie(const NetworkStorageSession& session, co
     WebCore::deleteCookie(session, url, cookieName);
 }
 
+#if 0
 void PlatformStrategiesQt::refreshPlugins()
 {
     PluginDatabase::installedPlugins()->refresh();
@@ -174,7 +179,6 @@ void PlatformStrategiesQt::getPluginInfo(const WebCore::Page* page, Vector<WebCo
 
 }
 
-#if 0
 // VisitedLinkStrategy
 
 bool PlatformStrategiesQt::isLinkVisited(Page* page, LinkHash hash, const URL& baseURL, const AtomicString& attributeURL)

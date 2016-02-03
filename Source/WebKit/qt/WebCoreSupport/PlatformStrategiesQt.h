@@ -37,7 +37,7 @@ namespace WebCore {
 class PasteboardStrategy;
 }
 
-class PlatformStrategiesQt : public WebCore::PlatformStrategies, private WebCore::CookiesStrategy, private WebCore::LoaderStrategy, private WebCore::PluginStrategy {
+class PlatformStrategiesQt : public WebCore::PlatformStrategies, private WebCore::CookiesStrategy, private WebCore::LoaderStrategy {
 public:
     static void initialize();
 
@@ -58,9 +58,11 @@ private:
     virtual bool getRawCookies(const WebCore::NetworkStorageSession&, const WebCore::URL& firstParty, const WebCore::URL&, Vector<WebCore::Cookie>&);
     virtual void deleteCookie(const WebCore::NetworkStorageSession&, const WebCore::URL&, const String&);
 
+#if 0
     // WebCore::PluginStrategy
     virtual void refreshPlugins();
     virtual void getPluginInfo(const WebCore::Page*, Vector<WebCore::PluginInfo>&);
+#endif
 
 // FIXME: Check if we still need to hook into visited links logic
 // See https://bugs.webkit.org/show_bug.cgi?id=20952

@@ -57,7 +57,9 @@
 #include "Page.h"
 #include "PlatformMouseEvent.h"
 #include "PluginData.h"
+#if !PLUGIN_VIEW_IS_BROKEN
 #include "PluginDatabase.h"
+#endif
 #include "PolicyChecker.h"
 #include "ProgressTracker.h"
 #include "QNetworkReplyHandler.h"
@@ -637,9 +639,11 @@ bool FrameLoaderClientQt::canShowMIMEType(const String& MIMEType) const
     if (MIMETypeRegistry::canShowMIMEType(type))
         return true;
 
+#if !PLUGIN_VIEW_IS_BROKEN
     if (m_frame && m_frame->settings().arePluginsEnabled()
         && PluginDatabase::installedPlugins()->isMIMETypeRegistered(type))
         return true;
+#endif
 
     return false;
 }
@@ -1365,12 +1369,15 @@ ObjectContentType FrameLoaderClientQt::objectContentType(const URL& url, const S
         mimeType = MIMETypeRegistry::getMIMETypeForExtension(extension);
 
     bool arePluginsEnabled = (m_frame && m_frame->settings().arePluginsEnabled());
+#if !PLUGIN_VIEW_IS_BROKEN
     if (arePluginsEnabled && !mimeType.length())
         mimeType = PluginDatabase::installedPlugins()->MIMETypeForExtension(extension);
+#endif
 
     if (!mimeType.length())
         return ObjectContentFrame;
 
+#if !PLUGIN_VIEW_IS_BROKEN
     ObjectContentType plugInType = ObjectContentNone;
     if (arePluginsEnabled && PluginDatabase::installedPlugins()->isMIMETypeRegistered(mimeType))
         plugInType = ObjectContentNetscapePlugin;
@@ -1386,6 +1393,7 @@ ObjectContentType FrameLoaderClientQt::objectContentType(const URL& url, const S
     
     if (plugInType != ObjectContentNone)
         return plugInType;
+#endif
 
     if (MIMETypeRegistry::isSupportedNonImageMIMEType(mimeType))
         return ObjectContentFrame;
@@ -1544,6 +1552,7 @@ PassRefPtr<Widget> FrameLoaderClientQt::createPlugin(const IntSize& pluginSize, 
         // FIXME: Make things work for widgetless plugins as well.
         delete pluginAdapter;
     }
+#if !PLUGIN_VIEW_IS_BROKEN
 #if ENABLE(NETSCAPE_PLUGIN_API)
     else { // NPAPI Plugins
         Vector<String> params = paramNames;
@@ -1563,6 +1572,7 @@ PassRefPtr<Widget> FrameLoaderClientQt::createPlugin(const IntSize& pluginSize, 
         return pluginView;
     }
 #endif // ENABLE(NETSCAPE_PLUGIN_API)
+#endif
 
     return 0;
 }
