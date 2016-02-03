@@ -24,9 +24,9 @@
 
 #include "DefaultFullScreenVideoHandler.h"
 #include "InitWebKitQt.h"
-#include "InspectorClientQt.h"
-#include "InspectorClientWebPage.h"
-#include "InspectorServerQt.h"
+//#include "InspectorClientQt.h"
+//#include "InspectorClientWebPage.h"
+//#include "InspectorServerQt.h"
 #include "PageClientQt.h"
 //#include "QGraphicsWidgetPluginImpl.h"
 #include "QWebUndoCommand.h"
@@ -641,9 +641,11 @@ void QWebPagePrivate::setInspectorWindowTitle(const QString& title)
 
 void QWebPagePrivate::createWebInspector(QObject** inspectorView, QWebPageAdapter** inspectorPage)
 {
+#if 0 // FIXME
     QWebPage* page = new WebKit::InspectorClientWebPage;
     *inspectorView = page->view();
     *inspectorPage = page->d;
+#endif
 }
 
 #ifndef QT_NO_MENU
