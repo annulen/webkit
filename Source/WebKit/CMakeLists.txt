@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8.12)
 include(WebKitCommon)
 
 set(WebKit_SOURCES
-    WebCoreSupport/WebResourceLoadScheduler.cpp
-    WebCoreSupport/WebViewGroup.cpp
+#    WebCoreSupport/WebResourceLoadScheduler.cpp
+#    WebCoreSupport/WebViewGroup.cpp
 )
 
 set(WebKit_INCLUDE_DIRECTORIES
