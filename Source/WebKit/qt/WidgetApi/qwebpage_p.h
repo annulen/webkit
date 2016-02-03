@@ -97,7 +97,7 @@ public:
     virtual QWebFrameAdapter* mainFrameAdapter() override;
     virtual QStringList chooseFiles(QWebFrameAdapter*, bool allowMultiple, const QStringList& suggestedFileNames) override;
     virtual QColor colorSelectionRequested(const QColor& selectedColor) override;
-    virtual QWebSelectMethod* createSelectPopup() override;
+    virtual std::unique_ptr<QWebSelectMethod> createSelectPopup() override;
     virtual QRect viewRectRelativeToWindow() override;
     virtual void geolocationPermissionRequested(QWebFrameAdapter*) override;
     virtual void geolocationPermissionRequestCancelled(QWebFrameAdapter*) override;
