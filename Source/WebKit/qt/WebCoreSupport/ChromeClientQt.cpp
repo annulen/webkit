@@ -779,4 +779,40 @@ void ChromeClientQt::populateVisitedLinks()
     }
 }
 
+void ChromeClientQt::invalidateRootView(const WebCore::IntRect&)
+{
+}
+
+void ChromeClientQt::invalidateContentsAndRootView(const WebCore::IntRect&)
+{
+}
+
+void ChromeClientQt::invalidateContentsForSlowScroll(const WebCore::IntRect&)
+{
+}
+
+void ChromeClientQt::exceededDatabaseQuota(WebCore::Frame*, const WTF::String& databaseName, WebCore::DatabaseDetails)
+{
+}
+
+void ChromeClientQt::attachRootGraphicsLayer(WebCore::Frame*, WebCore::GraphicsLayer*)
+{
+}
+
+void ChromeClientQt::attachViewOverlayGraphicsLayer(WebCore::Frame*, WebCore::GraphicsLayer*)
+{
+}
+
+void ChromeClientQt::setNeedsOneShotDrawingSynchronization()
+{
+}
+
+void ChromeClientQt::scheduleCompositingLayerFlush()
+{
+}
+
+void ChromeClientQt::wheelEventHandlersChanged(bool hasHandlers)
+{
+}
+
 } // namespace WebCore

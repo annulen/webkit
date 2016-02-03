@@ -1631,6 +1631,54 @@ void FrameLoaderClientQt::emitLoadFinished(bool ok)
     m_webFrame->emitLoadFinished(wasOriginatingLoad, ok);
 }
 
+void FrameLoaderClientQt::dispatchDidDispatchOnloadEvents()
+{
+}
+
+void FrameLoaderClientQt::dispatchDecidePolicyForResponse(const WebCore::ResourceResponse &, const WebCore::ResourceRequest &, WebCore::FramePolicyFunction)
+{
+}
+
+void FrameLoaderClientQt::dispatchDecidePolicyForNewWindowAction(const WebCore::NavigationAction &, const WebCore::ResourceRequest &, PassRefPtr<WebCore::FormState>, const WTF::String &frameName, WebCore::FramePolicyFunction)
+{
+}
+
+void FrameLoaderClientQt::dispatchDecidePolicyForNavigationAction(const WebCore::NavigationAction &, const WebCore::ResourceRequest &, PassRefPtr<WebCore::FormState>, WebCore::FramePolicyFunction)
+{
+}
+
+void FrameLoaderClientQt::dispatchWillSubmitForm(PassRefPtr<WebCore::FormState>, WebCore::FramePolicyFunction)
+{
+}
+
+void FrameLoaderClientQt::willReplaceMultipartContent()
+{
+}
+
+void FrameLoaderClientQt::didReplaceMultipartContent()
+{
+}
+
+WebCore::ResourceError FrameLoaderClientQt::blockedByContentBlockerError(const WebCore::ResourceRequest &)
+{
+}
+
+void FrameLoaderClientQt::updateCachedDocumentLoader(WebCore::DocumentLoader &)
+{
+}
+
+void FrameLoaderClientQt::convertMainResourceLoadToDownload(WebCore::DocumentLoader *, WebCore::SessionID, const WebCore::ResourceRequest &, const WebCore::ResourceResponse &)
+{
+}
+
+WebCore::ObjectContentType FrameLoaderClientQt::objectContentType(const WebCore::URL &, const WTF::String &mimeType)
+{
+}
+
+void FrameLoaderClientQt::prefetchDNS(const WTF::String &)
+{
+}
+
 }
 
 #include "moc_FrameLoaderClientQt.cpp"

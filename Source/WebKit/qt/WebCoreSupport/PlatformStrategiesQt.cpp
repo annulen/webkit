@@ -202,3 +202,44 @@ void PlatformStrategiesQt::addVisitedLink(Page* page, LinkHash hash)
     page->group().addVisitedLinkHash(hash);
 }
 #endif
+
+
+RefPtr<SubresourceLoader> PlatformStrategiesQt::loadResource(Frame *, CachedResource *, const ResourceRequest &, const ResourceLoaderOptions &)
+{
+}
+
+void PlatformStrategiesQt::loadResourceSynchronously(NetworkingContext *, unsigned long identifier, const ResourceRequest &, StoredCredentials, ClientCredentialPolicy, ResourceError &, ResourceResponse &, Vector<char> &data)
+{
+}
+
+void PlatformStrategiesQt::remove(ResourceLoader *)
+{
+}
+
+void PlatformStrategiesQt::setDefersLoading(ResourceLoader *, bool)
+{
+}
+
+void PlatformStrategiesQt::crossOriginRedirectReceived(ResourceLoader *, const URL &redirectURL)
+{
+}
+
+void PlatformStrategiesQt::servePendingRequests(ResourceLoadPriority minimumPriority)
+{
+}
+
+void PlatformStrategiesQt::suspendPendingRequests()
+{
+}
+
+void PlatformStrategiesQt::resumePendingRequests()
+{
+}
+
+void PlatformStrategiesQt::createPingHandle(NetworkingContext *, ResourceRequest &, bool shouldUseCredentialStorage)
+{
+}
+
+BlobRegistry *PlatformStrategiesQt::createBlobRegistry()
+{
+}

@@ -71,6 +71,22 @@ private:
     virtual bool isLinkVisited(WebCore::Page*, WebCore::LinkHash, const WebCore::URL& baseURL, const WTF::AtomicString& attributeURL);
     virtual void addVisitedLink(WebCore::Page*, WebCore::LinkHash);
 #endif
+
+    // LoaderStrategy interface
+public:
+    RefPtr<WebCore::SubresourceLoader> loadResource(WebCore::Frame *, WebCore::CachedResource *, const WebCore::ResourceRequest &, const WebCore::ResourceLoaderOptions &) override;
+    void loadResourceSynchronously(WebCore::NetworkingContext *, unsigned long identifier, const WebCore::ResourceRequest &, WebCore::StoredCredentials, WebCore::ClientCredentialPolicy, WebCore::ResourceError &, WebCore::ResourceResponse &, Vector<char> &data) override;
+    void remove(WebCore::ResourceLoader *) override;
+    void setDefersLoading(WebCore::ResourceLoader *, bool) override;
+    void crossOriginRedirectReceived(WebCore::ResourceLoader *, const WebCore::URL &redirectURL) override;
+    void servePendingRequests(WebCore::ResourceLoadPriority minimumPriority) override;
+    void suspendPendingRequests() override;
+    void resumePendingRequests() override;
+    void createPingHandle(WebCore::NetworkingContext *, WebCore::ResourceRequest &, bool shouldUseCredentialStorage) override;
+
+    // PlatformStrategies interface
+private:
+    WebCore::BlobRegistry *createBlobRegistry() override;
 };
 
 #endif // PlatformStrategiesQt_h

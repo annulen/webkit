@@ -227,6 +227,19 @@ public:
 
     virtual void registerForIconNotification(bool);
 
+    void dispatchDidDispatchOnloadEvents() override;
+    void dispatchDecidePolicyForResponse(const ResourceResponse &, const ResourceRequest &, FramePolicyFunction) override;
+    void dispatchDecidePolicyForNewWindowAction(const NavigationAction &, const ResourceRequest &, PassRefPtr<FormState>, const WTF::String &frameName, FramePolicyFunction) override;
+    void dispatchDecidePolicyForNavigationAction(const NavigationAction &, const ResourceRequest &, PassRefPtr<FormState>, FramePolicyFunction) override;
+    void dispatchWillSubmitForm(PassRefPtr<FormState>, FramePolicyFunction) override;
+    void willReplaceMultipartContent() override;
+    void didReplaceMultipartContent() override;
+    ResourceError blockedByContentBlockerError(const ResourceRequest &) override;
+    void updateCachedDocumentLoader(DocumentLoader &) override;
+    void convertMainResourceLoadToDownload(DocumentLoader *, SessionID, const ResourceRequest &, const ResourceResponse &) override;
+    ObjectContentType objectContentType(const URL &, const WTF::String &mimeType) override;
+    void prefetchDNS(const WTF::String &) override;
+
     QString chooseFile(const QString& oldFile);
 
     virtual PassRefPtr<FrameNetworkingContext> createNetworkingContext();
