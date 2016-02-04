@@ -33,6 +33,8 @@
 // FIXME
 #define PLUGIN_VIEW_IS_BROKEN 1
 
+#include "config.h"
+
 #include "FormState.h"
 #include "Frame.h"
 #include "FrameLoader.h"
