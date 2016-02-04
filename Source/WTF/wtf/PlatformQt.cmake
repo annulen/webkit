@@ -1,3 +1,7 @@
+list(APPEND WTF_SOURCES
+    text/qt/StringQt.cpp
+)
+
 if (WIN32)
     list(APPEND WTF_SOURCES
         win/MainThreadWin.cpp
