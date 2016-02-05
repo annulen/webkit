@@ -48,6 +48,13 @@ String::String(const QStringRef& ref)
 
 String::operator QString() const
 {
+    // FIXME: Is it better than QString::fromLatin1?
+    const UChar* uchars = is8Bit() ? StringView(*this).upconvertedCharacters().get()
+        : characters16();
+
+    return QString(reinterpret_cast<const QChar*>(uchars), length());
+
+/*
     if (is8Bit() && !m_impl->has16BitShadow()) {
         // Asking for characters() of an 8-bit string will make a 16-bit copy internally
         // in WTF::String. Since we're going to copy the data to QStringData anyways, we
@@ -55,7 +62,8 @@ String::operator QString() const
         return QString::fromLatin1(reinterpret_cast<const char*>(characters8()), length());
     }
 
-    return QString(reinterpret_cast<const QChar*>(characters()), length());
+    return QString(reinterpret_cast<const QChar*>(characters16()), length());
+*/
 }
 
 }
