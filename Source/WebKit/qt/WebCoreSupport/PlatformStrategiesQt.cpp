@@ -77,12 +77,10 @@ PasteboardStrategy* PlatformStrategiesQt::createPasteboardStrategy()
     return 0;
 }
 
-#if 0
 PluginStrategy* PlatformStrategiesQt::createPluginStrategy()
 {
-    return this;
+    return 0;
 }
-#endif
 
 String PlatformStrategiesQt::cookiesForDOM(const NetworkStorageSession& session, const URL& firstParty, const URL& url)
 {

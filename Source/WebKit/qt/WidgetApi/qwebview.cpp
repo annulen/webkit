@@ -22,6 +22,9 @@
 #include "config.h"
 #include "qwebview.h"
 
+// FIXME
+#define QT_NO_ACCESSIBILITY
+
 #include "QWebPageClient.h"
 #include "qwebframe.h"
 #include "qwebpage_p.h"
