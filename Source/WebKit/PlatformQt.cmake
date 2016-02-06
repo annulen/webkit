@@ -144,11 +144,13 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
 )
 
 list(APPEND WebKit_SOURCES
+    Storage/StorageThread.cpp
+
     qt/Api/qhttpheader.cpp
-#    qt/Api/qwebdatabase.cpp
+    qt/Api/qwebdatabase.cpp
     qt/Api/qwebelement.cpp
-#    qt/Api/qwebhistory.cpp
-#    qt/Api/qwebhistoryinterface.cpp
+    qt/Api/qwebhistory.cpp
+    qt/Api/qwebhistoryinterface.cpp
     qt/Api/qwebkitglobal.cpp
 #    qt/Api/qwebplugindatabase.cpp
 #    qt/Api/qwebpluginfactory.cpp
@@ -167,14 +169,14 @@ list(APPEND WebKit_SOURCES
 #    qt/WebCoreSupport/GeolocationPermissionClientQt.cpp
     qt/WebCoreSupport/IconDatabaseClientQt.cpp
     qt/WebCoreSupport/InitWebCoreQt.cpp
-#    qt/WebCoreSupport/InspectorClientQt.cpp
-#    qt/WebCoreSupport/InspectorServerQt.cpp
+    qt/WebCoreSupport/InspectorClientQt.cpp
+    qt/WebCoreSupport/InspectorServerQt.cpp
     qt/WebCoreSupport/NotificationPresenterClientQt.cpp
     qt/WebCoreSupport/PlatformStrategiesQt.cpp
     qt/WebCoreSupport/PopupMenuQt.cpp
     qt/WebCoreSupport/QWebFrameAdapter.cpp
     qt/WebCoreSupport/QWebPageAdapter.cpp
-#    qt/WebCoreSupport/QtPlatformPlugin.cpp
+    qt/WebCoreSupport/QtPlatformPlugin.cpp
     qt/WebCoreSupport/QtPluginWidgetAdapter.cpp
     qt/WebCoreSupport/QtPrintContext.cpp
     qt/WebCoreSupport/SearchPopupMenuQt.cpp
@@ -182,19 +184,19 @@ list(APPEND WebKit_SOURCES
     qt/WebCoreSupport/TextureMapperLayerClientQt.cpp
     qt/WebCoreSupport/UndoStepQt.cpp
     qt/WebCoreSupport/WebEventConversion.cpp
-#    qt/WidgetApi/qgraphicswebview.cpp
+    qt/WidgetApi/qgraphicswebview.cpp
     qt/WidgetApi/qwebframe.cpp
-#    qt/WidgetApi/qwebinspector.cpp
+    qt/WidgetApi/qwebinspector.cpp
     qt/WidgetApi/qwebpage.cpp
     qt/WidgetApi/qwebview.cpp
 #    qt/WidgetSupport/DefaultFullScreenVideoHandler.cpp
 #    qt/WidgetSupport/FullScreenVideoWidget.cpp
     qt/WidgetSupport/InitWebKitQt.cpp
-#    qt/WidgetSupport/InspectorClientWebPage.cpp
+    qt/WidgetSupport/InspectorClientWebPage.cpp
     qt/WidgetSupport/PageClientQt.cpp
-#    qt/WidgetSupport/QGraphicsWidgetPluginImpl.cpp
+    qt/WidgetSupport/QGraphicsWidgetPluginImpl.cpp
     qt/WidgetSupport/QStyleFacadeImp.cpp
-#    qt/WidgetSupport/QWebUndoCommand.cpp
+    qt/WidgetSupport/QWebUndoCommand.cpp
 #    qt/WidgetSupport/QWidgetPluginImpl.cpp
     qt/WidgetSupport/QtFallbackWebPopup.cpp
     qt/WidgetSupport/QtWebComboBox.cpp
