@@ -33,7 +33,6 @@
 
 #include "FrameView.h"
 #include "InspectorController.h"
-#include "InspectorFrontend.h"
 #include "InspectorServerQt.h"
 #include "MainFrame.h"
 #include "NotImplemented.h"
@@ -159,10 +158,9 @@ void InspectorClientQt::inspectorDestroyed()
 #endif
 }
 
-    
-WebCore::InspectorFrontendChannel* InspectorClientQt::openInspectorFrontend(WebCore::InspectorController* inspectorController)
+Inspector::FrontendChannel* InspectorClientQt::openInspectorFrontend(WebCore::InspectorController* inspectorController)
 {
-    WebCore::InspectorFrontendChannel* frontendChannel = 0;
+    Inspector::FrontendChannel* frontendChannel = 0;
 #if ENABLE(INSPECTOR)
     QObject* view = 0;
     QWebPageAdapter* inspectorPage = 0;
@@ -240,7 +238,7 @@ void InspectorClientQt::detachRemoteFrontend()
 {
 #if ENABLE(INSPECTOR)
     m_remoteFrontEndChannel = 0;
-    m_inspectedWebPage->page->inspectorController().disconnectFrontend();
+    m_inspectedWebPage->page->inspectorController().disconnectFrontend(this);
 #endif
 }
 
@@ -295,7 +293,7 @@ InspectorFrontendClientQt::~InspectorFrontendClientQt()
 void InspectorFrontendClientQt::frontendLoaded()
 {
     InspectorFrontendClientLocal::frontendLoaded();
-    setAttachedWindow(DOCKED_TO_BOTTOM);
+    setAttachedWindow(DockSide::Bottom);
 }
 
 String InspectorFrontendClientQt::localizedStringsURL()
@@ -334,11 +332,6 @@ void InspectorFrontendClientQt::setAttachedWindowWidth(unsigned)
     notImplemented();
 }
 
-void InspectorFrontendClientQt::setToolbarHeight(unsigned)
-{
-    notImplemented();
-}
-
 void InspectorFrontendClientQt::inspectedURLChanged(const String& newURL)
 {
     m_inspectedURL = newURL;
@@ -365,7 +358,7 @@ void InspectorFrontendClientQt::destroyInspectorView(bool notifyInspectorControl
 
 #if ENABLE(INSPECTOR)
     if (notifyInspectorController)
-        m_inspectedWebPage->page->inspectorController().disconnectFrontend();
+        m_inspectedWebPage->page->inspectorController().disconnectFrontend(m_inspectorClient);
 #endif
     if (m_inspectorClient)
         m_inspectorClient->releaseFrontendPage();

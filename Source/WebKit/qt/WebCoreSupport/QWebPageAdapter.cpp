@@ -46,9 +46,9 @@
 #include "HTMLInputElement.h"
 #include "HitTestResult.h"
 #include "InitWebCoreQt.h"
-//#include "InspectorClientQt.h"
-//#include "InspectorController.h"
-//#include "InspectorServerQt.h"
+#include "InspectorClientQt.h"
+#include "InspectorController.h"
+#include "InspectorServerQt.h"
 #include "LocalizedStrings.h"
 #include "MIMETypeRegistry.h"
 #include "MainFrame.h"
@@ -113,8 +113,6 @@
 #include "GeolocationClientQt.h"
 #endif
 #endif
-
-#define ENABLE_INSPECTOR 0
 
 // from text/qfont.cpp
 QT_BEGIN_NAMESPACE
@@ -1026,7 +1024,8 @@ void QWebPageAdapter::didShowInspector()
 void QWebPageAdapter::didCloseInspector()
 {
 #if ENABLE(INSPECTOR)
-    page->inspectorController().close();
+    // FIXME: Call InspectorFrontendClientQt::closeWindow()
+    // page->inspectorController().close();
 #endif
 }
 
