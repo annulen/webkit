@@ -202,6 +202,11 @@ list(APPEND WebKit_SOURCES
     qt/WidgetSupport/QtWebComboBox.cpp
 )
 
+qt_wrap_cpp(WebKit WebKit_SOURCES
+    qt/Api/qwebkitplatformplugin.h
+)
+
+
 if (ENABLE_ACCESSIBILITY)
     list(APPEND WebKit_SOURCES
         qt/WidgetApi/qwebviewaccessible.cpp
