@@ -38,6 +38,8 @@ list(APPEND WebCore_INCLUDE_DIRECTORIES
 list(APPEND WebCore_SOURCES
     accessibility/qt/AccessibilityObjectQt.cpp
 
+    bindings/js/ScriptControllerQt.cpp
+
     bridge/qt/qt_class.cpp
     bridge/qt/qt_instance.cpp
     bridge/qt/qt_pixmapruntime.cpp
