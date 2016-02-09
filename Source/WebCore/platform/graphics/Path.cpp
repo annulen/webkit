@@ -51,6 +51,7 @@ float Path::length() const
 
     return traversalState.totalLength();
 }
+#endif
 
 PathTraversalState Path::traversalStateAtLength(float length, bool& success) const
 {
@@ -64,6 +65,7 @@ PathTraversalState Path::traversalStateAtLength(float length, bool& success) con
     return traversalState;
 }
 
+#if !PLATFORM(QT)
 FloatPoint Path::pointAtLength(float length, bool& success) const
 {
     return traversalStateAtLength(length, success).current();
