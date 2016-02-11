@@ -125,6 +125,10 @@ void MainThreadSharedTimer::stop()
     SharedTimerQt::inst()->stop();
 }
 
+void MainThreadSharedTimer::invalidate()
+{
+}
+
 #include "MainThreadSharedTimerQt.moc"
 
 }
