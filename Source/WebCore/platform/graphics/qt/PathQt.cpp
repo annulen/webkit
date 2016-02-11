@@ -36,6 +36,7 @@
 #include "GraphicsContext.h"
 #include "ImageBuffer.h"
 #include "NativeImageQt.h"
+#include "NotImplemented.h"
 #include "StrokeStyleApplier.h"
 #include <QPainterPath>
 #include <QString>
@@ -326,6 +327,12 @@ void Path::addArc(const FloatPoint& p, float r, float sar, float ear, bool antic
 void Path::addRect(const FloatRect& r)
 {
     m_path.addRect(r.x(), r.y(), r.width(), r.height());
+}
+
+void Path::addEllipse(FloatPoint p, float radiusX, float radiusY, float rotation, float startAngle, float endAngle, bool anticlockwise)
+{
+    // FIXME: Use m_path.arcTo()
+    notImplemented();
 }
 
 void Path::addEllipse(const FloatRect& r)
