@@ -27,6 +27,8 @@ if (ENABLE_FTL_JIT)
     endif ()
 endif ()
 
+SET_AND_EXPOSE_TO_BUILD(USE_TEXTURE_MAPPER TRUE)
+
 if (WIN32)
     # bmalloc is not ported to Windows yet
     set(USE_SYSTEM_MALLOC 1)

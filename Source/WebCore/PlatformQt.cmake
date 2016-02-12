@@ -1,3 +1,6 @@
+include(platform/ImageDecoders.cmake)
+include(platform/TextureMapper.cmake)
+
 list(APPEND WebCore_INCLUDE_DIRECTORIES
     "${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}"
     "${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/inspector"
@@ -47,7 +50,12 @@ list(APPEND WebCore_SOURCES
     page/qt/DragControllerQt.cpp
     page/qt/EventHandlerQt.cpp
 
+    platform/KillRingNone.cpp
+
     platform/audio/qt/AudioBusQt.cpp
+
+    platform/graphics/ImageSource.cpp
+    platform/graphics/WOFFFileFormat.cpp
 
     platform/graphics/gpu/qt/DrawingBufferQt.cpp
 
@@ -78,6 +86,9 @@ list(APPEND WebCore_SOURCES
     platform/graphics/qt/TransformationMatrixQt.cpp
 
 #    platform/graphics/surfaces/qt/GraphicsSurfaceQt.cpp
+
+    platform/network/NetworkStorageSessionStub.cpp
+    platform/network/MIMESniffing.cpp
 
     platform/network/qt/CookieJarQt.cpp
     platform/network/qt/CredentialStorageQt.cpp
@@ -121,10 +132,18 @@ list(APPEND WebCore_SOURCES
     platform/qt/UserAgentQt.cpp
     platform/qt/WidgetQt.cpp
 
+    platform/text/Hyphenation.cpp
+    platform/text/LocaleICU.cpp
+
     platform/text/qt/TextBoundariesQt.cpp
     platform/text/qt/TextBreakIteratorInternalICUQt.cpp
 )
 
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+    list(APPEND WebCore_SOURCES
+        platform/linux/MemoryPressureHandlerLinux.cpp
+    )
+endif ()
 
 if (ENABLE_DEVICE_ORIENTATION)
     list(APPEND WebCore_SOURCES
