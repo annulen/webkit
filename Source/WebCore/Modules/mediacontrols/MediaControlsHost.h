@@ -54,6 +54,7 @@ public:
     static const AtomicString& alwaysOnKeyword();
     static const AtomicString& manualKeyword();
 
+#if ENABLE(VIDEO_TRACK)
     Vector<RefPtr<TextTrack>> sortedTrackListForMenu(TextTrackList*);
     Vector<RefPtr<AudioTrack>> sortedTrackListForMenu(AudioTrackList*);
     String displayNameForTrack(TextTrack*);
@@ -64,11 +65,13 @@ public:
     void setSelectedTextTrack(TextTrack*);
     Element* textTrackContainer();
     void updateTextTrackContainer();
+    void updateCaptionDisplaySizes();
+#endif
+
     bool allowsInlineMediaPlayback() const;
     bool supportsFullscreen();
     bool userGestureRequired() const;
 
-    void updateCaptionDisplaySizes();
     void enteredFullscreen();
     void exitedFullscreen();
 
@@ -84,7 +87,9 @@ private:
     MediaControlsHost(HTMLMediaElement*);
 
     HTMLMediaElement* m_mediaElement;
+#if ENABLE(VIDEO_TRACK)
     RefPtr<MediaControlTextTrackContainerElement> m_textTrackContainer;
+#endif
 };
 
 }

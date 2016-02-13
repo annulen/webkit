@@ -269,7 +269,6 @@ public:
 private:
     HTMLMediaElement* m_mediaElement;
 };
-#endif
 
 struct HTMLMediaElement::TrackGroup {
     enum GroupKind { CaptionsAndSubtitles, Description, Chapter, Metadata, Other };
@@ -288,6 +287,7 @@ struct HTMLMediaElement::TrackGroup {
     GroupKind kind;
     bool hasSrcLang;
 };
+#endif
 
 HashSet<HTMLMediaElement*>& HTMLMediaElement::allMediaElements()
 {
@@ -1028,8 +1028,10 @@ void HTMLMediaElement::prepareForLoad()
         // 4.2 - If a fetching process is in progress for the media element, the user agent should stop it.
         m_networkState = NETWORK_EMPTY;
 
+#if ENABLE(VIDEO_TRACK)
         // 4.3 - Forget the media element's media-resource-specific tracks.
         forgetResourceSpecificTracks();
+#endif
 
         // 4.4 - If readyState is not set to HAVE_NOTHING, then set it to that state.
         m_readyState = HAVE_NOTHING;
@@ -1866,8 +1868,10 @@ void HTMLMediaElement::noneSupported()
     // MEDIA_ERR_SRC_NOT_SUPPORTED.
     m_error = MediaError::create(MediaError::MEDIA_ERR_SRC_NOT_SUPPORTED);
 
+#if ENABLE(VIDEO_TRACK)
     // 6.2 - Forget the media element's media-resource-specific text tracks.
     forgetResourceSpecificTracks();
+#endif
 
     // 6.3 - Set the element's networkState attribute to the NETWORK_NO_SOURCE value.
     m_networkState = NETWORK_NO_SOURCE;
@@ -2000,9 +2004,11 @@ void HTMLMediaElement::mediaLoadingFailed(MediaPlayer::NetworkState error)
             LOG(Media, "HTMLMediaElement::setNetworkState(%p) - error event not sent, <source> was removed", this);
         
         // 9.Otherwise.10 - Asynchronously await a stable state. The synchronous section consists of all the remaining steps of this algorithm until the algorithm says the synchronous section has ended.
-        
+
+#if ENABLE(VIDEO_TRACK)
         // 9.Otherwise.11 - Forget the media element's media-resource-specific tracks.
         forgetResourceSpecificTracks();
+#endif
 
         if (havePotentialSourceChild()) {
             LOG(Media, "HTMLMediaElement::setNetworkState(%p) - scheduling next <source>", this);
@@ -3858,6 +3864,8 @@ void HTMLMediaElement::configureTextTrackGroup(const TrackGroup& group)
     m_processingPreferenceChange = false;
 }
 
+#endif
+
 static JSC::JSValue controllerJSValue(JSC::ExecState& exec, JSDOMGlobalObject& globalObject, HTMLMediaElement& media)
 {
     auto mediaJSWrapper = toJS(&exec, &globalObject, &media);
@@ -3883,7 +3891,9 @@ static JSC::JSValue controllerJSValue(JSC::ExecState& exec, JSDOMGlobalObject& g
 
     return controllerJSWrapper;
 }
-    
+
+#if ENABLE(VIDEO_TRACK)
+
 void HTMLMediaElement::updateCaptionContainer()
 {
     LOG(Media, "HTMLMediaElement::updateCaptionContainer(%p)", this);
@@ -3934,6 +3944,8 @@ void HTMLMediaElement::updateCaptionContainer()
 #endif
 }
 
+#endif
+
 void HTMLMediaElement::layoutSizeChanged()
 {
 #if ENABLE(MEDIA_CONTROLS_SCRIPT)
@@ -3950,6 +3962,8 @@ void HTMLMediaElement::visibilityDidChange()
 {
     updateShouldAutoplay();
 }
+
+#if ENABLE(VIDEO_TRACK)
 
 void HTMLMediaElement::setSelectedTextTrack(TextTrack* trackToSelect)
 {
@@ -6186,8 +6200,10 @@ String HTMLMediaElement::mediaPlayerSourceApplicationIdentifier() const
 
 Vector<String> HTMLMediaElement::mediaPlayerPreferredAudioCharacteristics() const
 {
+#if ENABLE(VIDEO_TRACK)
     if (Page* page = document().page())
         return page->group().captionPreferences().preferredAudioCharacteristics();
+#endif
     return Vector<String>();
 }
 

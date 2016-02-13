@@ -34,25 +34,25 @@ enum DeviceType {
     Conditional=MEDIA_CONTROLS_SCRIPT,
     ImplementationLacksVTable,
 ] interface MediaControlsHost {
-    TextTrack[] sortedTrackListForMenu(TextTrackList trackList);
-    AudioTrack[] sortedTrackListForMenu(AudioTrackList trackList);
-    DOMString displayNameForTrack(TextTrack track);
-    DOMString displayNameForTrack(AudioTrack track);
-    readonly attribute TextTrack captionMenuOffItem;
-    readonly attribute TextTrack captionMenuAutomaticItem;
-    readonly attribute DOMString captionDisplayMode;
-    void setSelectedTextTrack(TextTrack track);
-    readonly attribute HTMLElement textTrackContainer;
-    readonly attribute boolean allowsInlineMediaPlayback;
-    readonly attribute boolean supportsFullscreen;
-    readonly attribute boolean userGestureRequired;
+    [Conditional=VIDEO_TRACK] TextTrack[] sortedTrackListForMenu(TextTrackList trackList);
+    [Conditional=VIDEO_TRACK] AudioTrack[] sortedTrackListForMenu(AudioTrackList trackList);
+    [Conditional=VIDEO_TRACK] DOMString displayNameForTrack(TextTrack track);
+    [Conditional=VIDEO_TRACK] DOMString displayNameForTrack(AudioTrack track);
+    [Conditional=VIDEO_TRACK] readonly attribute TextTrack captionMenuOffItem;
+    [Conditional=VIDEO_TRACK] readonly attribute TextTrack captionMenuAutomaticItem;
+    [Conditional=VIDEO_TRACK] readonly attribute DOMString captionDisplayMode;
+    [Conditional=VIDEO_TRACK] void setSelectedTextTrack(TextTrack track);
+    [Conditional=VIDEO_TRACK] readonly attribute HTMLElement textTrackContainer;
+    [Conditional=VIDEO_TRACK] readonly attribute boolean allowsInlineMediaPlayback;
+    [Conditional=VIDEO_TRACK] readonly attribute boolean supportsFullscreen;
+    [Conditional=VIDEO_TRACK] readonly attribute boolean userGestureRequired;
 
     readonly attribute DOMString externalDeviceDisplayName;
     readonly attribute DeviceType externalDeviceType;
 
     attribute boolean controlsDependOnPageScaleFactor;
     
-    void updateTextTrackContainer();
+    [Conditional=VIDEO_TRACK] void updateTextTrackContainer();
     void enteredFullscreen();
     void exitedFullscreen();
 
