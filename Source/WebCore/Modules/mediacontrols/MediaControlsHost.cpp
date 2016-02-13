@@ -83,6 +83,8 @@ MediaControlsHost::~MediaControlsHost()
 {
 }
 
+#if ENABLE(VIDEO_TRACK)
+
 Vector<RefPtr<TextTrack>> MediaControlsHost::sortedTrackListForMenu(TextTrackList* trackList)
 {
     if (!trackList)
@@ -182,23 +184,31 @@ void MediaControlsHost::updateTextTrackContainer()
         m_textTrackContainer->updateDisplay();
 }
 
+#endif
+
 void MediaControlsHost::enteredFullscreen()
 {
+#if ENABLE(VIDEO_TRACK)
     if (m_textTrackContainer)
         m_textTrackContainer->enteredFullscreen();
+#endif
 }
 
 void MediaControlsHost::exitedFullscreen()
 {
+#if ENABLE(VIDEO_TRACK)
     if (m_textTrackContainer)
         m_textTrackContainer->exitedFullscreen();
+#endif
 }
 
+#if ENABLE(VIDEO_TRACK)
 void MediaControlsHost::updateCaptionDisplaySizes()
 {
     if (m_textTrackContainer)
         m_textTrackContainer->updateSizes(true);
 }
+#endif
     
 bool MediaControlsHost::allowsInlineMediaPlayback() const
 {
