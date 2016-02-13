@@ -15,18 +15,6 @@ set(ENABLE_WEBKIT2 OFF)
 set(ENABLE_API_TESTS OFF)
 set(WTF_USE_UDIS86 1)
 
-if (ENABLE_FTL_JIT)
-    if (WTF_CPU_X86_64)
-        find_package(LLVM 3.6)
-        if (NOT LLVM_FOUND)
-            message(FATAL_ERROR "LLVM 3.6 is required for ENABLE_FTL_JIT")
-        endif ()
-        SET_AND_EXPOSE_TO_BUILD(HAVE_LLVM TRUE)
-    else ()
-        message(FATAL_ERROR "FTL is only supported for X86_64")
-    endif ()
-endif ()
-
 SET_AND_EXPOSE_TO_BUILD(USE_TEXTURE_MAPPER TRUE)
 
 if (WIN32)
