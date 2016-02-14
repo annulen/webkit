@@ -165,7 +165,7 @@ static QVariant convertJSValueToNodeVariant(JSC::JSObject* object, int *distance
 {
     if (!object || !object->inherits(JSNode::info()))
         return QVariant();
-    return QVariant::fromValue<QDRTNode>(QtDRTNodeRuntime::create(JSNode::toWrapped(object));
+    return QVariant::fromValue<QDRTNode>(QtDRTNodeRuntime::create(JSNode::toWrapped(object)));
 }
 
 static JSC::JSValue convertNodeVariantToJSValue(JSC::ExecState* exec, WebCore::JSDOMGlobalObject* globalObject, const QVariant& variant)
@@ -284,7 +284,7 @@ void DumpRenderTreeSupportQt::clearFrameName(QWebFrameAdapter *adapter)
 
 int DumpRenderTreeSupportQt::javaScriptObjectsCount()
 {
-    return JSDOMWindowBase::commonVM()->heap.globalObjectCount();
+    return JSDOMWindowBase::commonVM().heap.globalObjectCount();
 }
 
 void DumpRenderTreeSupportQt::garbageCollectorCollect()
