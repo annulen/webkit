@@ -51,15 +51,16 @@ class InspectorClientQt : public InspectorClient, public Inspector::FrontendChan
 public:
     explicit InspectorClientQt(QWebPageAdapter*);
 
-    virtual void inspectorDestroyed();
+    void inspectedPageDestroyed() override;
 
-    virtual Inspector::FrontendChannel* openInspectorFrontend(WebCore::InspectorController*);
+    Inspector::FrontendChannel* openLocalFrontend(InspectorController*) override;
     virtual void closeInspectorFrontend();
     virtual void bringFrontendToFront();
 
     virtual void highlight();
     virtual void hideHighlight();
 
+    ConnectionType connectionType() const override;
     virtual bool sendMessageToFrontend(const String&);
 
     void releaseFrontendPage();

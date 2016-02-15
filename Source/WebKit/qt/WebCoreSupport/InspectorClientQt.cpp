@@ -145,20 +145,21 @@ InspectorClientQt::InspectorClientQt(QWebPageAdapter* page)
         webInspectorServer->registerClient(this);
 }
 
-void InspectorClientQt::inspectorDestroyed()
+void InspectorClientQt::inspectedPageDestroyed()
 {
-#if ENABLE(INSPECTOR)
-    closeInspectorFrontend();
-
-    InspectorServerQt* webInspectorServer = InspectorServerQt::server();
-    if (webInspectorServer)
-        webInspectorServer->unregisterClient(this);
-
-    delete this;
-#endif
+    // FIXME
+//#if ENABLE(INSPECTOR)
+//    closeInspectorFrontend();
+//
+//    InspectorServerQt* webInspectorServer = InspectorServerQt::server();
+//    if (webInspectorServer)
+//        webInspectorServer->unregisterClient(this);
+//
+//    delete this;
+//#endif
 }
 
-Inspector::FrontendChannel* InspectorClientQt::openInspectorFrontend(WebCore::InspectorController* inspectorController)
+Inspector::FrontendChannel* InspectorClientQt::openLocalFrontend(WebCore::InspectorController* inspectorController)
 {
     Inspector::FrontendChannel* frontendChannel = 0;
 #if ENABLE(INSPECTOR)
@@ -253,6 +254,10 @@ void InspectorClientQt::hideHighlight()
     QRect rect = m_inspectedWebPage->mainFrameAdapter()->frameRect();
     if (!rect.isEmpty())
         frame.view()->invalidateRect(rect);
+}
+
+InspectorClientQt::ConnectionType InspectorClientQt::connectionType() const
+{
 }
 
 bool InspectorClientQt::sendMessageToFrontend(const String& message)
