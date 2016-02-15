@@ -244,7 +244,7 @@ void QWebPageAdapter::initializeWebCorePage()
     pageConfiguration.contextMenuClient = new ContextMenuClientQt();
     pageConfiguration.editorClient = new EditorClientQt(this);
     pageConfiguration.dragClient = new DragClientQt(pageConfiguration.chromeClient);
-    // FIXME: pageConfiguration.inspectorClient = new InspectorClientQt(this);
+    pageConfiguration.inspectorClient = new InspectorClientQt(this);
     pageConfiguration.loaderClientForMainFrame = new FrameLoaderClientQt();
     page = new Page(pageConfiguration);
 
