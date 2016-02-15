@@ -226,7 +226,7 @@ if (ENABLE_VIDEO)
         ${WEBCORE_DIR}/English.lproj/mediaControlsLocalizedStrings.js
         ${WEBCORE_DIR}/Modules/mediacontrols/mediaControlsBase.js
     )
-    set(WebCore_USER_AGENT_SCRIPTS_DEPENDENCIES ${WEBCORE_DIR}/platform/efl/RenderThemeEfl.cpp)
+    set(WebCore_USER_AGENT_SCRIPTS_DEPENDENCIES ${WEBCORE_DIR}/platform/qt/RenderThemeQt.cpp)
 endif()
 
 # Build the include path with duplicates removed
