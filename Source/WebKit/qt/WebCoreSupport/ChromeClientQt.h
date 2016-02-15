@@ -183,7 +183,7 @@ public:
     virtual void serviceScriptedAnimations();
 #endif
 
-    virtual void scrollRectIntoView(const LayoutRect) const { }
+    virtual void scrollRectIntoView(const IntRect&) const { }
 
     virtual bool selectItemWritingDirectionIsNatural();
     virtual bool selectItemAlignmentFollowsMenuWritingDirection();
