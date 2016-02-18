@@ -216,8 +216,6 @@ if (ENABLE_ACCESSIBILITY)
     )
 endif ()
 
-add_definitions(-DQT_NO_DRAGANDDROP)
-
 set(WebKit_OUTPUT_NAME Qt5WebKit)
 
 # FIXME: Split out libQt5WebKitWidgets
