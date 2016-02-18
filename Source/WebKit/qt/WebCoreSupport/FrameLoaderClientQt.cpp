@@ -1662,6 +1662,8 @@ void FrameLoaderClientQt::didReplaceMultipartContent()
 
 WebCore::ResourceError FrameLoaderClientQt::blockedByContentBlockerError(const WebCore::ResourceRequest &)
 {
+    notImplemented();
+    return WebCore::ResourceError();
 }
 
 void FrameLoaderClientQt::updateCachedDocumentLoader(WebCore::DocumentLoader &)
@@ -1674,6 +1676,8 @@ void FrameLoaderClientQt::convertMainResourceLoadToDownload(WebCore::DocumentLoa
 
 WebCore::ObjectContentType FrameLoaderClientQt::objectContentType(const WebCore::URL &, const WTF::String &mimeType)
 {
+    notImplemented();
+    return WebCore::ObjectContentNone;
 }
 
 void FrameLoaderClientQt::prefetchDNS(const WTF::String &)

@@ -44,6 +44,7 @@
 #if !PLUGIN_VIEW_IS_BROKEN
 #include <PluginDatabase.h>
 #endif
+#include <SubresourceLoader.h>
 #include <QCoreApplication>
 #include <QLocale>
 #include <wtf/MathExtras.h>
@@ -204,6 +205,8 @@ void PlatformStrategiesQt::addVisitedLink(Page* page, LinkHash hash)
 
 RefPtr<SubresourceLoader> PlatformStrategiesQt::loadResource(Frame *, CachedResource *, const ResourceRequest &, const ResourceLoaderOptions &)
 {
+    notImplemented();
+    return nullptr;
 }
 
 void PlatformStrategiesQt::loadResourceSynchronously(NetworkingContext *, unsigned long identifier, const ResourceRequest &, StoredCredentials, ClientCredentialPolicy, ResourceError &, ResourceResponse &, Vector<char> &data)
@@ -240,4 +243,6 @@ void PlatformStrategiesQt::createPingHandle(NetworkingContext *, ResourceRequest
 
 BlobRegistry *PlatformStrategiesQt::createBlobRegistry()
 {
+    notImplemented();
+    return nullptr;
 }
