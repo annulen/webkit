@@ -146,6 +146,12 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
     "${WTF_DIR}"
 )
 
+if (APPLE)
+   list(APPEND WebKit_INCLUDE_DIRECTORIES
+      "${WEBKIT_DIR}/mac/icu"
+   )
+endif ()
+
 list(APPEND WebKit_SOURCES
     Storage/StorageThread.cpp
 

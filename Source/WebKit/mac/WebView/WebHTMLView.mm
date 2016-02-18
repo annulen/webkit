@@ -529,6 +529,8 @@ static Optional<NSInteger> toTag(ContextMenuAction action)
         return WebMenuItemTagMediaMute;
     case ContextMenuItemTagDictationAlternative:
         return WebMenuItemTagDictationAlternative;
+    case ContextMenuItemTagOpenLinkInThisWindow:
+        return Nullopt;		// FIXME: This was added to QTWebKit
     case ContextMenuItemTagToggleVideoFullscreen:
         return WebMenuItemTagToggleVideoFullscreen;
     case ContextMenuItemTagShareMenu:

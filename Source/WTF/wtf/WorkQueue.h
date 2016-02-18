@@ -34,7 +34,7 @@
 #include <wtf/RefCounted.h>
 #include <wtf/Threading.h>
 
-#if OS(DARWIN) && !PLATFORM(GTK)
+#if OS(DARWIN) && !PLATFORM(GTK) && !PLATFORM(QT)
 #include <dispatch/dispatch.h>
 #endif
 
@@ -44,7 +44,7 @@
 #include <wtf/glib/GRefPtr.h>
 #elif PLATFORM(EFL)
 #include <DispatchQueueEfl.h>
-#elif PLATFORM(QT) && !OS(DARWIN) && !OS(WINDOWS)
+#elif PLATFORM(QT) && !OS(WINDOWS)
 #include <QSocketNotifier>
 #elif OS(WINDOWS)
 #include <wtf/HashMap.h>
@@ -81,7 +81,7 @@ public:
 #elif PLATFORM(EFL)
     void registerSocketEventHandler(int, std::function<void ()>);
     void unregisterSocketEventHandler(int);
-#elif OS(DARWIN)
+#elif OS(DARWIN) && !PLATFORM(QT)
     dispatch_queue_t dispatchQueue() const { return m_dispatchQueue; }
 #elif PLATFORM(QT) && !OS(WINDOWS)
     QSocketNotifier* registerSocketEventHandler(int, QSocketNotifier::Type, std::function<void()>);
@@ -115,7 +115,7 @@ private:
     Condition m_terminateRunLoopCondition;
 #elif PLATFORM(EFL)
     RefPtr<DispatchQueue> m_dispatchQueue;
-#elif OS(DARWIN)
+#elif OS(DARWIN) && !PLATFORM(QT)
     static void executeFunction(void*);
     dispatch_queue_t m_dispatchQueue;
 #elif PLATFORM(QT) && !OS(WINDOWS)

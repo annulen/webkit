@@ -125,7 +125,7 @@ namespace JSC {
 
 enum LocaleDateTimeFormat { LocaleDateAndTime, LocaleDate, LocaleTime };
  
-#if OS(DARWIN) && USE(CF)
+#if OS(DARWIN) && USE(CF) && !PLATFORM(QT)
 
 // FIXME: Since this is superior to the strftime-based version, why limit this to OS(DARWIN)?
 // Instead we should consider using this whenever USE(CF) is true.

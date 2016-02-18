@@ -32,3 +32,11 @@ if (WIN32)
 
     set(JavaScriptCore_LIBRARY_TYPE STATIC)
 endif ()
+
+# From PlatformMac.cmake
+if (APPLE)
+   list(APPEND JavaScriptCore_INCLUDE_DIRECTORIES
+      ${JAVASCRIPTCORE_DIR}/disassembler/udis86
+      ${JAVASCRIPTCORE_DIR}/icu
+   )
+endif ()
