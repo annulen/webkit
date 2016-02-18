@@ -218,7 +218,7 @@ if (USE_GSTREAMER)
     )
 endif ()
 
-if (ENABLE_VIDEO)
+if (ENABLE_VIDEO OR APPLE)
     list(APPEND WebCore_USER_AGENT_STYLE_SHEETS
         ${WEBCORE_DIR}/Modules/mediacontrols/mediaControlsBase.css
     )
@@ -272,6 +272,13 @@ if (WIN32)
 
     set(WebCore_POST_BUILD_COMMAND "${CMAKE_BINARY_DIR}/DerivedSources/WebCore/postBuild.cmd")
     file(WRITE "${WebCore_POST_BUILD_COMMAND}" "@xcopy /y /s /d /f \"${DERIVED_SOURCES_WEBCORE_DIR}/*.h\" \"${DERIVED_SOURCES_DIR}/ForwardingHeaders/WebCore\" >nul 2>nul\n")
+endif ()
+
+# From PlatformMac.cmake
+if (APPLE)
+    list(APPEND WebCore_INCLUDE_DIRECTORIES
+       "${WEBCORE_DIR}/icu"
+    )
 endif ()
 
 # From PlatformEfl.cmake

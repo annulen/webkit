@@ -60,7 +60,10 @@ find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Sqlite REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(ICU REQUIRED)
+
+if (NOT APPLE)
+   find_package(ICU REQUIRED)
+endif ()
 
 if (NOT WIN32)
     find_package(Threads REQUIRED)

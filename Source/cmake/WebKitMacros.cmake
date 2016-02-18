@@ -243,7 +243,7 @@ macro(WEBKIT_WRAP_SOURCELIST)
 endmacro()
 
 macro(WEBKIT_FRAMEWORK _target)
-    if (APPLE AND NOT PORT STREQUAL "GTK")
+    if (APPLE AND NOT PORT STREQUAL "GTK" AND NOT PORT STREQUAL "Qt")
         set_target_properties(${_target} PROPERTIES FRAMEWORK TRUE)
         install(TARGETS ${_target} FRAMEWORK DESTINATION ${LIB_INSTALL_DIR})
     endif ()
