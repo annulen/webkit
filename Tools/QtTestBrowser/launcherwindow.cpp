@@ -200,9 +200,10 @@ void LauncherWindow::initializeView()
 
     applyPrefs();
 
-    splitter->addWidget(m_inspector);
-    m_inspector->setPage(page());
-    m_inspector->hide();
+// FIXME: Inspector crashes
+//    splitter->addWidget(m_inspector);
+//    m_inspector->setPage(page());
+//    m_inspector->hide();
 
     if (m_windowOptions.remoteInspectorPort)
         page()->setProperty("_q_webInspectorServerPort", m_windowOptions.remoteInspectorPort);
