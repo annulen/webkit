@@ -122,6 +122,7 @@ list(APPEND WebCore_SOURCES
     platform/qt/MIMETypeRegistryQt.cpp
     platform/qt/PasteboardQt.cpp
     platform/qt/PlatformKeyboardEventQt.cpp
+    platform/qt/PlatformMouseEventQt.cpp
     platform/qt/PlatformScreenQt.cpp
     platform/qt/QtTestSupport.cpp
     platform/qt/RenderThemeQStyle.cpp
@@ -279,6 +280,10 @@ if (WIN32)
         "${DERIVED_SOURCES_DIR}/ForwardingHeaders/WTF"
         "${WEBCORE_DIR}/ForwardingHeaders"
         "${WEBCORE_DIR}/platform/win"
+    )
+
+    list(APPEND WebCore_SOURCES
+        platform/win/SystemInfo.cpp
     )
 
     file(MAKE_DIRECTORY ${DERIVED_SOURCES_DIR}/ForwardingHeaders/WebCore)
