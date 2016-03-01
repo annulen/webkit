@@ -47,18 +47,18 @@
 
 namespace WebCore {
 
-static const QString fromRawDataWithoutRef(const String& string, int start = 0, int len = -1)
+static const QString toNormalizedQString(const TextRun& run)
 {
-    if (len < 0)
-        len = string.length() - start;
-    Q_ASSERT(start + len <= string.length());
+    if (run.is8Bit()) {
+        String sanitized = FontCascade::normalizeSpaces(run.characters8(), run.length());
+        return QString(sanitized); // FIXME: avoid second is8Bit() check
+    }
+
+    String sanitized = FontCascade::normalizeSpaces(run.characters16(), run.length());
 
     // We don't detach. This assumes the WebCore string data will stay valid for the
     // lifetime of the QString we pass back, since we don't ref the WebCore string.
-
-    // FIXME: Find a replacement of deprected characters(), e.g. StringView(string).upconvertedCharacters()
-    Q_ASSERT(!string.is8Bit());
-    return QString::fromRawData(reinterpret_cast<const QChar*>(string.characters16() + start), len);
+    return QString::fromRawData(reinterpret_cast<const QChar*>(sanitized.characters16()), sanitized.length());
 }
 
 static QTextLine setupLayout(QTextLayout* layout, const TextRun& style)
@@ -201,8 +201,7 @@ float FontCascade::floatWidthForComplexText(const TextRun& run, HashSet<const Fo
 
     if (run.length() == 1 && treatAsSpace(run[0]))
         return primaryFont().spaceWidth() + run.expansion();
-    String sanitized = FontCascade::normalizeSpaces(run.characters16(), run.length());
-    QString string = fromRawDataWithoutRef(sanitized);
+    QString string = toNormalizedQString(run);
 
     QTextLayout layout(string);
     layout.setRawFont(rawFont());
@@ -217,10 +216,7 @@ float FontCascade::floatWidthForComplexText(const TextRun& run, HashSet<const Fo
 
 int FontCascade::offsetForPositionForComplexText(const TextRun& run, float position, bool) const
 {
-    // FIXME: check run.is8Bit(), convert to QString properly
-    Q_ASSERT(!run.is8Bit());
-    String sanitized = FontCascade::normalizeSpaces(run.characters16(), run.length());
-    QString string = fromRawDataWithoutRef(sanitized);
+    QString string = toNormalizedQString(run);
 
     QTextLayout layout(string);
     layout.setRawFont(rawFont());
@@ -231,10 +227,7 @@ int FontCascade::offsetForPositionForComplexText(const TextRun& run, float posit
 
 void FontCascade::adjustSelectionRectForComplexText(const TextRun& run, LayoutRect& selectionRect, int from, int to) const
 {
-    // FIXME: check run.is8Bit(), convert to QString properly
-    Q_ASSERT(!run.is8Bit());
-    String sanitized = FontCascade::normalizeSpaces(run.characters16(), run.length());
-    QString string = fromRawDataWithoutRef(sanitized);
+    QString string = toNormalizedQString(run);
 
     QTextLayout layout(string);
     layout.setRawFont(rawFont());
