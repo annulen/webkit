@@ -59,7 +59,9 @@
 #include <wtf/FastMalloc.h>
 #include <wtf/text/WTFString.h>
 
-
+static void myFunction(bool param)
+{
+}
 
 QWEBKIT_EXPORT void qt_networkAccessAllowed(bool isAllowed)
 {
