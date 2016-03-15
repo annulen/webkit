@@ -143,9 +143,9 @@ bool QtInstance::getOwnPropertySlot(JSObject* object, ExecState* exec, PropertyN
     return JSObject::getOwnPropertySlot(object, exec, propertyName, slot);
 }
 
-void QtInstance::put(JSObject* object, ExecState* exec, PropertyName propertyName, JSValue value, PutPropertySlot& slot)
+bool QtInstance::put(JSObject* object, ExecState* exec, PropertyName propertyName, JSValue value, PutPropertySlot& slot)
 {
-    JSObject::put(object, exec, propertyName, value, slot);
+    return JSObject::put(object, exec, propertyName, value, slot);
 }
 
 QtInstance* QtInstance::getInstance(JSObject* object)
@@ -346,10 +346,10 @@ JSValue QtField::valueFromInstance(ExecState* exec, const Instance* inst) const
     return exec->vm().throwException(exec, createError(exec, msg.toLatin1().constData()));
 }
 
-void QtField::setValueToInstance(ExecState* exec, const Instance* inst, JSValue aValue) const
+bool QtField::setValueToInstance(ExecState* exec, const Instance* inst, JSValue aValue) const
 {
     if (m_type == ChildObject) // QtScript doesn't allow setting to a named child
-        return;
+        return false;
 
     const QtInstance* instance = static_cast<const QtInstance*>(inst);
     QObject* obj = instance->getObject();
@@ -363,20 +363,22 @@ void QtField::setValueToInstance(ExecState* exec, const Instance* inst, JSValue 
         QVariant val = convertValueToQVariant(toRef(exec), toRef(exec, aValue), argtype, 0, &exception);
         if (exception) {
             exec->vm().throwException(exec, toJS(exec, exception));
-            return;
+            return false;
         }
         if (m_type == MetaProperty) {
             if (m_property.isWritable())
-                m_property.write(obj, val);
+                return m_property.write(obj, val);
         }
 #ifndef QT_NO_PROPERTIES
         else if (m_type == DynamicProperty)
-            obj->setProperty(m_dynamicProperty.constData(), val);
+            return obj->setProperty(m_dynamicProperty.constData(), val);
 #endif
     } else {
         QString msg = QString(QLatin1String("cannot access member `%1' of deleted QObject")).arg(QLatin1String(name()));
         exec->vm().throwException(exec, createError(exec, msg.toLatin1().constData()));
+        return false;
     }
+    return false;
 }
 
 
