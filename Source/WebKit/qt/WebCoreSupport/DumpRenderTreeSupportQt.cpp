@@ -635,15 +635,21 @@ void DumpRenderTreeSupportQt::evaluateScriptInIsolatedWorld(QWebFrameAdapter *ad
 
 void DumpRenderTreeSupportQt::addUserStyleSheet(QWebPageAdapter* adapter, const QString& sourceCode)
 {
-    auto styleSheet = std::make_unique<UserStyleSheet>(sourceCode, URL(), Vector<String>(), Vector<String>(),
-        WebCore::InjectInAllFrames, UserStyleUserLevel);
-    adapter->page->userContentController()->addUserStyleSheet(mainThreadNormalWorld(), WTFMove(styleSheet),
-        InjectInExistingDocuments);
+    // FIXME: Fix userContentProvider/userContentController
+    RELEASE_ASSERT_NOT_REACHED();
+
+//    auto styleSheet = std::make_unique<UserStyleSheet>(sourceCode, URL(), Vector<String>(), Vector<String>(),
+//        WebCore::InjectInAllFrames, UserStyleUserLevel);
+//    adapter->page->userContentController()->addUserStyleSheet(mainThreadNormalWorld(), WTFMove(styleSheet),
+//        InjectInExistingDocuments);
 }
 
 void DumpRenderTreeSupportQt::removeUserStyleSheets(QWebPageAdapter* adapter)
 {
-    adapter->page->userContentController()->removeUserStyleSheets(mainThreadNormalWorld());
+    // FIXME: Fix userContentProvider/userContentController
+    RELEASE_ASSERT_NOT_REACHED();
+
+//    adapter->page->userContentController()->removeUserStyleSheets(mainThreadNormalWorld());
 }
 
 void DumpRenderTreeSupportQt::simulateDesktopNotificationClick(const QString& title)
