@@ -55,6 +55,10 @@ class ImpureDataSlot {
     WTF_MAKE_NONCOPYABLE(ImpureDataSlot);
     WTF_MAKE_FAST_ALLOCATED;
 public:
+    ImpureDataSlot(HeapLocation _key, LazyNode _value, unsigned _hash)
+        : key(_key), value(_value), hash(_hash)
+    { }
+
     HeapLocation key;
     LazyNode value;
     unsigned hash;
