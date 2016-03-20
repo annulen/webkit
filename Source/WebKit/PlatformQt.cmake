@@ -179,7 +179,6 @@ list(APPEND WebKit_SOURCES
     qt/WebCoreSupport/ChromeClientQt.cpp
     qt/WebCoreSupport/ContextMenuClientQt.cpp
     qt/WebCoreSupport/DragClientQt.cpp
-    qt/WebCoreSupport/DumpRenderTreeSupportQt.cpp
     qt/WebCoreSupport/EditorClientQt.cpp
     qt/WebCoreSupport/FrameLoaderClientQt.cpp
     qt/WebCoreSupport/FrameNetworkingContextQt.cpp
@@ -215,7 +214,6 @@ list(APPEND WebKit_LIBRARIES
     ${Qt5Core_LIBRARIES}
     ${Qt5Gui_LIBRARIES}
     ${Qt5Network_LIBRARIES}
-    WebCoreTestSupport
 )
 
 if (ENABLE_GEOLOCATION)
@@ -247,6 +245,14 @@ ecm_generate_headers(
 
 set(WebKit_LIBRARY_TYPE SHARED)
 set(WebKit_OUTPUT_NAME Qt5WebKit)
+
+
+############   WebKitTestSupport   ############
+
+
+add_library(WebKitTestSupport STATIC qt/WebCoreSupport/DumpRenderTreeSupportQt.cpp)
+target_link_libraries(WebKitTestSupport WebCoreTestSupport WebKit)
+WEBKIT_SET_EXTRA_COMPILER_FLAGS(WebKitTestSupport)
 
 
 ############     WebKitWidgets     ############

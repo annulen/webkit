@@ -38,6 +38,7 @@ set(QtTestBrowser_LIBRARIES
     ${Qt5Widgets_LIBRARIES}
     WebCore # FIXME: Fix cmake to add WebKit's dependencies automatically
     WebCoreTestSupport
+    WebKitTestSupport
     WebKitWidgets
 )
 
