@@ -77,6 +77,7 @@
 #include "TextIterator.h"
 #include "UndoStepQt.h"
 #include "UserAgentQt.h"
+#include "UserContentController.h"
 #include "VisitedLinkStoreQt.h"
 #include "WebDatabaseProvider.h"
 #include "WebEventConversion.h"
@@ -220,6 +221,9 @@ static void openNewWindow(const QUrl& url, Frame* frame)
     }
 }
 
+// FIXME: Find a better place
+Ref<UserContentController> s_userContentProvider = UserContentController::create();
+
 QWebPageAdapter::QWebPageAdapter()
     : settings(0)
     , page(0)
@@ -255,6 +259,7 @@ void QWebPageAdapter::initializeWebCorePage()
     // FIXME: Allow changing localStoragePath in existing page
     pageConfiguration.storageNamespaceProvider = WebStorageNamespaceProvider::create(
         QWebSettings::globalSettings()->localStoragePath());
+    pageConfiguration.userContentProvider = &s_userContentProvider.get();
     pageConfiguration.visitedLinkStore = &VisitedLinkStoreQt::singleton();
     page = new Page(pageConfiguration);
 
