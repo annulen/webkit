@@ -45,8 +45,8 @@ public:
     virtual void checkSpellingOfString(StringView, int* misspellingLocation, int* misspellingLength);
     virtual String getAutoCorrectSuggestionForMisspelledWord(const String& misspelledWord);
     virtual void checkGrammarOfString(StringView, Vector<GrammarDetail>&, int* badGrammarLocation, int* badGrammarLength);
-    virtual void getGuessesForWord(const String& word, const String& context, Vector<String>& guesses);
-    virtual void requestCheckingOfString(WTF::PassRefPtr<WebCore::TextCheckingRequest>) { }
+    virtual void getGuessesForWord(const String& word, const String& context, const VisibleSelection&, Vector<String>& guesses);
+    virtual void requestCheckingOfString(WTF::PassRefPtr<WebCore::TextCheckingRequest>, const VisibleSelection&) { }
 
     virtual bool isContinousSpellCheckingEnabled();
     virtual void toggleContinousSpellChecking();
