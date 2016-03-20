@@ -477,6 +477,16 @@ String AXLinkActionVerb()
     return String();
 }
 
+String AXAutoFillCredentialsLabel()
+{
+    return WEB_UI_STRING("password auto fill", "Label for the auto fill credentials button inside a text field.");
+}
+
+String AXAutoFillContactsLabel()
+{
+    return WEB_UI_STRING("contact info auto fill", "Label for the auto fill contacts button inside a text field.");
+}
+
 String missingPluginText()
 {
     return QCoreApplication::translate("QWebPage", "Missing Plug-in", "Label text to be used when a plug-in is missing");
