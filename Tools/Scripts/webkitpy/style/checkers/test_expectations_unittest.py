@@ -77,7 +77,8 @@ class TestExpectationsTestCase(unittest.TestCase):
         self._expect_port_for_expectations_path(None, '/mock-checkout/LayoutTests/platform/win/TestExpectations')
         self._expect_port_for_expectations_path('win', 'LayoutTests/platform/win/TestExpectations')
         self._expect_port_for_expectations_path('efl', 'LayoutTests/platform/efl/TestExpectations')
-        self._expect_port_for_expectations_path('qt', 'LayoutTests/platform/qt-win/TestExpectations')
+        # FIXME: Qt port definiton not restored!
+        #self._expect_port_for_expectations_path('qt', 'LayoutTests/platform/qt-win/TestExpectations')
         # FIXME: check-webkit-style doesn't know how to create port objects for all Qt version (4.8, 5.0) and
         # will only check files based on the installed version of Qt.
         #self._expect_port_for_expectations_path('qt', 'LayoutTests/platform/qt-5.0-wk2/TestExpectations')
