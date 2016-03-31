@@ -47,18 +47,23 @@
 
 namespace WebCore {
 
+template <typename CharacterType>
+static inline String toNormalizedQStringImpl(const CharacterType* characters, unsigned length)
+{
+    QString normalized;
+    normalized.reserve(length);
+
+    for (unsigned i = 0; i < length; ++i)
+        normalized.append(QChar(FontCascade::normalizeSpaces(characters[i])));
+
+    return normalized;
+}
+
 static const QString toNormalizedQString(const TextRun& run)
 {
-    if (run.is8Bit()) {
-        String sanitized = FontCascade::normalizeSpaces(run.characters8(), run.length());
-        return QString(sanitized); // FIXME: avoid second is8Bit() check
-    }
-
-    String sanitized = FontCascade::normalizeSpaces(run.characters16(), run.length());
-
-    // We don't detach. This assumes the WebCore string data will stay valid for the
-    // lifetime of the QString we pass back, since we don't ref the WebCore string.
-    return QString::fromRawData(reinterpret_cast<const QChar*>(sanitized.characters16()), sanitized.length());
+    return run.is8Bit()
+        ? toNormalizedQStringImpl(run.characters8(), run.length())
+        : toNormalizedQStringImpl(run.characters16(), run.length());
 }
 
 static QTextLine setupLayout(QTextLayout* layout, const TextRun& style)
