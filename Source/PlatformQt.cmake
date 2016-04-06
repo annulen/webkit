@@ -1,1 +1,1 @@
-# FIXME: Put platform-specific things here
+set_target_properties(gtest PROPERTIES COMPILE_DEFINITIONS QT_NO_KEYWORDS)
