@@ -53,7 +53,13 @@ inline NetworkStorageSession& storageSession(const Document* document)
     NetworkingContext* context = networkingContext(document);
     return context ? context->storageSession() : NetworkStorageSession::defaultStorageSession();
 }
+
+#if PLATFORM(QT)
+// FIXME: storageSession(document) needs to provide respective QNetowrkCookieJar
+#define LOCAL_SESSION(document) NetworkStorageSession session(SessionID::defaultSessionID(), networkingContext(document));
+#else
 #define LOCAL_SESSION(document) NetworkStorageSession& session = storageSession(document);
+#endif
 
 String cookies(const Document* document, const URL& url)
 {
