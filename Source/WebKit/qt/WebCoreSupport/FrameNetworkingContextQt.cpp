@@ -53,7 +53,8 @@ NetworkStorageSession& FrameNetworkingContextQt::storageSession() const
     ASSERT(isMainThread());
 
     if (frame() && frame()->page()->usesEphemeralSession())
-        return *privateSession(); // FIXME: Implement and call ensurePrivateBrowsingSession()
+        notImplemented();
+//        return *privateSession(); // FIXME: Implement and call ensurePrivateBrowsingSession()
 
     return NetworkStorageSession::defaultStorageSession();
 }
