@@ -176,8 +176,8 @@ public:
     void setCursorHiddenUntilMouseMoves(bool) override { }
 
 #if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
-    virtual void scheduleAnimation();
-    virtual void serviceScriptedAnimations();
+    void scheduleAnimation() override;
+    void serviceScriptedAnimations();
 #endif
 
     void scrollRectIntoView(const IntRect&) const override { }
