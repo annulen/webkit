@@ -5,7 +5,6 @@ if (NOT MSVC)
 endif ()
 
 list(APPEND WebKit_INCLUDE_DIRECTORIES
-    "${CMAKE_BINARY_DIR}/include"
     "${WEBCORE_DIR}"
     "${DERIVED_SOURCES_DIR}"
     "${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}"
@@ -231,6 +230,8 @@ if (ENABLE_VIDEO)
     )
 endif ()
 
+WEBKIT_CREATE_FORWARDING_HEADERS(QtWebKit DIRECTORIES qt/Api)
+
 ecm_generate_headers(
     QtWebKit_FORWARDING_HEADERS
     HEADER_NAMES
@@ -242,7 +243,7 @@ ecm_generate_headers(
     RELATIVE
         qt/Api
     OUTPUT_DIR
-        "${CMAKE_BINARY_DIR}/include/QtWebKit"
+        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKit"
 )
 
 set(WebKit_LIBRARY_TYPE SHARED)
@@ -302,6 +303,8 @@ if (USE_QT_MULTIMEDIA)
     endif ()
 endif ()
 
+WEBKIT_CREATE_FORWARDING_HEADERS(QtWebKitWidgets DIRECTORIES qt/WidgetApi)
+
 ecm_generate_headers(
     QtWebKitWidgets_FORWARDING_HEADERS
     HEADER_NAMES
@@ -313,7 +316,7 @@ ecm_generate_headers(
     RELATIVE
         qt/WidgetApi
     OUTPUT_DIR
-        "${CMAKE_BINARY_DIR}/include/QtWebKitWidgets"
+        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKit"
 )
 
 if (WIN32)
