@@ -242,4 +242,14 @@ QDataStream& WebCore::HistoryItem::saveState(QDataStream& out, int version) cons
 
 */
 
+RefPtr<HistoryItem> HistoryItem::restoreState(QDataStream& in, int version)
+{
+    return nullptr;
+}
+
+QDataStream& WebCore::HistoryItem::saveState(QDataStream& out, int version) const
+{
+    return out;
+}
+
 } // namespace WebCore
