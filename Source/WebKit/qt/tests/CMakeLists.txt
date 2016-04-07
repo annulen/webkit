@@ -25,7 +25,7 @@ set(QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY
     ${CMAKE_BINARY_DIR}/tests
 )
 
-set (QtWK1ApiTests
+set(QtWK1ApiTests
     qwebframe
     qwebhistory
     qwebhistoryinterface
