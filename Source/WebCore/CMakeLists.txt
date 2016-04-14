@@ -2781,7 +2781,6 @@ set(WebCore_SOURCES
     svg/SVGTextPathElement.cpp
     svg/SVGTextPositioningElement.cpp
     svg/SVGTitleElement.cpp
-    svg/SVGToOTFFontConversion.cpp
     svg/SVGTransform.cpp
     svg/SVGTransformDistance.cpp
     svg/SVGTransformList.cpp
@@ -2858,6 +2857,12 @@ set(WebCore_SOURCES
     xml/parser/XMLDocumentParserLibxml2.cpp
     xml/parser/XMLDocumentParserScope.cpp
 )
+
+if (ENABLE_SVG_FONTS)
+    list(APPEND WebCore_SOURCES
+        svg/SVGToOTFFontConversion.cpp
+    )
+endif ()
 
 if (ENABLE_GAMEPAD)
     list(APPEND WebCore_INCLUDE_DIRECTORIES

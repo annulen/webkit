@@ -73,7 +73,9 @@ CSSFontFaceSource::CSSFontFaceSource(CSSFontFace& owner, const String& familyNam
     : m_familyNameOrURI(familyNameOrURI)
     , m_font(font)
     , m_face(owner)
+#if ENABLE(SVG_FONTS)
     , m_svgFontFaceElement(fontFace)
+#endif
 {
     // This may synchronously call fontLoaded().
     if (m_font)
