@@ -52,7 +52,11 @@ int launcherMain(const QApplication& app)
 {
 #ifndef NDEBUG
     int retVal = app.exec();
+
+#if HAVE(QTTESTSUPPORT)
     WebKit::QtTestSupport::garbageCollectorCollect();
+#endif
+
     QWebSettings::clearMemoryCaches();
     return retVal;
 #else
