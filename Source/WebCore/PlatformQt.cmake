@@ -274,6 +274,12 @@ list(APPEND WebCoreTestSupport_LIBRARIES
     WebCore
 )
 
+if (HAVE_FONTCONFIG)
+    list(APPEND WebCoreTestSupport_LIBRARIES
+        ${FONTCONFIG_LIBRARIES}
+    )
+endif ()
+
 # From PlatformWin.cmake
 if (WIN32)
     list(APPEND WebCore_INCLUDE_DIRECTORIES
