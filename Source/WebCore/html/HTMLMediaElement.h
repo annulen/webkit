@@ -532,6 +532,8 @@ private:
     double effectivePlaybackRate() const;
     double requestedPlaybackRate() const;
 
+    Document* mediaPlayerOwningDocument() override;
+
     void mediaPlayerNetworkStateChanged(MediaPlayer*) override;
     void mediaPlayerReadyStateChanged(MediaPlayer*) override;
     void mediaPlayerTimeChanged(MediaPlayer*) override;

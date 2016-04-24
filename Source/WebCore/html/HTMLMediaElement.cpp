@@ -1945,6 +1945,11 @@ void HTMLMediaElement::cancelPendingEventsAndCallbacks()
         source.cancelPendingErrorEvent();
 }
 
+Document* HTMLMediaElement::mediaPlayerOwningDocument()
+{
+    return &document();
+}
+
 void HTMLMediaElement::mediaPlayerNetworkStateChanged(MediaPlayer*)
 {
     beginProcessingMediaPlayerCallback();
