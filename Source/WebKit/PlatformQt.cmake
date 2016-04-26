@@ -203,6 +203,10 @@ list(APPEND WebKit_SOURCES
     qt/WebCoreSupport/WebEventConversion.cpp
 )
 
+qt_wrap_cpp(WebKit WebKit_SOURCES
+    qt/Api/qwebkitplatformplugin.h
+)
+
 # Note: Qt5Network_INCLUDE_DIRS includes Qt5Core_INCLUDE_DIRS
 list(APPEND WebKit_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Gui_INCLUDE_DIRS}
@@ -226,9 +230,12 @@ if (ENABLE_GEOLOCATION)
     )
 endif ()
 
-if (ENABLE_VIDEO)
+if (USE_QT_MULTIMEDIA)
     list(APPEND WebKit_SOURCES
         qt/WebCoreSupport/FullScreenVideoQt.cpp
+    )
+    qt_wrap_cpp(WebKit WebKit_SOURCES
+        qt/Api/qwebfullscreenvideohandler.h
     )
 endif ()
 
@@ -317,10 +324,6 @@ set(WebKitWidgets_SOURCES
     qt/WidgetSupport/QtWebComboBox.cpp
 )
 
-qt_wrap_cpp(WebKit WebKitWidgets_SOURCES
-    qt/Api/qwebkitplatformplugin.h
-)
-
 set(WebKitWidgets_SYSTEM_INCLUDE_DIRECTORIES
     ${WebKit_SYSTEM_INCLUDE_DIRECTORIES}
     ${Qt5Widgets_INCLUDE_DIRS}
@@ -335,12 +338,17 @@ set(WebKitWidgets_LIBRARIES
 if (USE_QT_MULTIMEDIA)
     list(APPEND WebKitWidgets_SOURCES
         qt/WidgetSupport/DefaultFullScreenVideoHandler.cpp
+        qt/WidgetSupport/FullScreenVideoWidget.cpp
     )
-    if (NOT USE_GSTREAMER)
-        list(APPEND WebKitWidgets_SOURCES
-            qt/WidgetSupport/DefaultFullScreenVideoHandler.cpp
-        )
-    endif ()
+    qt_wrap_cpp(WebKit WebKitWidgets_SOURCES
+        qt/Api/qwebkitplatformplugin.h
+    )
+    list(APPEND WebKitWidgets_SYSTEM_INCLUDE_DIRECTORIES
+        ${Qt5MultimediaWidgets_INCLUDE_DIRS}
+    )
+    list(APPEND WebKitWidgets_LIBRARIES
+        ${Qt5MultimediaWidgets_LIBRARIES}
+    )
 endif ()
 
 WEBKIT_CREATE_FORWARDING_HEADERS(QtWebKitWidgets DIRECTORIES qt/WidgetApi)
