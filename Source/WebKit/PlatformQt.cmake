@@ -203,10 +203,6 @@ list(APPEND WebKit_SOURCES
     qt/WebCoreSupport/WebEventConversion.cpp
 )
 
-qt_wrap_cpp(WebKit WebKit_SOURCES
-    qt/Api/qwebkitplatformplugin.h
-)
-
 # Note: Qt5Network_INCLUDE_DIRS includes Qt5Core_INCLUDE_DIRS
 list(APPEND WebKit_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Gui_INCLUDE_DIRS}
@@ -233,9 +229,6 @@ endif ()
 if (USE_QT_MULTIMEDIA)
     list(APPEND WebKit_SOURCES
         qt/WebCoreSupport/FullScreenVideoQt.cpp
-    )
-    qt_wrap_cpp(WebKit WebKit_SOURCES
-        qt/Api/qwebfullscreenvideohandler.h
     )
 endif ()
 
@@ -324,6 +317,10 @@ set(WebKitWidgets_SOURCES
     qt/WidgetSupport/QtWebComboBox.cpp
 )
 
+qt_wrap_cpp(WebKitWidgets WebKitWidgets_SOURCES
+    qt/Api/qwebkitplatformplugin.h
+)
+
 set(WebKitWidgets_SYSTEM_INCLUDE_DIRECTORIES
     ${WebKit_SYSTEM_INCLUDE_DIRECTORIES}
     ${Qt5Widgets_INCLUDE_DIRS}
@@ -340,8 +337,8 @@ if (USE_QT_MULTIMEDIA)
         qt/WidgetSupport/DefaultFullScreenVideoHandler.cpp
         qt/WidgetSupport/FullScreenVideoWidget.cpp
     )
-    qt_wrap_cpp(WebKit WebKitWidgets_SOURCES
-        qt/Api/qwebkitplatformplugin.h
+    qt_wrap_cpp(WebKitWidgets WebKitWidgets_SOURCES
+        qt/Api/qwebfullscreenvideohandler.h
     )
     list(APPEND WebKitWidgets_SYSTEM_INCLUDE_DIRECTORIES
         ${Qt5MultimediaWidgets_INCLUDE_DIRS}
