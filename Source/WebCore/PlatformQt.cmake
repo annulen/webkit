@@ -76,7 +76,6 @@ list(APPEND WebCore_SOURCES
     platform/graphics/qt/FontQt.cpp
     platform/graphics/qt/GlyphPageTreeNodeQt.cpp
     platform/graphics/qt/GradientQt.cpp
-    platform/graphics/qt/GraphicsContext3DQt.cpp
     platform/graphics/qt/GraphicsContextQt.cpp
     platform/graphics/qt/IconQt.cpp
     platform/graphics/qt/ImageBufferQt.cpp
@@ -161,6 +160,12 @@ endif ()
 if (ENABLE_GAMEPAD)
     list(APPEND WebCore_SOURCES
         platform/qt/GamepadsQt.cpp
+    )
+endif ()
+
+if (ENABLE_GRAPHICS_CONTEXT_3D)
+    list(APPEND WebCore_SOURCES
+        platform/graphics/qt/GraphicsContext3DQt.cpp
     )
 endif ()
 
