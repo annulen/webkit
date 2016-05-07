@@ -590,7 +590,7 @@ void QWebFrameAdapter::renderFrameExtras(GraphicsContext& context, int layers, c
 
 #if ENABLE(PAN_SCROLLING)
         if (layers & PanIconLayer)
-            view->paintPanScrollIcon(*context);
+            view->paintPanScrollIcon(context);
 #endif
 
         painter->restore();
