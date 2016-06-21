@@ -303,11 +303,12 @@ void ChromeClientQt::setResizable(bool)
     notImplemented();
 }
 
-void ChromeClientQt::addMessageToConsole(MessageSource, MessageLevel, const String& message, unsigned lineNumber, unsigned columnNumber, const String& sourceID)
+void ChromeClientQt::addMessageToConsole(MessageSource source, MessageLevel level, const String& message, unsigned lineNumber, unsigned columnNumber, const String& sourceID)
 {
     QString x = message;
     QString y = sourceID;
     UNUSED_PARAM(columnNumber);
+    m_webPage->javaScriptConsoleMessage(QWebPageAdapter::MessageSource(source), QWebPageAdapter::MessageLevel(level), x, lineNumber, y);
     m_webPage->javaScriptConsoleMessage(x, lineNumber, y);
 }
 

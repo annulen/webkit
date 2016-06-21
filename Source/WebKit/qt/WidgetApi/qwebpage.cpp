@@ -261,6 +261,11 @@ void QWebPagePrivate::javaScriptConsoleMessage(const QString &message, int lineN
     q->javaScriptConsoleMessage(message, lineNumber, sourceID);
 }
 
+void QWebPagePrivate::javaScriptConsoleMessage(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
+{
+    q->javaScriptConsoleMessage(QWebPage::MessageSource(source), QWebPage::MessageLevel(level), message, lineNumber, sourceID);
+}
+
 void QWebPagePrivate::javaScriptAlert(QWebFrameAdapter* frame, const QString& msg)
 {
     q->javaScriptAlert(QWebFramePrivate::kit(frame), msg);
@@ -1487,6 +1492,22 @@ void QWebPage::javaScriptConsoleMessage(const QString& message, int lineNumber, 
             fprintf(stdout, "%s\n", message.toUtf8().constData());
         }
     }
+}
+
+/*!
+    This function is called whenever a JavaScript program tries to print a \a message to the web browser's console.
+
+    For example in case of evaluation errors the source URL may be provided in \a sourceID as well as the \a lineNumber.
+
+    The default implementation prints nothing.
+*/
+void QWebPage::javaScriptConsoleMessage(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
+{
+    Q_UNUSED(source)
+    Q_UNUSED(level)
+    Q_UNUSED(message)
+    Q_UNUSED(lineNumber)
+    Q_UNUSED(sourceID)
 }
 
 /*!

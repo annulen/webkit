@@ -79,7 +79,7 @@ class QWEBKITWIDGETS_EXPORT QWebPage : public QObject {
     Q_PROPERTY(QPalette palette READ palette WRITE setPalette)
     Q_PROPERTY(bool contentEditable READ isContentEditable WRITE setContentEditable)
     Q_PROPERTY(VisibilityState visibilityState READ visibilityState WRITE setVisibilityState)
-    Q_ENUMS(LinkDelegationPolicy NavigationType VisibilityState WebAction)
+    Q_ENUMS(LinkDelegationPolicy NavigationType VisibilityState WebAction MessageSource MessageLevel)
 public:
     enum NavigationType {
         NavigationTypeLinkClicked,
@@ -230,6 +230,26 @@ public:
         VisibilityStateHidden,
         VisibilityStatePrerender,
         VisibilityStateUnloaded
+    };
+
+    enum MessageSource {
+        XMLMessageSource,
+        JSMessageSource,
+        NetworkMessageSource,
+        ConsoleAPIMessageSource,
+        StorageMessageSource,
+        AppCacheMessageSource,
+        RenderingMessageSource,
+        CSSMessageSource,
+        SecurityMessageSource,
+        OtherMessageSource,
+    };
+
+    enum MessageLevel {
+        DebugMessageLevel = 4,
+        LogMessageLevel = 1,
+        WarningMessageLevel = 2,
+        ErrorMessageLevel = 3
     };
 
     class QWEBKITWIDGETS_EXPORT ViewportAttributes {
@@ -435,6 +455,7 @@ protected:
     virtual bool javaScriptConfirm(QWebFrame *originatingFrame, const QString& msg);
     virtual bool javaScriptPrompt(QWebFrame *originatingFrame, const QString& msg, const QString& defaultValue, QString* result);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
+    virtual void javaScriptConsoleMessage(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
 
     virtual QString userAgentForUrl(const QUrl& url) const;
 
