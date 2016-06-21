@@ -33,12 +33,13 @@ qt5_add_resources(DumpRenderTree_SOURCES
 
 list(APPEND DumpRenderTree_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS}
 )
 
 list(APPEND DumpRenderTree_LIBRARIES
-    ${Qt5Widgets_LIBRARIES}
+    ${Qt5PrintSupport_LIBRARIES}
     ${Qt5Test_LIBRARIES}
-    WebKitTestSupport
+    ${Qt5Widgets_LIBRARIES}
     WebKitWidgets
 )
 
