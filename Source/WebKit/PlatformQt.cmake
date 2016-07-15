@@ -1,11 +1,3 @@
-get_cmake_property(_variableNames VARIABLES)
-foreach (_variableName ${_variableNames})
-    if ((_variableName MATCHES "^QT_NO_") AND ("${${_variableName}}" STREQUAL "ON"))
-        add_definitions( -D_variableName )
-        message(STATUS "Qt definition added: ${_variableName}")
-    endif()
-endforeach()
-
 include(ECMGenerateHeaders)
 include(ECMGeneratePkgConfigFile)
 include(ECMGeneratePriFile)
