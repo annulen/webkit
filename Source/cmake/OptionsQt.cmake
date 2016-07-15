@@ -227,16 +227,13 @@ set(REQUIRED_QT_VERSION 5.2.0)
 
 find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Network Sql)
 
-if (ENABLE_OPENGL)
-    find_package(Qt5OpenGL ${REQUIRED_QT_VERSION})
-endif()
+# FIXME: Allow building w/o these components
+find_package(Qt5OpenGL ${REQUIRED_QT_VERSION})
+find_package(Qt5Widgets ${REQUIRED_QT_VERSION} REQUIRED)
 
 if (NOT DISABLE_TESTS)
     find_package(Qt5Test ${REQUIRED_QT_VERSION} REQUIRED)
 endif()
-
-# FIXME: Allow building w/o this components
-find_package(Qt5Widgets ${REQUIRED_QT_VERSION} REQUIRED)
 
 if (COMPILER_IS_GCC_OR_CLANG AND UNIX)
     if (APPLE OR CMAKE_SYSTEM_NAME MATCHES "Android" OR ${Qt5_VERSION} VERSION_LESS 5.6)
