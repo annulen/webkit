@@ -46,12 +46,21 @@ WEBKIT_OPTION_DEFINE(ENABLE_OPENGL "Whether to use OpenGL." PUBLIC OFF)
 WEBKIT_OPTION_DEFINE(ENABLE_PRINT_SUPPORT "Enable support for printing web pages" PUBLIC ON)
 
 option(GENERATE_DOCUMENTATION "Generate HTML and QCH documentation" OFF)
-option(ENABLE_TEST_SUPPORT "Build tools for running layout tests and related library code" ON)
+
+if (DISABLE_TESTS)
+    option(ENABLE_TEST_SUPPORT "Build tools for running layout tests and related library code" OFF)
+else()
+    option(ENABLE_TEST_SUPPORT "Build tools for running layout tests and related library code" ON)
+endif()
 
 # Public options shared with other WebKit ports. There must be strong reason
 # to support changing the value of the option.
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ALLINONE_BUILD PUBLIC ON)
-WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_API_TESTS PUBLIC ON)
+if (DISABLE_TESTS)
+    WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_API_TESTS PUBLIC OFF)
+else()
+    WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_API_TESTS PUBLIC ON)
+endif()
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_CSS_GRID_LAYOUT PUBLIC ON)
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_DATABASE_PROCESS PUBLIC OFF)
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_DATALIST_ELEMENT PUBLIC ON)
@@ -115,6 +124,10 @@ set(ENABLE_WEBKIT ON)
 set(ENABLE_WEBKIT2 OFF)
 set(WTF_USE_UDIS86 1)
 
+if (QT_STATIC_BUILD)
+    set(SHARED_CORE OFF)
+endif()
+
 if (SHARED_CORE)
     set(WebCoreTestSupport_LIBRARY_TYPE SHARED)
 else ()
@@ -167,6 +180,10 @@ find_package(Sqlite REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
 
+if (QT_STATIC_BUILD)
+    find_package(OPENSSL REQUIRED)
+endif()
+
 if (NOT APPLE)
     find_package(ICU REQUIRED)
 else ()
@@ -176,8 +193,14 @@ else ()
         "${WTF_DIR}/icu"
     )
     set(ICU_LIBRARIES libicucore.dylib)
-
     find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+    if (QT_STATIC_BUILD)
+        find_library(CARBON_LIBRARY Carbon)
+        find_library(COCOA_LIBRARY Cocoa)
+        find_library(SYSTEMCONFIGURATION_LIBRARY SystemConfiguration)
+        find_library(CORESERVICES_LIBRARY CoreServices)
+        find_library(SECURITY_LIBRARY Security)
+    endif()
 endif ()
 
 if (ENABLE_XSLT)
@@ -200,9 +223,15 @@ set(REQUIRED_QT_VERSION 5.2.0)
 
 find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Network Sql)
 
-# FIXME: Allow building w/o these components
-find_package(Qt5OpenGL ${REQUIRED_QT_VERSION})
-find_package(Qt5Test ${REQUIRED_QT_VERSION} REQUIRED)
+if (ENABLE_OPENGL)
+    find_package(Qt5OpenGL ${REQUIRED_QT_VERSION})
+endif()
+
+if (NOT DISABLE_TESTS)
+    find_package(Qt5Test ${REQUIRED_QT_VERSION} REQUIRED)
+endif()
+
+# FIXME: Allow building w/o this components
 find_package(Qt5Widgets ${REQUIRED_QT_VERSION} REQUIRED)
 
 if (COMPILER_IS_GCC_OR_CLANG AND UNIX)

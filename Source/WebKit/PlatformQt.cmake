@@ -1,3 +1,11 @@
+get_cmake_property(_variableNames VARIABLES)
+foreach (_variableName ${_variableNames})
+    if ((_variableName MATCHES "^QT_NO_") AND ("${${_variableName}}" STREQUAL "ON"))
+        add_definitions( -D_variableName )
+        message(STATUS "Qt definition added: ${_variableName}")
+    endif()
+endforeach()
+
 include(ECMGenerateHeaders)
 include(ECMGeneratePkgConfigFile)
 include(ECMGeneratePriFile)
@@ -213,6 +221,27 @@ list(APPEND WebKit_LIBRARIES
         ${Qt5Network_LIBRARIES}
 )
 
+if (QT_STATIC_BUILD)
+    if (APPLE)
+        list(APPEND WebKit_LIBRARIES
+            PUBLIC
+                ${SYSTEMCONFIGURATION_LIBRARY}
+                ${CORESERVICES_LIBRARY}
+                ${SECURITY_LIBRARY}
+                ${CARBON_LIBRARY}
+                ${COCOA_LIBRARY}
+        )
+    endif()
+
+    list(APPEND WebKit_LIBRARIES
+        PUBLIC
+            ${OPENSSL_LIBRARIES}
+            ${_qt5Widgets_install_prefix}/lib/libqtharfbuzzng.a
+            ${_qt5Widgets_install_prefix}/lib/libqtpcre.a
+            ${ZLIB_LIBRARIES}
+    )
+endif()
+
 if (ENABLE_GEOLOCATION)
     list(APPEND WebKit_SOURCES
         qt/WebCoreSupport/GeolocationClientQt.cpp
@@ -324,7 +353,12 @@ ecm_generate_pri_file(
 )
 install(FILES ${WebKit_PRI_FILENAME} DESTINATION ${ECM_MKSPECS_INSTALL_DIR})
 
-set(WebKit_LIBRARY_TYPE SHARED)
+if (QT_STATIC_BUILD)
+    set(WebKit_LIBRARY_TYPE STATIC)
+else()
+    set(WebKit_LIBRARY_TYPE SHARED)
+endif()
+
 set(WebKit_OUTPUT_NAME Qt5WebKit)
 
 
@@ -489,7 +523,12 @@ if (WIN32)
     ADD_PRECOMPILED_HEADER("WebKitWidgetsPrefix.h" "qt/WebKitWidgetsPrefix.cpp" WebKitWidgets_SOURCES)
 endif ()
 
-set(WebKitWidgets_LIBRARY_TYPE SHARED)
+if (QT_STATIC_BUILD)
+    set(WebKitWidgets_LIBRARY_TYPE STATIC)
+else()
+    set(WebKitWidgets_LIBRARY_TYPE SHARED)
+endif()
+
 set(WebKitWidgets_OUTPUT_NAME Qt5WebKitWidgets)
 set(WebKitWidgets_PRIVATE_HEADERS_LOCATION Headers/${PROJECT_VERSION}/QtWebKitWidgets/Private)
 
