@@ -184,8 +184,7 @@ public:
     virtual QSize viewportSize() const = 0;
     virtual QWebPageAdapter* createWindow(bool /*dialog*/) = 0;
     virtual QObject* handle() = 0;
-    virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID) = 0;
-    virtual void javaScriptConsoleMessage(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID) = 0;
+    virtual void javaScriptConsoleMessage(MessageSource, MessageLevel, const QString& message, int lineNumber, const QString& sourceID) = 0;
     virtual void javaScriptAlert(QWebFrameAdapter*, const QString& msg) = 0;
     virtual bool javaScriptConfirm(QWebFrameAdapter*, const QString& msg) = 0;
     virtual bool javaScriptPrompt(QWebFrameAdapter*, const QString& msg, const QString& defaultValue, QString* result) = 0;

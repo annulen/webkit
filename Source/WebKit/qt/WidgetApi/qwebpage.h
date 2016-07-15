@@ -445,6 +445,8 @@ Q_SIGNALS:
     void featurePermissionRequested(QWebFrame* frame, QWebPage::Feature feature);
     void featurePermissionRequestCanceled(QWebFrame* frame, QWebPage::Feature feature);
 
+    void consoleMessageAdded(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
+
 protected:
     virtual QWebPage *createWindow(WebWindowType type);
     virtual QObject *createPlugin(const QString &classid, const QUrl &url, const QStringList &paramNames, const QStringList &paramValues);
@@ -455,7 +457,6 @@ protected:
     virtual bool javaScriptConfirm(QWebFrame *originatingFrame, const QString& msg);
     virtual bool javaScriptPrompt(QWebFrame *originatingFrame, const QString& msg, const QString& defaultValue, QString* result);
     virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
-    virtual void javaScriptConsoleMessage(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
 
     virtual QString userAgentForUrl(const QUrl& url) const;
 
