@@ -233,7 +233,7 @@ public:
     };
 
     enum MessageSource {
-        XMLMessageSource,
+        XmlMessageSource,
         JSMessageSource,
         NetworkMessageSource,
         ConsoleAPIMessageSource,
