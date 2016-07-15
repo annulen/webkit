@@ -46,20 +46,15 @@ WEBKIT_OPTION_DEFINE(ENABLE_OPENGL "Whether to use OpenGL." PUBLIC OFF)
 WEBKIT_OPTION_DEFINE(ENABLE_PRINT_SUPPORT "Enable support for printing web pages" PUBLIC ON)
 
 option(GENERATE_DOCUMENTATION "Generate HTML and QCH documentation" OFF)
-
-if (DISABLE_TESTS)
-    option(ENABLE_TEST_SUPPORT "Build tools for running layout tests and related library code" OFF)
-else()
-    option(ENABLE_TEST_SUPPORT "Build tools for running layout tests and related library code" ON)
-endif()
+option(ENABLE_TEST_SUPPORT "Build tools for running layout tests and related library code" ON)
 
 # Public options shared with other WebKit ports. There must be strong reason
 # to support changing the value of the option.
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ALLINONE_BUILD PUBLIC ON)
-if (DISABLE_TESTS)
-    WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_API_TESTS PUBLIC OFF)
-else()
+if (ENABLE_TEST_SUPPORT)
     WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_API_TESTS PUBLIC ON)
+else()
+    WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_API_TESTS PUBLIC OFF)
 endif()
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_CSS_GRID_LAYOUT PUBLIC ON)
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_DATABASE_PROCESS PUBLIC OFF)
@@ -231,7 +226,7 @@ find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Network Sql
 find_package(Qt5OpenGL ${REQUIRED_QT_VERSION})
 find_package(Qt5Widgets ${REQUIRED_QT_VERSION} REQUIRED)
 
-if (NOT DISABLE_TESTS)
+if (ENABLE_TEST_SUPPORT)
     find_package(Qt5Test ${REQUIRED_QT_VERSION} REQUIRED)
 endif()
 
