@@ -147,9 +147,9 @@ list(APPEND WebCore_SOURCES
     platform/text/qt/TextBreakIteratorInternalICUQt.cpp
 )
 
-if ((DEFINED ENV{SQLITE3SRCDIR}) AND (EXISTS $ENV{SQLITE3SRCDIR}/sqlite3.c))
+if (SQLITE_SOURCE_FILE)
     list(APPEND WebCore_SOURCES
-        "$ENV{SQLITE3SRCDIR}/sqlite3.c"
+        "${SQLITE_SOURCE_FILE}"
     )
     add_definitions(-DSQLITE_CORE -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_OMIT_COMPLETE)
 endif ()
