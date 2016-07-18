@@ -79,7 +79,7 @@ class QWEBKITWIDGETS_EXPORT QWebPage : public QObject {
     Q_PROPERTY(QPalette palette READ palette WRITE setPalette)
     Q_PROPERTY(bool contentEditable READ isContentEditable WRITE setContentEditable)
     Q_PROPERTY(VisibilityState visibilityState READ visibilityState WRITE setVisibilityState)
-    Q_ENUMS(LinkDelegationPolicy NavigationType VisibilityState WebAction MessageSource MessageLevel)
+    Q_ENUMS(LinkDelegationPolicy MessageLevel MessageSource NavigationType VisibilityState WebAction)
 public:
     enum NavigationType {
         NavigationTypeLinkClicked,
