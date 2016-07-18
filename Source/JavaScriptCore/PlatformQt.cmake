@@ -24,13 +24,13 @@ if (QT_STATIC_BUILD)
             ${CARBON_LIBRARY}
             ${COCOA_LIBRARY}
         )
-    endif()
+    endif ()
 
     list(APPEND JavaScriptCore_LIBRARIES
         ${_qt5Widgets_install_prefix}/lib/libqtpcre.a
         ${ZLIB_LIBRARIES}
     )
-endif()
+endif ()
 
 # From PlatformWin.cmake
 if (WIN32)

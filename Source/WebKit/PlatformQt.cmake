@@ -223,7 +223,7 @@ if (QT_STATIC_BUILD)
                 ${CARBON_LIBRARY}
                 ${COCOA_LIBRARY}
         )
-    endif()
+    endif ()
 
     list(APPEND WebKit_LIBRARIES
         PUBLIC
@@ -232,7 +232,7 @@ if (QT_STATIC_BUILD)
             ${_qt5Widgets_install_prefix}/lib/libqtpcre.a
             ${ZLIB_LIBRARIES}
     )
-endif()
+endif ()
 
 if (ENABLE_GEOLOCATION)
     list(APPEND WebKit_SOURCES
@@ -347,9 +347,9 @@ install(FILES ${WebKit_PRI_FILENAME} DESTINATION ${ECM_MKSPECS_INSTALL_DIR})
 
 if (QT_STATIC_BUILD)
     set(WebKit_LIBRARY_TYPE STATIC)
-else()
+else ()
     set(WebKit_LIBRARY_TYPE SHARED)
-endif()
+endif ()
 
 set(WebKit_OUTPUT_NAME Qt5WebKit)
 
@@ -517,9 +517,9 @@ endif ()
 
 if (QT_STATIC_BUILD)
     set(WebKitWidgets_LIBRARY_TYPE STATIC)
-else()
+else ()
     set(WebKitWidgets_LIBRARY_TYPE SHARED)
-endif()
+endif ()
 
 set(WebKitWidgets_OUTPUT_NAME Qt5WebKitWidgets)
 set(WebKitWidgets_PRIVATE_HEADERS_LOCATION Headers/${PROJECT_VERSION}/QtWebKitWidgets/Private)

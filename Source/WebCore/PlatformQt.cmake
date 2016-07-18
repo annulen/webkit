@@ -147,22 +147,12 @@ list(APPEND WebCore_SOURCES
     platform/text/qt/TextBreakIteratorInternalICUQt.cpp
 )
 
-if (SQLITE3SRCDIR)
-    list(APPEND WebCore_INCLUDE_DIRECTORIES
-        "${SQLITE3SRCDIR}"
-    )
+if ((DEFINED ENV{SQLITE3SRCDIR}) AND (EXISTS $ENV{SQLITE3SRCDIR}/sqlite3.c))
     list(APPEND WebCore_SOURCES
-        "${SQLITE3SRCDIR}/sqlite3.c"
+        "$ENV{SQLITE3SRCDIR}/sqlite3.c"
     )
     add_definitions(-DSQLITE_CORE -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_OMIT_COMPLETE)
-else()
-    list(APPEND WebCore_SYSTEM_INCLUDE_DIRECTORIES
-        ${SQLITE_INCLUDE_DIR}
-    )
-    list(APPEND WebCore_LIBRARIES
-        ${SQLITE_LIBRARIES}
-    )
-endif()
+endif ()
 
 if (ENABLE_DEVICE_ORIENTATION)
     list(APPEND WebCore_SOURCES
@@ -210,6 +200,7 @@ list(APPEND WebCore_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Network_INCLUDE_DIRS}
     ${Qt5Sensors_INCLUDE_DIRS}
     ${Qt5Sql_INCLUDE_DIRS}
+    ${SQLITE_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIRS}
 )
 
@@ -222,6 +213,7 @@ list(APPEND WebCore_LIBRARIES
     ${Qt5Network_LIBRARIES}
     ${Qt5Sensors_LIBRARIES}
     ${Qt5Sql_LIBRARIES}
+    ${SQLITE_LIBRARIES}
     ${ZLIB_LIBRARIES}
 )
 
