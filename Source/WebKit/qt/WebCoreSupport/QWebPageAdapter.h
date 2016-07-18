@@ -146,6 +146,7 @@ public:
         VisibilityStateUnloaded
     };
 
+    // Must match with values of QWebPage::MessageSource enum.
     enum MessageSource {
         XmlMessageSource,
         JSMessageSource,
@@ -156,14 +157,17 @@ public:
         RenderingMessageSource,
         CSSMessageSource,
         SecurityMessageSource,
+        ContentBlockerMessageSource,
         OtherMessageSource,
     };
 
+    // Must match with values of QWebPage::MessageLevel enum.
     enum MessageLevel {
-        DebugMessageLevel = 4,
         LogMessageLevel = 1,
         WarningMessageLevel = 2,
-        ErrorMessageLevel = 3
+        ErrorMessageLevel = 3,
+        DebugMessageLevel = 4,
+        InfoMessageLevel = 5,
     };
 
     QWebPageAdapter();

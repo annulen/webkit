@@ -242,14 +242,16 @@ public:
         RenderingMessageSource,
         CSSMessageSource,
         SecurityMessageSource,
+        ContentBlockerMessageSource,
         OtherMessageSource,
     };
 
     enum MessageLevel {
-        DebugMessageLevel = 4,
         LogMessageLevel = 1,
         WarningMessageLevel = 2,
-        ErrorMessageLevel = 3
+        ErrorMessageLevel = 3,
+        DebugMessageLevel = 4,
+        InfoMessageLevel = 5,
     };
 
     class QWEBKITWIDGETS_EXPORT ViewportAttributes {
