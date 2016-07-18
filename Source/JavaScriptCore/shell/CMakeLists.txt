@@ -41,7 +41,7 @@ if (WIN32)
     add_dependencies(jsc jscLib)
 endif ()
 
-if (NOT WIN32 AND ENABLE_TEST_SUPPORT)
+if (NOT WIN32 AND ENABLE_API_TESTS)
     set(TESTB3_SOURCES
         ../b3/testb3.cpp
     )
