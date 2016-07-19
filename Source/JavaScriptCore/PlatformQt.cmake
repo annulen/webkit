@@ -19,15 +19,7 @@ list(APPEND JavaScriptCore_LIBRARIES
 )
 
 if (QT_STATIC_BUILD)
-    if (APPLE)
-        list(APPEND JavaScriptCore_LIBRARIES
-            ${CARBON_LIBRARY}
-            ${COCOA_LIBRARY}
-        )
-    endif ()
-
     list(APPEND JavaScriptCore_LIBRARIES
-        ${_qt5Widgets_install_prefix}/lib/libqtpcre.a
         ${ZLIB_LIBRARIES}
     )
 endif ()

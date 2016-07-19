@@ -214,22 +214,8 @@ list(APPEND WebKit_LIBRARIES
 )
 
 if (QT_STATIC_BUILD)
-    if (APPLE)
-        list(APPEND WebKit_LIBRARIES
-            PUBLIC
-                ${SYSTEMCONFIGURATION_LIBRARY}
-                ${CORESERVICES_LIBRARY}
-                ${SECURITY_LIBRARY}
-                ${CARBON_LIBRARY}
-                ${COCOA_LIBRARY}
-        )
-    endif ()
-
     list(APPEND WebKit_LIBRARIES
         PUBLIC
-            ${OPENSSL_LIBRARIES}
-            ${_qt5Widgets_install_prefix}/lib/libqtharfbuzzng.a
-            ${_qt5Widgets_install_prefix}/lib/libqtpcre.a
             ${ZLIB_LIBRARIES}
     )
 endif ()
