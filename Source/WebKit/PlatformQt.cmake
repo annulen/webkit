@@ -213,13 +213,6 @@ list(APPEND WebKit_LIBRARIES
         ${Qt5Network_LIBRARIES}
 )
 
-if (QT_STATIC_BUILD)
-    list(APPEND WebKit_LIBRARIES
-        PUBLIC
-            ${ZLIB_LIBRARIES}
-    )
-endif ()
-
 if (ENABLE_GEOLOCATION)
     list(APPEND WebKit_SOURCES
         qt/WebCoreSupport/GeolocationClientQt.cpp
