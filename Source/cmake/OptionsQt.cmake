@@ -259,7 +259,7 @@ if (QT_STATIC_BUILD)
     if (TARGET Qt5::Test)
         macro_process_qtbase_prl_file(Qt5::Test)
     endif ()
-endif()
+endif ()
 
 if (COMPILER_IS_GCC_OR_CLANG AND UNIX)
     if (APPLE OR CMAKE_SYSTEM_NAME MATCHES "Android" OR ${Qt5_VERSION} VERSION_LESS 5.6)
