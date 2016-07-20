@@ -2,28 +2,30 @@ include(FeatureSummary)
 include(ECMPackageConfigHelpers)
 include(ECMQueryQmake)
 
-macro (macro_process_qtbase_prl_file qt_target_component)
-    get_target_property(_lib_name ${qt_target_component} NAME)
-    string(REGEX REPLACE "::" "" _lib_name ${_lib_name})
-    get_target_property(_lib_location ${qt_target_component} LOCATION)
-    get_target_property(_prl_file_location ${qt_target_component} LOCATION)
-    string(REGEX REPLACE "^(.+/lib${_lib_name}).+$" "\\1.prl" _prl_file_location ${_prl_file_location})
-    get_target_property(_link_libs ${qt_target_component} INTERFACE_LINK_LIBRARIES)
-    if (_link_libs)
-        set(_list_sep ";")
-    else ()
-        set(_list_sep "")
+macro(macro_process_qtbase_prl_file qt_target_component)
+    if (TARGET ${qt_target_component})
+        get_target_property(_lib_name ${qt_target_component} NAME)
+        string(REGEX REPLACE "::" "" _lib_name ${_lib_name})
+        get_target_property(_lib_location ${qt_target_component} LOCATION)
+        get_target_property(_prl_file_location ${qt_target_component} LOCATION)
+        string(REGEX REPLACE "^(.+/lib${_lib_name}).+$" "\\1.prl" _prl_file_location ${_prl_file_location})
+        get_target_property(_link_libs ${qt_target_component} INTERFACE_LINK_LIBRARIES)
+        if (_link_libs)
+            set(_list_sep ";")
+        else ()
+            set(_list_sep "")
+        endif ()
+        if (EXISTS ${_prl_file_location})
+            file(STRINGS ${_prl_file_location} prl_strings REGEX "QMAKE_PRL_LIBS")
+            string(REGEX REPLACE "QMAKE_PRL_LIBS *= *([^\n]*)" "\\1" static_depends ${prl_strings})
+            string(STRIP ${static_depends} static_depends)
+            set_target_properties(${qt_target_component} PROPERTIES
+                "INTERFACE_LINK_LIBRARIES" "${_link_libs}${_list_sep}${static_depends}"
+                "IMPORTED_LOCATION" "${_lib_location}"
+            )
+        endif ()
     endif ()
-    if (EXISTS ${_prl_file_location})
-        file(STRINGS ${_prl_file_location} prl_strings REGEX "QMAKE_PRL_LIBS")
-        string(REGEX REPLACE "QMAKE_PRL_LIBS *= *([^\n]*)" "\\1" static_depends ${prl_strings} )
-        string(STRIP ${static_depends} static_depends)
-        set_target_properties(${qt_target_component} PROPERTIES
-            "INTERFACE_LINK_LIBRARIES" "${_link_libs}${_list_sep}${static_depends}"
-            "IMPORTED_LOCATION" "${_lib_location}"
-        )
-    endif ()
-endmacro ()
+endmacro()
 
 set(PROJECT_VERSION_MAJOR 5)
 set(PROJECT_VERSION_MINOR 602)
@@ -237,29 +239,33 @@ endif ()
 
 set(REQUIRED_QT_VERSION 5.2.0)
 
-find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Network Sql)
+
+set(QT_REQUIRED_COMPONENTS Core Gui Network Sql)
 
 # FIXME: Allow building w/o these components
-find_package(Qt5OpenGL ${REQUIRED_QT_VERSION})
-find_package(Qt5Widgets ${REQUIRED_QT_VERSION} REQUIRED)
+list(APPEND QT_REQUIRED_COMPONENTS
+    Widgets
+)
+set(QT_OPTIONAL_COMPONENTS OpenGL)
 
 if (ENABLE_TEST_SUPPORT)
-    find_package(Qt5Test ${REQUIRED_QT_VERSION} REQUIRED)
+    list(APPEND QT_REQUIRED_COMPONENTS
+        Test
+    )
 endif ()
 
+find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 if (QT_STATIC_BUILD)
-    macro_process_qtbase_prl_file(Qt5::Core)
-    macro_process_qtbase_prl_file(Qt5::Gui)
-    macro_process_qtbase_prl_file(Qt5::Network)
-    macro_process_qtbase_prl_file(Qt5::Sql)
-    macro_process_qtbase_prl_file(Qt5::Widgets)
-    if (TARGET Qt5::OpenGL)
-        macro_process_qtbase_prl_file(Qt5::OpenGL)
-    endif ()
-    if (TARGET Qt5::Test)
-        macro_process_qtbase_prl_file(Qt5::Test)
-    endif ()
+    foreach (qt_module ${QT_REQUIRED_COMPONENTS})
+        macro_process_qtbase_prl_file(Qt5::${qt_module})
+    endforeach ()
 endif ()
+foreach (qt_module ${QT_OPTIONAL_COMPONENTS})
+    find_package("Qt5${qt_module}" ${REQUIRED_QT_VERSION})
+    if (QT_STATIC_BUILD)
+        macro_process_qtbase_prl_file(Qt5::${qt_module})
+    endif ()
+endforeach ()
 
 if (COMPILER_IS_GCC_OR_CLANG AND UNIX)
     if (APPLE OR CMAKE_SYSTEM_NAME MATCHES "Android" OR ${Qt5_VERSION} VERSION_LESS 5.6)
