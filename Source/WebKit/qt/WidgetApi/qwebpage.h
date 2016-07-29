@@ -447,7 +447,7 @@ Q_SIGNALS:
     void featurePermissionRequested(QWebFrame* frame, QWebPage::Feature feature);
     void featurePermissionRequestCanceled(QWebFrame* frame, QWebPage::Feature feature);
 
-    void consoleMessageAdded(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
+    void consoleMessageReceived(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
 
 protected:
     virtual QWebPage *createWindow(WebWindowType type);
