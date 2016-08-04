@@ -78,9 +78,22 @@
 #include <cairo-win32.h>
 #endif
 
+#if PLATFORM(QT)
+#include "QWebPageClient.h"
+#include <QWindow>
+#endif
+
 static inline HWND windowHandleForPageClient(PlatformPageClient client)
 {
+#if PLATFORM(QT)
+    if (!client)
+        return 0;
+    if (QWindow* window = client->ownerWindow())
+        return reinterpret_cast<HWND>(window->winId());
+    return 0;
+#else
     return client;
+#endif
 }
 
 using JSC::ExecState;
@@ -239,6 +252,10 @@ static bool registerPluginView()
 
     haveRegisteredWindowClass = true;
 
+#if PLATFORM(QT)
+    WebCore::setInstanceHandle((HINSTANCE)(GetModuleHandle(0)));
+#endif
+
     ASSERT(WebCore::instanceHandle());
 
     WNDCLASSEX wcex;
@@ -280,12 +297,24 @@ static bool isWindowsMessageUserGesture(UINT message)
 
 static inline IntPoint contentsToNativeWindow(FrameView* view, const IntPoint& point)
 {
+#if PLATFORM(QT)
+    // Our web view's QWidget isn't necessarily a native window itself. Map the position
+    // all the way up to the QWidget associated with the HWND returned as NPNVnetscapeWindow.
+    if (PlatformPageClient client = view->hostWindow()->platformPageClient())
+        return client->mapToOwnerWindow(view->contentsToWindow(point));
+#endif
     return view->contentsToWindow(point);
 }
 
 static inline IntRect contentsToNativeWindow(FrameView* view, const IntRect& rect)
 {
+#if PLATFORM(QT)
+    // This only handles translation of the rect.
+    ASSERT(view->contentsToWindow(rect).size() == rect.size());
+    return IntRect(contentsToNativeWindow(view, rect.location()), rect.size());
+#else
     return view->contentsToWindow(rect);
+#endif
 }
 
 LRESULT
@@ -559,11 +588,21 @@ void PluginView::paint(GraphicsContext& context, const IntRect& rect)
         return;
     }
 
+    // In the Qt port we draw in an offscreen buffer and don't want to use the window
+    // coordinates.
+#if PLATFORM(QT)
+    IntRect rectInWindow(rect);
+    rectInWindow.intersect(frameRect());
+#else
     IntRect rectInWindow = downcast<FrameView>(*parent()).contentsToWindow(frameRect());
+#endif
     LocalWindowsContext windowsContext(context, rectInWindow, m_isTransparent);
 
     // On Safari/Windows without transparency layers the GraphicsContext returns the HDC
     // of the window and the plugin expects that the passed in DC has window coordinates.
+    // In the Qt port we always draw in an offscreen buffer and therefore need
+    // to preserve the translation set in getWindowsContext.
+#if !PLATFORM(QT)
     if (context.hdc() == windowsContext.hdc()) {
         XFORM transform;
         GetWorldTransform(windowsContext.hdc(), &transform);
@@ -571,6 +610,7 @@ void PluginView::paint(GraphicsContext& context, const IntRect& rect)
         transform.eDy = 0;
         SetWorldTransform(windowsContext.hdc(), &transform);
     }
+#endif
 
     paintIntoTransformedContext(windowsContext.hdc());
 }
@@ -669,9 +709,11 @@ void PluginView::handleMouseEvent(MouseEvent* event)
 
     // Currently, Widget::setCursor is always called after this function in EventHandler.cpp
     // and since we don't want that we set ignoreNextSetCursor to true here to prevent that.
+#if !PLATFORM(QT)
     ignoreNextSetCursor = true;
     if (Page* page = m_parentFrame->page())
         page->chrome().client().setLastSetCursorToCurrentCursor();
+#endif
 }
 
 void PluginView::setParent(ScrollView* parent)
@@ -715,7 +757,14 @@ void PluginView::setNPWindowRect(const IntRect& rect)
 
     float scaleFactor = deviceScaleFactor();
 
+    // In the Qt port we draw in an offscreen buffer and don't want to use the window
+    // coordinates.
+#if PLATFORM(QT)
+    IntPoint p = rect.location();
+#else
     IntPoint p = downcast<FrameView>(*parent()).contentsToWindow(rect.location());
+#endif
+
     p.scale(scaleFactor, scaleFactor);
 
     IntSize s = rect.size();
@@ -885,7 +934,11 @@ bool PluginView::platformStart()
         HWND window = ::CreateWindowEx(0, kWebPluginViewClassName, 0, flags,
                                        0, 0, 0, 0, parentWindowHandle, 0, WebCore::instanceHandle(), 0);
 
+#if OS(WINDOWS) && PLATFORM(QT)
+        m_window = window;
+#else
         setPlatformWidget(window);
+#endif
 
         // Calling SetWindowLongPtrA here makes the window proc ASCII, which is required by at least
         // the Shockwave Director plug-in.

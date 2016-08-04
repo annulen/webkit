@@ -46,7 +46,12 @@
 #include "npruntime_internal.h"
 #endif
 
+#if OS(WINDOWS) && PLATFORM(QT)
+typedef struct HWND__* HWND;
+typedef HWND PlatformPluginWidget;
+#else
 typedef PlatformWidget PlatformPluginWidget;
+#endif
 
 namespace JSC {
     namespace Bindings {
@@ -332,9 +337,19 @@ namespace WebCore {
         bool m_haveUpdatedPluginWidget;
 #endif
 
+
+#if PLATFORM(QT) && OS(WINDOWS)
+        // On Mac OSX and Qt/Windows the plugin does not have its own native widget,
+        // but is using the containing window as its reference for positioning/painting.
+        PlatformPluginWidget m_window;
+public:
+        PlatformPluginWidget platformPluginWidget() const { return m_window; }
+        void setPlatformPluginWidget(PlatformPluginWidget widget) { m_window = widget; }
+#else
 public:
         void setPlatformPluginWidget(PlatformPluginWidget widget) { setPlatformWidget(widget); }
         PlatformPluginWidget platformPluginWidget() const { return platformWidget(); }
+#endif
 
 private:
         IntRect m_clipRect; // The clip rect to apply to a windowed plug-in
