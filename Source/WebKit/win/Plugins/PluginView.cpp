@@ -756,6 +756,9 @@ PluginView::PluginView(Frame* parentFrame, const IntSize& size, PluginPackage* p
     , m_isCallingPluginWndProc(false)
     , m_wmPrintHDC(0)
     , m_haveUpdatedPluginWidget(false)
+#if PLATFORM(QT) && OS(WINDOWS)
+    , m_window(0)
+#endif
 #endif
     , m_loadManually(loadManually)
     , m_manualStream(0)
