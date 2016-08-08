@@ -780,6 +780,11 @@ DownloadProxy* WebProcessPool::download(WebPageProxy* initiatingPage, const Reso
         return downloadProxy;
     }
 
+#if PLATFORM(QT)
+    ASSERT(initiatingPage); // Our design does not suppport downloads without a WebPage.
+    initiatingPage->handleDownloadRequest(downloadProxy);
+#endif
+
     return downloadProxy;
 }
 
@@ -830,7 +835,7 @@ void WebProcessPool::setAdditionalPluginsDirectory(const String& directory)
 }
 #endif // ENABLE(NETSCAPE_PLUGIN_API)
 
-pid_t WebProcessPool::networkProcessIdentifier()
+PlatformProcessIdentifier WebProcessPool::networkProcessIdentifier()
 {
     if (!m_networkProcess)
         return 0;

@@ -122,6 +122,12 @@ void NPN_Status(NPP instance, const char* message)
 void NPN_InvalidateRect(NPP instance, NPRect* invalidRect)
 {
     PluginView* view = pluginViewForInstance(instance);
+#if defined(XP_UNIX)
+    // NSPluginWrapper, a plugin wrapper binary that allows running 32-bit plugins
+    // on 64-bit architectures typically used in X11, will sometimes give us a null NPP here.
+    if (!view)
+        return;
+#endif
     view->invalidateRect(invalidRect);
 }
 
@@ -196,7 +202,13 @@ NPError NPN_GetAuthenticationInfo(NPP instance, const char* protocol, const char
 
 NPError NPN_PopUpContextMenu(NPP instance, NPMenu* menu)
 {
+#if PLATFORM(QT) && defined(XP_MACOSX)
+    PluginView* plugin = pluginViewForInstance(instance);
+    plugin->popUpContextMenu(menu);
+    return NPERR_NO_ERROR;
+#else
     UNUSED_PARAM(instance);
     UNUSED_PARAM(menu);
     return NPERR_NO_ERROR;
+#endif // PLATFORM(QT) && defined(XP_MACOSX)
 }

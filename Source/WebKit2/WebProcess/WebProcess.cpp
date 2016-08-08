@@ -91,7 +91,6 @@
 #include <WebCore/SchemeRegistry.h>
 #include <WebCore/SecurityOrigin.h>
 #include <WebCore/Settings.h>
-#include <unistd.h>
 #include <wtf/CurrentTime.h>
 #include <wtf/HashCountedSet.h>
 #include <wtf/PassRefPtr.h>
@@ -108,6 +107,10 @@
 
 #if ENABLE(SEC_ITEM_SHIM)
 #include "SecItemShim.h"
+#endif
+
+#if !OS(WINDOWS)
+#include <unistd.h>
 #endif
 
 #if ENABLE(DATABASE_PROCESS)
@@ -153,6 +156,9 @@ WebProcess::WebProcess()
     , m_hasSetCacheModel(false)
     , m_cacheModel(CacheModelDocumentViewer)
     , m_fullKeyboardAccessEnabled(false)
+#if PLATFORM(QT)
+    , m_networkAccessManager(0)
+#endif
     , m_textCheckerState()
     , m_iconDatabaseProxy(*new WebIconDatabaseProxy(this))
     , m_webLoaderStrategy(*new WebLoaderStrategy)
@@ -1058,6 +1064,13 @@ void WebProcess::ensureWebToDatabaseProcessConnection()
 }
 
 #endif // ENABLED(DATABASE_PROCESS)
+
+#if PLATFORM(QT)
+void WebProcess::startTransfer(uint64_t downloadID, const String& destination)
+{
+    downloadManager().startTransfer(downloadID, destination);
+}
+#endif
 
 void WebProcess::setEnhancedAccessibility(bool flag)
 {

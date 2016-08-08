@@ -27,9 +27,9 @@
 #include "InspectorClientWebPage.h"
 #include "InspectorServerQt.h"
 #include "PageClientQt.h"
-//#include "QGraphicsWidgetPluginImpl.h"
+#include "QGraphicsWidgetPluginImpl.h"
 #include "QWebUndoCommand.h"
-//#include "QWidgetPluginImpl.h"
+#include "QWidgetPluginImpl.h"
 #include "QtFallbackWebPopup.h"
 #include "QtPlatformPlugin.h"
 #include "UndoStepQt.h"
@@ -256,9 +256,10 @@ QWebPageAdapter *QWebPagePrivate::createWindow(bool dialog)
     return newPage->d;
 }
 
-void QWebPagePrivate::javaScriptConsoleMessage(const QString &message, int lineNumber, const QString &sourceID)
+void QWebPagePrivate::consoleMessageReceived(MessageSource source, MessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
 {
     q->javaScriptConsoleMessage(message, lineNumber, sourceID);
+    emit q->consoleMessageReceived(QWebPage::MessageSource(source), QWebPage::MessageLevel(level), message, lineNumber, sourceID);
 }
 
 void QWebPagePrivate::javaScriptAlert(QWebFrameAdapter* frame, const QString& msg)
@@ -411,14 +412,12 @@ QtPluginWidgetAdapter *QWebPagePrivate::createPlugin(const QString &classid, con
 
 QtPluginWidgetAdapter *QWebPagePrivate::adapterForWidget(QObject *object) const
 {
-#if !PLUGIN_VIEW_IS_BROKEN
     if (QWidget *widget = qobject_cast<QWidget*>(object))
         return new QWidgetPluginImpl(widget);
 #ifndef QT_NO_GRAPHICSVIEW
     if (QGraphicsWidget *widget = qobject_cast<QGraphicsWidget*>(object))
         return new QGraphicsWidgetPluginImpl(widget);
 #endif
-#endif // !PLUGIN_VIEW_IS_BROKEN
     return 0;
 }
 

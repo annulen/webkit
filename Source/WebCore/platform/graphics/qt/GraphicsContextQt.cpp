@@ -201,10 +201,8 @@ static Qt::PenStyle toQPenStyle(StrokeStyle style)
         return Qt::NoPen;
         break;
     case SolidStroke:
-#if ENABLE(CSS3_TEXT)
     case DoubleStroke:
     case WavyStroke:
-#endif
         return Qt::SolidLine;
         break;
     case DottedStroke:
@@ -230,41 +228,6 @@ static inline Qt::FillRule toQtFillRule(WindRule rule)
         ASSERT_NOT_REACHED();
     }
     return Qt::OddEvenFill;
-}
-
-static inline void adjustPointsForDottedLine(FloatPoint& p1, FloatPoint& p2, float width, bool isVerticalLine)
-{
-    if (isVerticalLine) {
-        p1.setY(p1.y() - width / 2);
-        p2.setY(p2.y() + width / 2);
-    } else {
-        p1.setX(p1.x() - width / 2);
-        p2.setX(p2.x() + width / 2);
-    }
-}
-
-static inline void drawLineEndpointsForStyle(QPainter *painter, const FloatPoint& p1, const FloatPoint& p2, float width, bool isVerticalLine, StrokeStyle style, Color color)
-{
-    // Do a rect fill of our endpoints. This ensures we always have the
-    // appearance of being a border.
-    if (style == DashedStroke) {
-        if (isVerticalLine) {
-            painter->fillRect(FloatRect(p1.x() - width / 2, p1.y() - width, width, width), QColor(color));
-            painter->fillRect(FloatRect(p2.x() - width / 2, p2.y(), width, width), QColor(color));
-        } else {
-            painter->fillRect(FloatRect(p1.x() - width, p1.y() - width / 2, width, width), QColor(color));
-            painter->fillRect(FloatRect(p2.x(), p2.y() - width / 2, width, width), QColor(color));
-        }
-    }
-
-    // As per css spec a dotted stroke should be made of circles so we're
-    // drawing circles as endpoints.
-    if (style == DottedStroke) {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor(color));
-        painter->drawEllipse(p1.x() - width / 2, p1.y() - width / 2, width, width);
-        painter->drawEllipse(p2.x() - width / 2, p2.y() - width / 2, width, width);
-    }
 }
 
 class GraphicsContextPlatformPrivate {
@@ -351,6 +314,7 @@ void GraphicsContext::platformInit(QPainter* painter)
     QPen pen(painter->pen());
     pen.setColor(strokeColor());
     pen.setJoinStyle(toQtLineJoin(MiterJoin));
+    pen.setCapStyle(Qt::FlatCap);
     painter->setPen(pen);
 }
 
@@ -409,9 +373,15 @@ void GraphicsContext::drawRect(const FloatRect& rect, float borderThickness)
     const bool antiAlias = p->testRenderHint(QPainter::Antialiasing);
     p->setRenderHint(QPainter::Antialiasing, m_data->antiAliasingForRectsAndLines);
 
-    // FIXME: use borderThickness
+    // strokeThickness() is disregarded
+    QPen oldPen(p->pen());
+    QPen newPen(oldPen);
+    newPen.setWidthF(borderThickness);
+    p->setPen(newPen);
+
     p->drawRect(rect);
 
+    p->setPen(oldPen);
     p->setRenderHint(QPainter::Antialiasing, antiAlias);
 }
 
@@ -422,179 +392,97 @@ void GraphicsContext::drawLine(const FloatPoint& point1, const FloatPoint& point
     if (paintingDisabled())
         return;
 
-    StrokeStyle style = strokeStyle();
-    Color color = strokeColor();
-    if (style == NoStroke)
+    if (strokeStyle() == NoStroke)
         return;
 
-    float width = strokeThickness();
+    if (isRecording()) {
+        m_displayListRecorder->drawLine(point1, point2);
+        return;
+    }
 
-    FloatPoint p1 = point1;
-    FloatPoint p2 = point2;
-    bool isVerticalLine = (p1.x() == p2.x());
+    const Color& strokeColor = this->strokeColor();
+    float thickness = strokeThickness();
+    bool isVerticalLine = (point1.x() + thickness == point2.x());
+    float strokeWidth = isVerticalLine ? point2.y() - point1.y() : point2.x() - point1.x();
+    if (!thickness || !strokeWidth)
+        return;
 
-    QPainter* p = m_data->p();
-    const bool antiAlias = p->testRenderHint(QPainter::Antialiasing);
+    QPainter* p = platformContext();
+    const bool savedAntiAlias = p->testRenderHint(QPainter::Antialiasing);
     p->setRenderHint(QPainter::Antialiasing, m_data->antiAliasingForRectsAndLines);
-    adjustLineToPixelBoundaries(p1, p2, width, style);
 
-    Qt::PenCapStyle capStyle = Qt::FlatCap;
-    QVector<qreal> dashes;
-    int patWidth = 0;
+    StrokeStyle strokeStyle = this->strokeStyle();
+    float cornerWidth = 0;
+    bool drawsDashedLine = strokeStyle == DottedStroke || strokeStyle == DashedStroke;
 
-    switch (style) {
-    case NoStroke:
-    case SolidStroke:
-#if ENABLE(CSS3_TEXT)
-    case DoubleStroke:
-    case WavyStroke:
-#endif
-        break;
-    case DottedStroke: {
-        capStyle = Qt::RoundCap;
-        patWidth = static_cast<int>(width);
-        // The actual length of one line element can not be set to zero and at 0.1 the dots
-        // are still slightly elongated. Setting it to 0.01 will make it look like the
-        // line endings are being stuck together, close enough to look like a circle.
-        // For the distance of the line elements we subtract the small amount again.
-        const qreal lineElementLength = 0.01;
-        dashes << lineElementLength << qreal(2 * patWidth) / width - lineElementLength;
-        adjustPointsForDottedLine(p1, p2, width, isVerticalLine);
-        break;
-    }
-    case DashedStroke:
-        capStyle = Qt::FlatCap;
-        patWidth = 3 * static_cast<int>(width);
-        dashes << qreal(patWidth) / width << qreal(patWidth) / width;
-        break;
-    }
-
-    if (patWidth) {
+    if (drawsDashedLine) {
         p->save();
+        // Figure out end points to ensure we always paint corners.
+        cornerWidth = strokeStyle == DottedStroke ? thickness : std::min(2 * thickness, std::max(thickness, strokeWidth / 3));
 
-        QPen pen = p->pen();
-
-        drawLineEndpointsForStyle(p, p1, p2, width, isVerticalLine, style, color);
-
-        // Example: 80 pixels with a width of 30 pixels.
-        // Remainder is 20.  The maximum pixels of line we could paint
-        // will be 50 pixels.
-        int distance = (isVerticalLine ? (point2.y() - point1.y()) : (point2.x() - point1.x())) - 2*(int)width;
-        int remainder = distance % patWidth;
-        int coverage = distance - remainder;
-        int numSegments = coverage / patWidth;
-
-        float patternOffset = 0.0f;
-        // Special case 1px dotted borders for speed.
-        if (patWidth == 1)
-            patternOffset = 1.0f;
-        else {
-            bool evenNumberOfSegments = !(numSegments % 2);
-            if (remainder)
-                evenNumberOfSegments = !evenNumberOfSegments;
-            if (evenNumberOfSegments) {
-                if (remainder) {
-                    patternOffset += patWidth - remainder;
-                    patternOffset += remainder / 2;
-                } else
-                    patternOffset = patWidth / 2;
-            } else {
-                if (remainder)
-                    patternOffset = (patWidth - remainder) / 2;
-            }
+        if (isVerticalLine) {
+            p->fillRect(FloatRect(point1.x(), point1.y(), thickness, cornerWidth), strokeColor);
+            p->fillRect(FloatRect(point1.x(), point2.y() - cornerWidth, thickness, cornerWidth),  strokeColor);
+        } else {
+            p->fillRect(FloatRect(point1.x(), point1.y(), cornerWidth, thickness), strokeColor);
+            p->fillRect(FloatRect(point2.x() - cornerWidth, point1.y(), cornerWidth, thickness), strokeColor);
         }
 
-        pen.setWidthF(width);
+        strokeWidth -= 2 * cornerWidth;
+        float patternWidth = strokeStyle == DottedStroke ? thickness : std::min(3 * thickness, std::max(thickness, strokeWidth / 3));
+        // Check if corner drawing sufficiently covers the line.
+        if (strokeWidth <= patternWidth + 1) {
+            p->restore();
+            return;
+        }
+
+        // Pattern starts with full fill and ends with the empty fill.
+        // 1. Let's start with the empty phase after the corner.
+        // 2. Check if we've got odd or even number of patterns and whether they fully cover the line.
+        // 3. In case of even number of patterns and/or remainder, move the pattern start position
+        // so that the pattern is balanced between the corners.
+        float patternOffset = patternWidth;
+        int numberOfSegments = std::floor(strokeWidth / patternWidth);
+        bool oddNumberOfSegments = numberOfSegments % 2;
+        float remainder = strokeWidth - (numberOfSegments * patternWidth);
+        if (oddNumberOfSegments && remainder)
+            patternOffset -= remainder / 2.f;
+        else if (!oddNumberOfSegments) {
+            if (remainder)
+                patternOffset += patternOffset - (patternWidth + remainder) / 2.f;
+            else
+                patternOffset += patternWidth / 2.f;
+        }
+
+        Qt::PenCapStyle capStyle = Qt::FlatCap;
+        QVector<qreal> dashes { patternWidth / thickness, patternWidth / thickness };
+
+        QPen pen = p->pen();
         pen.setCapStyle(capStyle);
         pen.setDashPattern(dashes);
-        pen.setDashOffset(patternOffset / width);
+        pen.setDashOffset(patternOffset / thickness);
         p->setPen(pen);
     }
 
-#if ENABLE(CSS3_TEXT)
-    if (style == WavyStroke) {
-        const float step = 2 * width; // Make wave height equal to two times strokeThickness().
-        const float flat = width; // Set size of flat lines between diagonal lines.
-        short signal = -1;
-        QPainterPath path;
-        float x1, y1, x2, y2;
-
-        if (isVerticalLine) {
-            x1 = x2 = p1.x();
-
-            // Make sure (x1, y1) < (x2, y2)
-            if (p1.y() < p2.y()) {
-                y1 = p1.y();
-                y2 = p2.y();
-            } else {
-                y1 = p2.y();
-                y2 = p1.y();
-            }
-
-            // Qt interprets geometric units as end-point inclusive, while WebCore interprets geometric units as endpoint exclusive.
-            // This means we need to subtract one from the endpoint, or the line will be painted one pixel too long.
-            y2 -= 1;
-            path.moveTo(x1 + signal * step, y1);
-            float y = y1 + 2 * step;
-
-            while (y <= y2) {
-                signal = -signal;
-                path.lineTo(x1 + signal * step, y);
-                path.lineTo(x1 + signal * step, y + flat); // Draw flat line between diagonal lines.
-                y += 2 * step + flat;
-            }
-        } else {
-            y1 = y2 = p1.y();
-
-            // Make sure (x1, y1) < (x2, y2)
-            if (p1.x() < p2.x()) {
-                x1 = p1.x();
-                x2 = p2.x();
-            } else {
-                x1 = p2.x();
-                x2 = p1.x();
-            }
-
-            // Qt interprets geometric units as end-point inclusive, while WebCore interprets geometric units as endpoint exclusive.
-            // This means we need to subtract one from the endpoint, or the line will be painted one pixel too long.
-            x2 -= 1;
-            path.moveTo(x1, y1 + signal * step);
-            float x = x1 + 2 * step;
-
-            while (x <= x2) {
-                signal = -signal;
-                path.lineTo(x, y1 + signal * step);
-                path.lineTo(x + flat, y1 + signal * step); // Draw flat line between diagonal lines.
-                x += 2 * step + flat;
-            }
-        }
-
-        // The last point created by the while loops above may not be the end
-        // point, so complete the wave by connecting the end point.
-        path.lineTo(x2, y2);
-        QPen pen = p->pen();
-        pen.setJoinStyle(Qt::BevelJoin); // A bevelled line join is more suitable for wavy than miter or round.
-        pen.setWidth(width);
-        const bool oldAntiAliasing = p->testRenderHint(QPainter::Antialiasing);
-        p->setRenderHint(QPainter::Antialiasing, true); // AntiAliasing is needed for diagonal lines of wavy stroke
-        p->strokePath(path, pen);
-        p->setRenderHint(QPainter::Antialiasing, oldAntiAliasing);
+    FloatPoint p1 = point1;
+    FloatPoint p2 = point2;
+    // Center line and cut off corners for pattern patining.
+    if (isVerticalLine) {
+        float centerOffset = (p2.x() - p1.x()) / 2;
+        p1.move(centerOffset, cornerWidth);
+        p2.move(-centerOffset, -cornerWidth);
     } else {
-#endif // CSS3_TEXT
-    // Qt interprets geometric units as end-point inclusive, while WebCore interprets geomtric units as endpoint exclusive.
-    // This means we need to subtract one from the endpoint, or the line will be painted one pixel too long.
-    if (p1.x() == p2.x())
-        p->drawLine(p1, p2 - FloatSize(0, 1));
-    else
-        p->drawLine(p1, p2 - FloatSize(1, 0));
-#if ENABLE(CSS3_TEXT)
+        float centerOffset = (p2.y() - p1.y()) / 2;
+        p1.move(cornerWidth, centerOffset);
+        p2.move(-cornerWidth, -centerOffset);
     }
-#endif // CSS3_TEXT
 
-    if (patWidth)
+    p->drawLine(p1, p2);
+
+    if (drawsDashedLine)
         p->restore();
 
-    p->setRenderHint(QPainter::Antialiasing, antiAlias);
+    p->setRenderHint(QPainter::Antialiasing, savedAntiAlias);
 }
 
 // This method is only used to draw the little circles used in lists.
@@ -798,6 +686,7 @@ void GraphicsContext::strokePath(const Path& path)
     QPainterPathStroker pathStroker;
     pathStroker.setJoinStyle(pen.joinStyle());
     pathStroker.setDashOffset(pen.dashOffset());
+    pathStroker.setDashPattern(pen.dashPattern());
     pathStroker.setMiterLimit(pen.miterLimit());
     pathStroker.setCapStyle(pen.capStyle());
     pathStroker.setWidth(pen.widthF());
@@ -1115,7 +1004,7 @@ void GraphicsContext::drawFocusRing(const Vector<FloatRect>& rects, float width,
     if (!rects.size())
         return;
 
-    int radius = (width - 1) / 2;
+    float radius = (width - 1) / 2;
     QPainterPath path;
     for (unsigned i = 0; i < rectCount; ++i) {
         QRectF rect = QRectF(rects[i]).adjusted(-offset - radius, -offset - radius, offset + radius, offset + radius);
@@ -1130,19 +1019,57 @@ void GraphicsContext::drawFocusRing(const Vector<FloatRect>& rects, float width,
 
 void GraphicsContext::drawLineForText(const FloatPoint& origin, float width, bool printing, bool doubleLines)
 {
-    // FIXME: drawLinesForText produces incorreclty thick lines
-//    DashArray widths;
-//    widths.append(width);
-//    widths.append(0);
-//    drawLinesForText(origin, widths, printing, doubleLines);
-
     if (paintingDisabled())
         return;
 
-    FloatPoint startPoint = origin;
-    FloatPoint endPoint = origin + FloatSize(width, 0);
+    if (isRecording()) {
+        DashArray widths;
+        widths.append(width);
+        widths.append(0);
+        m_displayListRecorder->drawLinesForText(origin, widths, printing, doubleLines, strokeThickness());
+        return;
+    }
 
-    drawLine(startPoint, endPoint);
+    Color localStrokeColor(strokeColor());
+
+    FloatRect bounds = computeLineBoundsAndAntialiasingModeForText(origin, width, printing, localStrokeColor);
+    bool strokeColorChanged = strokeColor() != localStrokeColor;
+    bool strokeThicknessChanged = strokeThickness() != bounds.height();
+    bool needSavePen = strokeColorChanged || strokeThicknessChanged;
+
+    QPainter* p = platformContext();
+    const bool savedAntiAlias = p->testRenderHint(QPainter::Antialiasing);
+    p->setRenderHint(QPainter::Antialiasing, m_data->antiAliasingForRectsAndLines);
+
+    QPen oldPen(p->pen());
+    if (needSavePen) {
+        QPen newPen(oldPen);
+        if (strokeThicknessChanged)
+            newPen.setWidthF(bounds.height());
+        if (strokeColorChanged)
+            newPen.setColor(localStrokeColor);
+        p->setPen(newPen);
+    }
+
+    QPointF startPoint = bounds.location();
+    startPoint.setY(startPoint.y() + bounds.height() / 2);
+    QPointF endPoint = startPoint;
+    endPoint.setX(endPoint.x() + bounds.width());
+
+    p->drawLine(startPoint, endPoint);
+
+    if (doubleLines) {
+        // The space between double underlines is equal to the height of the underline
+        // so distance between line centers is 2x height
+        startPoint.setY(startPoint.y() + 2 * bounds.height());
+        endPoint.setY(endPoint.y() + 2 * bounds.height());
+        p->drawLine(startPoint, endPoint);
+    }
+
+    if (needSavePen)
+        p->setPen(oldPen);
+
+    p->setRenderHint(QPainter::Antialiasing, savedAntiAlias);
 }
 
 // NOTE: this code is based on GraphicsContextCG implementation
@@ -1164,6 +1091,7 @@ void GraphicsContext::drawLinesForText(const FloatPoint& origin, const DashArray
     FloatRect bounds = computeLineBoundsAndAntialiasingModeForText(origin, widths.last(), printing, localStrokeColor);
     bool fillColorIsNotEqualToStrokeColor = fillColor() != localStrokeColor;
 
+    // FIXME: drawRects() is significantly slower than drawLine() for thin lines (<= 1px)
     Vector<QRectF, 4> dashBounds;
     ASSERT(!(widths.size() % 2));
     dashBounds.reserveInitialCapacity(dashBounds.size() / 2);
@@ -1177,6 +1105,8 @@ void GraphicsContext::drawLinesForText(const FloatPoint& origin, const DashArray
     }
 
     QPainter* p = m_data->p();
+    QPen oldPen = p->pen();
+    p->setPen(Qt::NoPen);
 
     if (fillColorIsNotEqualToStrokeColor) {
         const QBrush oldBrush = p->brush();
@@ -1186,6 +1116,8 @@ void GraphicsContext::drawLinesForText(const FloatPoint& origin, const DashArray
     } else {
         p->drawRects(dashBounds.data(), dashBounds.size());
     }
+
+    p->setPen(oldPen);
 }
 
 

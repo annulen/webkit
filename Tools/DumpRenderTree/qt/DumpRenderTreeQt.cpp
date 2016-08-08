@@ -291,7 +291,7 @@ void WebPage::javaScriptConsoleMessage(const QString& message, int lineNumber, c
     if (!message.isEmpty()) {
         newMessage = message;
 
-        size_t fileProtocol = newMessage.indexOf(QLatin1String("file://"));
+        int fileProtocol = newMessage.indexOf(QLatin1String("file://"));
         if (fileProtocol != -1) {
             newMessage = newMessage.left(fileProtocol) + urlSuitableForTestResult(newMessage.mid(fileProtocol));
         }
@@ -867,19 +867,25 @@ static QString dumpHistoryItem(const QWebHistoryItem& item, int indent, bool cur
     for (int i = start; i < indent; i++)
         result.append(' ');
 
-    QString url = item.url().toString();
-    if (url.contains("file://")) {
+    QUrl url = item.url();
+    QString urlString;
+    if (url.scheme() == "data")
+        urlString = url.toString(QUrl::DecodeReserved);
+    else
+        urlString = url.toString();
+
+    if (urlString.contains("file://")) {
         static QString layoutTestsString("/LayoutTests/");
         static QString fileTestString("(file test):");
 
-        QString res = url.mid(url.indexOf(layoutTestsString) + layoutTestsString.length());
+        QString res = urlString.mid(urlString.indexOf(layoutTestsString) + layoutTestsString.length());
         if (res.isEmpty())
             return result;
 
         result.append(fileTestString);
         result.append(res);
     } else {
-        result.append(url);
+        result.append(urlString);
     }
 
     QString target = DumpRenderTreeSupportQt::historyItemTarget(item);
@@ -999,11 +1005,15 @@ void DumpRenderTree::dump()
     fputs("#EOF\n", stderr);
 
     if (m_dumpPixelsForCurrentTest && m_jscController->generatePixelResults()) {
+        // Should use the same render hints as default QWebView/QGraphicsWebView
+        QPainter::RenderHints renderHints(QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
+
         QImage image;
         if (!m_jscController->isPrinting()) {
             image = QImage(m_page->viewportSize(), QImage::Format_ARGB32);
             image.fill(Qt::white);
             QPainter painter(&image);
+            painter.setRenderHints(renderHints);
             mainFrame->render(&painter);
             painter.end();
         } else
@@ -1021,6 +1031,7 @@ void DumpRenderTree::dump()
                 maskPainter.fillRect(repaintRects[i], Qt::transparent);
 
             QPainter painter(&image);
+            painter.setRenderHints(renderHints);
             painter.drawImage(image.rect(), mask);
 
             DumpRenderTreeSupportQt::setTrackRepaintRects(mainFrameAdapter(), false);

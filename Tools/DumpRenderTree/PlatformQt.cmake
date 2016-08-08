@@ -32,6 +32,7 @@ qt5_add_resources(DumpRenderTree_SOURCES
 )
 
 list(APPEND DumpRenderTree_SYSTEM_INCLUDE_DIRECTORIES
+    ${ICU_INCLUDE_DIRS}
     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
     ${Qt5Widgets_INCLUDE_DIRS}
 )
@@ -48,7 +49,7 @@ if (WIN32)
     add_definitions(-DSTATICALLY_LINKED_WITH_WTF -DSTATICALLY_LINKED_WITH_JavaScriptCore)
 endif ()
 
-if (WTF_OS_UNIX AND ENABLE_NETSCAPE_PLUGIN_API)
+if (ENABLE_X11_TARGET AND ENABLE_NETSCAPE_PLUGIN_API)
     add_definitions(-DXP_UNIX)
-    link_libraries(X11)
+    link_libraries(${X11_X11_LIB})
 endif ()

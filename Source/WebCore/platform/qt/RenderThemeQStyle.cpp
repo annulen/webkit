@@ -47,9 +47,7 @@
 #include "PaintInfo.h"
 #include "QWebPageClient.h"
 #include "RenderBox.h"
-#if ENABLE(PROGRESS_ELEMENT)
 #include "RenderProgress.h"
-#endif
 #include "RenderSlider.h"
 #include "ScrollbarThemeQStyle.h"
 #include "SliderThumbElement.h"
@@ -406,19 +404,18 @@ bool RenderThemeQStyle::paintMenuListButtonDecorations(const RenderBox& o, const
     return false;
 }
 
-#if ENABLE(PROGRESS_ELEMENT)
-double RenderThemeQStyle::animationDurationForProgressBar(RenderProgress* renderProgress) const
+double RenderThemeQStyle::animationDurationForProgressBar(RenderProgress& renderProgress) const
 {
-    if (renderProgress->position() >= 0)
+    if (renderProgress.position() >= 0)
         return 0;
 
-    IntSize size = renderProgress->pixelSnappedSize();
+    IntSize size = roundedIntSize(renderProgress.size());
     // FIXME: Until http://bugreports.qt.nokia.com/browse/QTBUG-9171 is fixed,
     // we simulate one square animating across the progress bar.
     return (size.width() / m_qStyle->progressBarChunkWidth(size)) * animationRepeatIntervalForProgressBar(renderProgress);
 }
 
-bool RenderThemeQStyle::paintProgressBar(RenderObject& o, const PaintInfo& pi, const IntRect& r)
+bool RenderThemeQStyle::paintProgressBar(const RenderObject& o, const PaintInfo& pi, const IntRect& r)
 {
     if (!o.isProgress())
         return true;
@@ -428,11 +425,10 @@ bool RenderThemeQStyle::paintProgressBar(RenderObject& o, const PaintInfo& pi, c
         return true;
 
     p.styleOption.rect = r;
-    RenderProgress* renderProgress = toRenderProgress(o);
-    p.paintProgressBar(renderProgress->position(), renderProgress->animationProgress());
+    auto& renderProgress = downcast<RenderProgress>(o);
+    p.paintProgressBar(renderProgress.position(), renderProgress.animationProgress());
     return false;
 }
-#endif
 
 bool RenderThemeQStyle::paintSliderTrack(const RenderObject& o, const PaintInfo& pi, const IntRect& r)
 {
@@ -453,17 +449,19 @@ bool RenderThemeQStyle::paintSliderTrack(const RenderObject& o, const PaintInfo&
         p.styleOption.state |= QStyleFacade::State_Sunken;
 
     // some styles need this to show a highlight on one side of the groove
-    HTMLInputElement* slider = downcast<HTMLInputElement>(o.node());
-    if (slider && slider->isSteppable()) {
-        p.styleOption.slider.upsideDown = (p.appearance == SliderHorizontalPart) && !o.style().isLeftToRightDirection();
-        // Use the width as a multiplier in case the slider values are <= 1
-        const int width = r.width() > 0 ? r.width() : 100;
-        p.styleOption.slider.maximum = slider->maximum() * width;
-        p.styleOption.slider.minimum = slider->minimum() * width;
-        if (!p.styleOption.slider.upsideDown)
-            p.styleOption.slider.position = slider->valueAsNumber() * width;
-        else
-            p.styleOption.slider.position = p.styleOption.slider.minimum + p.styleOption.slider.maximum - slider->valueAsNumber() * width;
+    if (is<HTMLInputElement>(o.node())) {
+        HTMLInputElement& slider = downcast<HTMLInputElement>(*o.node());
+        if (slider.isSteppable()) {
+            p.styleOption.slider.upsideDown = (p.appearance == SliderHorizontalPart) && !o.style().isLeftToRightDirection();
+            // Use the width as a multiplier in case the slider values are <= 1
+            const int width = r.width() > 0 ? r.width() : 100;
+            p.styleOption.slider.maximum = slider.maximum() * width;
+            p.styleOption.slider.minimum = slider.minimum() * width;
+            if (!p.styleOption.slider.upsideDown)
+                p.styleOption.slider.position = slider.valueAsNumber() * width;
+            else
+                p.styleOption.slider.position = p.styleOption.slider.minimum + p.styleOption.slider.maximum - slider.valueAsNumber() * width;
+        }
     }
 
     p.paintSliderTrack();

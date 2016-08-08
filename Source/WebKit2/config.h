@@ -35,6 +35,31 @@
 #include <wtf/DisallowCType.h>
 #include <wtf/ExportMacros.h>
 
+#if defined(WIN32) || defined(_WIN32)
+
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0502
+#endif
+
+#ifndef WINVER
+#define WINVER 0x0502
+#endif
+
+#ifndef _WINSOCKAPI_
+#define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
+#endif
+
+#if !PLATFORM(QT)
+#include <WebCore/config.h>
+#endif
+#include <windows.h>
+
+#if USE(CG)
+#include <CoreGraphics/CoreGraphics.h>
+#endif
+
+#endif /* defined(WIN32) || defined(_WIN32) */
+
 #ifdef __cplusplus
 
 // These undefs match up with defines in WebKit2Prefix.h for Mac OS X.
@@ -58,7 +83,7 @@
 #define PLUGIN_ARCHITECTURE(ARCH) (defined PLUGIN_ARCHITECTURE_##ARCH && PLUGIN_ARCHITECTURE_##ARCH)
 
 #ifndef ENABLE_INSPECTOR_SERVER
-#if ENABLE(WEB_SOCKETS) && (PLATFORM(GTK) || PLATFORM(EFL))
+#if ENABLE(WEB_SOCKETS) && (PLATFORM(QT) || PLATFORM(GTK) || PLATFORM(EFL))
 #define ENABLE_INSPECTOR_SERVER 1
 #endif
 #endif

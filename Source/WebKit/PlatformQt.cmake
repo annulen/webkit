@@ -143,6 +143,7 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
     "${WEBKIT_DIR}/qt"
     "${WEBKIT_DIR}/qt/Api"
     "${WEBKIT_DIR}/qt/WebCoreSupport"
+    "${WEBKIT_DIR}/win/Plugins"
 
     "${WTF_DIR}"
 )
@@ -192,11 +193,18 @@ list(APPEND WebKit_SOURCES
     qt/WebCoreSupport/VisitedLinkStoreQt.cpp
     qt/WebCoreSupport/WebDatabaseProviderQt.cpp
     qt/WebCoreSupport/WebEventConversion.cpp
+
+    win/Plugins/PluginDatabase.cpp
+    win/Plugins/PluginDebug.cpp
+    win/Plugins/PluginPackage.cpp
+    win/Plugins/PluginStream.cpp
+    win/Plugins/PluginView.cpp
 )
 
 # Note: Qt5Network_INCLUDE_DIRS includes Qt5Core_INCLUDE_DIRS
 list(APPEND WebKit_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Gui_INCLUDE_DIRS}
+    ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
     ${Qt5Network_INCLUDE_DIRS}
     ${Qt5Positioning_INCLUDE_DIRS}
 )
@@ -207,6 +215,9 @@ list(APPEND WebKit_LIBRARIES
     PRIVATE
         ${ICU_LIBRARIES}
         ${Qt5Positioning_LIBRARIES}
+        ${X11_X11_LIB}
+        ${X11_Xcomposite_LIB}
+        ${X11_Xrender_LIB}
     PUBLIC
         ${Qt5Core_LIBRARIES}
         ${Qt5Gui_LIBRARIES}
@@ -241,6 +252,44 @@ if (ENABLE_TEST_SUPPORT)
     else ()
         list(APPEND WebKit_LIBRARIES PRIVATE WebCoreTestSupport)
     endif ()
+endif ()
+
+if (ENABLE_NETSCAPE_PLUGIN_API)
+    list(APPEND WebKit_SOURCES
+        win/Plugins/PluginMainThreadScheduler.cpp
+        win/Plugins/npapi.cpp
+    )
+
+    if (UNIX AND NOT APPLE)
+        list(APPEND WebKit_SOURCES
+            qt/Plugins/PluginPackageQt.cpp
+            qt/Plugins/PluginViewQt.cpp
+        )
+    endif ()
+
+    if (PLUGIN_BACKEND_XLIB)
+        list(APPEND WebKit_SOURCES
+            qt/Plugins/QtX11ImageConversion.cpp
+        )
+    endif ()
+
+    if (WIN32)
+        list(APPEND WebKit_INCLUDE_DIRECTORIES
+            ${WEBCORE_DIR}/platform/win
+        )
+
+        list(APPEND WebKit_SOURCES
+            win/Plugins/PluginDatabaseWin.cpp
+            win/Plugins/PluginMessageThrottlerWin.cpp
+            win/Plugins/PluginPackageWin.cpp
+            win/Plugins/PluginViewWin.cpp
+        )
+    endif ()
+else ()
+    list(APPEND WebKit_SOURCES
+        qt/Plugins/PluginPackageNone.cpp
+        qt/Plugins/PluginViewNone.cpp
+    )
 endif ()
 
 # Resources have to be included directly in the final binary.
@@ -368,6 +417,7 @@ set(WebKitWidgets_SYSTEM_INCLUDE_DIRECTORIES
 
 set(WebKitWidgets_LIBRARIES
     PRIVATE
+        ${Qt5MultimediaWidgets_LIBRARIES}
         ${Qt5PrintSupport_LIBRARIES}
     PUBLIC
         ${Qt5Widgets_LIBRARIES}
@@ -381,9 +431,6 @@ if (USE_QT_MULTIMEDIA)
     )
     list(APPEND WebKitWidgets_SYSTEM_INCLUDE_DIRECTORIES
         ${Qt5MultimediaWidgets_INCLUDE_DIRS}
-    )
-    list(APPEND WebKitWidgets_LIBRARIES
-        ${Qt5MultimediaWidgets_LIBRARIES}
     )
 endif ()
 

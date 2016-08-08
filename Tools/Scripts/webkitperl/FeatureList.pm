@@ -254,10 +254,10 @@ my @features = (
       define => "ENABLE_DEVICE_ORIENTATION", default => (isIOSWebKit() || isQt()), value => \$deviceOrientationSupport },
 
     { option => "dom4-events-constructor", desc => "Expose DOM4 Events constructors",
-      define => "ENABLE_DOM4_EVENTS_CONSTRUCTOR", default => (isAppleWebKit() || isGtk() || isEfl()), value => \$dom4EventsConstructor },
+      define => "ENABLE_DOM4_EVENTS_CONSTRUCTOR", default => (isAppleWebKit() || isGtk() || isEfl() || isQt()), value => \$dom4EventsConstructor },
 
     { option => "download-attribute", desc => "Toggle Download Attribute support",
-      define => "ENABLE_DOWNLOAD_ATTRIBUTE", default => isEfl(), value => \$downloadAttributeSupport },
+      define => "ENABLE_DOWNLOAD_ATTRIBUTE", default => (isEfl() || isQt()), value => \$downloadAttributeSupport },
 
     { option => "fetch-api", desc => "Toggle Fetch API support",
       define => "ENABLE_FETCH_API", default => 1, value => \$fetchAPISupport },
@@ -359,7 +359,7 @@ my @features = (
       define => "ENABLE_NAVIGATOR_HWCONCURRENCY", default => 1, value => \$hardwareConcurrencySupport },
 
     { option => "netscape-plugin-api", desc => "Toggle Netscape Plugin API support",
-      define => "ENABLE_NETSCAPE_PLUGIN_API", default => (!isIOSWebKit() && !isQt()), value => \$netscapePluginAPISupport },
+      define => "ENABLE_NETSCAPE_PLUGIN_API", default => (!isIOSWebKit() && !(isQt() && isDarwin())), value => \$netscapePluginAPISupport },
 
     { option => "nosniff", desc => "Toggle support for 'X-Content-Type-Options: nosniff'",
       define => "ENABLE_NOSNIFF", default => isEfl(), value => \$nosniffSupport },
