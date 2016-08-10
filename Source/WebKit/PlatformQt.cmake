@@ -351,10 +351,32 @@ install(
         ${CMAKE_INSTALL_PREFIX}/include/QtWebKit/${PROJECT_VERSION}/QtWebKit/private
 )
 
+if (QT_STATIC_BUILD)
+    set(EXTRA_LIBS_NAMES "WTF" "JavaScriptCore" "WebCore" "xml2")
+    if (NOT USE_SYSTEM_MALLOC)
+        list(APPEND EXTRA_LIBS_NAMES "bmalloc")
+    endif ()
+    if (ENABLE_XSLT)
+        list(APPEND EXTRA_LIBS_NAMES "xslt")
+    endif ()
+    if (APPLE)
+        list(APPEND EXTRA_LIBS_NAMES "icucore")
+    else ()
+        list(APPEND EXTRA_LIBS_NAMES "icu")
+    endif ()
+
+    set(PKGCONFIG_EXTRA_LIBS "")
+    set(PRI_EXTRA_LIBS "")
+    foreach(LIB_NAME ${EXTRA_LIBS_NAMES})
+        set(PKGCONFIG_EXTRA_LIBS "${PKGCONFIG_EXTRA_LIBS} ${LIB_NAME}")
+        set(PRI_EXTRA_LIBS "${PRI_EXTRA_LIBS} -l${LIB_NAME}")
+    endforeach()
+endif ()
+
 ecm_generate_pkgconfig_file(
     BASE_NAME Qt5WebKit
     LIB_INSTALL_DIR "lib"
-    DEPS "Qt5Core Qt5Gui Qt5Network"
+    DEPS "Qt5Core Qt5Gui Qt5Network Qt5Sql${PKGCONFIG_EXTRA_LIBS}"
     FILENAME_VAR WebKit_PKGCONFIG_FILENAME
     INSTALL
 )
@@ -364,11 +386,12 @@ ecm_generate_pri_file(
     LIB_NAME QtWebKit
     INCLUDE_INSTALL_DIR "include"
     INCLUDE_INSTALL_DIR2 "include/QtWebKit"
-    DEPS "core gui network"
-    RUNTIME_DEPS "sensors positioning qml quick webchannel sql core_private gui_private"
+    DEPS "core gui network sql"
+    RUNTIME_DEPS "sensors positioning qml quick webchannel core_private gui_private"
     DEFINES QT_WEBKIT_LIB
     SET_RPATH ON
     QT_MODULES webkit
+    EXTRA_LIBS "${PRI_EXTRA_LIBS}"
     FILENAME_VAR WebKit_PRI_FILENAME
 )
 install(FILES ${WebKit_PRI_FILENAME} DESTINATION ${ECM_MKSPECS_INSTALL_DIR})
@@ -487,8 +510,8 @@ ecm_generate_pri_file(
     LIB_NAME QtWebKitWidgets
     INCLUDE_INSTALL_DIR "include"
     INCLUDE_INSTALL_DIR2 "include/QtWebKitWidgets"
-    DEPS "core gui network widgets webkit"
-    RUNTIME_DEPS "sensors positioning widgets_private printsupport opengl sql core_private gui_private"
+    DEPS "core gui network widgets printsupport webkit"
+    RUNTIME_DEPS "sensors positioning widgets_private opengl sql core_private gui_private"
     DEFINES QT_WEBKITWIDGETS_LIB
     SET_RPATH ON
     QT_MODULES webkitwidgets

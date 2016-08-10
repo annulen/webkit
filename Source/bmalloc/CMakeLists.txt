@@ -31,3 +31,10 @@ include_directories(${bmalloc_INCLUDE_DIRECTORIES})
 add_library(bmalloc STATIC ${bmalloc_SOURCES})
 target_link_libraries(bmalloc ${bmalloc_LIBRARIES})
 set_target_properties(bmalloc PROPERTIES COMPILE_DEFINITIONS "BUILDING_bmalloc")
+
+if (QT_STATIC_BUILD)
+    install(TARGETS bmalloc EXPORT WebKitTargets
+        DESTINATION "${LIB_INSTALL_DIR}"
+        INCLUDES DESTINATION "${CMAKE_INSTALL_PREFIX}/include/QtWebKitWidgets"
+    )
+endif ()
