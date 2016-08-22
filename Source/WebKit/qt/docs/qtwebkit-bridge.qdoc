@@ -22,7 +22,7 @@
     The playlist manager is usually best authored as a classic desktop application,
     with the native-looking robust \l{QWidget}s as the application's backbone.
     The media-player control usually has a custom look and feel and is best written using the \l{Graphics View framework}
-    or \l{QtDeclarative}. The music store, which shows dynamic content
+    or \l{Qt Quick}. The music store, which shows dynamic content
     from the Internet and gets modified rapidly, is best authored in HTML and maintained on the server.
 
     With the Qt WebKit bridge, the music store component can interact with native parts of the application,
@@ -360,8 +360,8 @@
     \snippet webkitsnippets/qtwebkit_bridge_snippets.cpp 1
 
     The JavaScript environment can then use the pixmap from Qt and display it inside the HTML environment,
-    by assigning it to an existing \c{<img>} element with \c{assignToHTMLImageElement()}. It can also use the \c{toDataURL()} function,
-    which allows using the pixmap as the \c{src} attribute of an image or as a \c{background-image} URL. Note that the \c{toDataURL()}
+    by assigning it to an existing \c{<img>} element with \c{assignToHTMLImageElement()}. It can also use the \c{toDataUrl()} function,
+    which allows using the pixmap as the \c{src} attribute of an image or as a \c{background-image} URL. Note that the \c{toDataUrl()}
     function is costly and should be used with caution.
     It can also use the \c{toImageData()} function to convert the pixmap to a JavaScript \c{ImageData} object.
 

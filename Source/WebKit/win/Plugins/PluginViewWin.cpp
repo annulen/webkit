@@ -325,16 +325,26 @@ static bool isWindowsMessageUserGesture(UINT message)
     }
 }
 
+static inline bool isWebViewVisible(FrameView* view)
+{
+#if PLATFORM(QT)
+    if (PlatformPageClient client = view->hostWindow()->platformPageClient())
+        return client->isViewVisible();
+    return false;
+#else
+    return true;
+#endif // PLATFORM(QT)
+}
+
 static inline IntPoint contentsToNativeWindow(FrameView* view, const IntPoint& point)
 {
 #if PLATFORM(QT)
     // Our web view's QWidget isn't necessarily a native window itself. Map the position
     // all the way up to the QWidget associated with the HWND returned as NPNVnetscapeWindow.
-    PlatformPageClient client = view->hostWindow()->platformPageClient();
-    return client->mapToOwnerWindow(view->contentsToWindow(point));
-#else
-    return view->contentsToWindow(point);
+    if (PlatformPageClient client = view->hostWindow()->platformPageClient())
+        return client->mapToOwnerWindow(view->contentsToWindow(point));
 #endif
+    return view->contentsToWindow(point);
 }
 
 static inline IntRect contentsToNativeWindow(FrameView* view, const IntRect& rect)
@@ -429,7 +439,6 @@ void PluginView::updatePluginWidget()
     m_windowRect.scale(deviceScaleFactor());
     m_clipRect = windowClipRect();
     m_clipRect.move(-m_windowRect.x(), -m_windowRect.y());
-
     if (platformPluginWidget() && (!m_haveUpdatedPluginWidget || m_windowRect != oldWindowRect || m_clipRect != oldClipRect)) {
 
         setCallingPlugin(true);
@@ -447,8 +456,10 @@ void PluginView::updatePluginWidget()
             ::SetWindowRgn(platformPluginWidget(), rgn.leak(), TRUE);
         }
 
-        if (!m_haveUpdatedPluginWidget || m_windowRect != oldWindowRect)
-            ::MoveWindow(platformPluginWidget(), m_windowRect.x(), m_windowRect.y(), m_windowRect.width(), m_windowRect.height(), TRUE);
+        if (!m_haveUpdatedPluginWidget || m_windowRect != oldWindowRect) {
+            IntRect nativeWindowRect = contentsToNativeWindow(&frameView, frameRect());
+            ::MoveWindow(platformPluginWidget(), nativeWindowRect.x(), nativeWindowRect.y(), nativeWindowRect.width(), nativeWindowRect.height(), TRUE);
+        }
 
         if (clipToZeroRect) {
             auto rgn = adoptGDIObject(::CreateRectRgn(m_clipRect.x(), m_clipRect.y(), m_clipRect.maxX(), m_clipRect.maxY()));
@@ -484,9 +495,10 @@ void PluginView::show()
 {
     setSelfVisible(true);
 
-    if (isParentVisible() && platformPluginWidget())
+    if (isParentVisible() && platformPluginWidget()) {
         ShowWindow(platformPluginWidget(), SW_SHOWNA);
-
+        forceRedraw();
+    }
     Widget::show();
 }
 
@@ -774,9 +786,10 @@ void PluginView::setParentVisible(bool visible)
     Widget::setParentVisible(visible);
 
     if (isSelfVisible() && platformPluginWidget()) {
-        if (visible)
+        if (visible) {
             ShowWindow(platformPluginWidget(), SW_SHOWNA);
-        else
+            forceRedraw();
+        } else
             ShowWindow(platformPluginWidget(), SW_HIDE);
     }
 }
@@ -957,7 +970,8 @@ bool PluginView::platformStart()
         setUpOffscreenPaintingHooks(hookedBeginPaint, hookedEndPaint);
 
         DWORD flags = WS_CHILD;
-        if (isSelfVisible())
+        auto* frameView = downcast<FrameView>(parent());
+        if (isSelfVisible() && isWebViewVisible(frameView))
             flags |= WS_VISIBLE;
 
         HWND parentWindowHandle = windowHandleForPageClient(m_parentFrame->view()->hostWindow()->platformPageClient());

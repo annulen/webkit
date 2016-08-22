@@ -55,6 +55,7 @@ class WebPageProxy;
 
 class QWebNavigationHistory;
 class QWebKitTest;
+class QWebChannelWebKitTransport;
 
 QT_BEGIN_NAMESPACE
 class QQmlComponent;
@@ -121,6 +122,7 @@ public:
     bool transparentBackground() const;
     void setNavigatorQtObjectEnabled(bool);
     void updateUserScripts();
+    void updateUserStyleSheets();
     void updateSchemeDelegates();
 
     QPointF contentPos() const;
@@ -137,6 +139,9 @@ public:
     void handleDownloadRequest(WebKit::DownloadProxy*);
 
     void didReceiveMessageFromNavigatorQtObject(WKStringRef message);
+#ifdef HAVE_WEBCHANNEL
+    void didReceiveMessageFromNavigatorQtWebChannelTransportObject(WKStringRef message);
+#endif
 
     WebCore::CoordinatedGraphicsScene* coordinatedGraphicsScene();
     float deviceScaleFactor();
@@ -210,6 +215,7 @@ protected:
     QQmlComponent* colorChooser;
 
     QList<QUrl> userScripts;
+    QList<QUrl> userStyleSheets;
 
     bool m_betweenLoadCommitAndFirstFrame;
     bool m_useDefaultContentItemSize;
@@ -246,6 +252,7 @@ public:
     virtual void updateViewportSize();
 
     virtual void pageDidRequestScroll(const QPoint& pos);
+    virtual void handleMouseEvent(QMouseEvent*);
 
 private:
     QScopedPointer<WebKit::PageViewportController> m_pageViewportController;

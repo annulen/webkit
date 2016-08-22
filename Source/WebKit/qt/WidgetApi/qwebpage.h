@@ -35,6 +35,7 @@ class QMenu;
 class QNetworkRequest;
 class QNetworkReply;
 class QNetworkAccessManager;
+class QScreen;
 QT_END_NAMESPACE
 
 class QWebElement;
@@ -286,7 +287,7 @@ public:
     };
 
 
-    explicit QWebPage(QObject *parent = 0);
+    explicit QWebPage(QObject *parent = Q_NULLPTR);
     ~QWebPage();
 
     QWebFrame *mainFrame() const;
@@ -338,7 +339,7 @@ public:
 
     QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
 
-    bool findText(const QString &subString, FindFlags options = 0);
+    bool findText(const QString &subString, FindFlags options = FindFlags());
 
     void setForwardUnsupportedContent(bool forward);
     bool forwardUnsupportedContent() const;
@@ -404,7 +405,7 @@ public:
     };
 
 
-    virtual bool extension(Extension extension, const ExtensionOption *option = 0, ExtensionReturn *output = 0);
+    virtual bool extension(Extension extension, const ExtensionOption *option = Q_NULLPTR, ExtensionReturn *output = Q_NULLPTR);
     virtual bool supportsExtension(Extension extension) const;
 
     QWebPageAdapter* handle() const;
@@ -468,6 +469,7 @@ private:
     Q_PRIVATE_SLOT(d, void _q_webActionTriggered(bool checked))
 #endif
     Q_PRIVATE_SLOT(d, void _q_cleanupLeakMessages())
+    Q_PRIVATE_SLOT(d, void _q_updateScreen(QScreen*))
 
     QWebPagePrivate *d;
 

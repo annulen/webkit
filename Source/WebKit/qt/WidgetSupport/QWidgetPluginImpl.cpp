@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+ * Copyright (C) 2015 The Qt Company Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -54,7 +54,9 @@ void QWidgetPluginImpl::setVisible(bool visible)
 
 void QWidgetPluginImpl::setStyleSheet(const QString &stylesheet)
 {
+#ifndef QT_NO_STYLE_STYLESHEET
     m_widget->setStyleSheet(stylesheet);
+#endif
 }
 
 void QWidgetPluginImpl::setWidgetParent(QObject *parent)

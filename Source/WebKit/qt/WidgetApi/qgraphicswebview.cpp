@@ -142,6 +142,7 @@ void QGraphicsWebViewPrivate::_q_scaleChanged()
 /*!
     \class QGraphicsWebView
     \brief The QGraphicsWebView class allows Web content to be added to a GraphicsView.
+    \inmodule QtWebKit
     \since 4.6
 
     An instance of this class renders Web content from a URL or supplied as data, using
@@ -167,33 +168,6 @@ void QGraphicsWebViewPrivate::_q_scaleChanged()
     features like plugin support to be customized for each item.
 
     \sa QWebView, QGraphicsTextItem
-*/
-
-/*!
-    \fn void QGraphicsWebView::titleChanged(const QString &title)
-
-    This signal is emitted whenever the \a title of the main frame changes.
-
-    \sa title()
-*/
-
-/*!
-    \fn void QGraphicsWebView::urlChanged(const QUrl &url)
-
-    This signal is emitted when the \a url of the view changes.
-
-    \sa url(), load()
-*/
-
-/*!
-    \fn void QGraphicsWebView::iconChanged()
-
-    This signal is emitted whenever the icon of the page is loaded or changes.
-
-    In order for icons to be loaded, you will need to set an icon database path
-    using QWebSettings::setIconDatabasePath().
-
-    \sa icon(), QWebSettings::setIconDatabasePath()
 */
 
 /*!
@@ -291,10 +265,8 @@ bool QGraphicsWebView::sceneEvent(QEvent* event)
         || event->type() == QEvent::TouchEnd
         || event->type() == QEvent::TouchUpdate
         || event->type() == QEvent::TouchCancel)) {
-        d->page->event(event);
-
-        // Always return true so that we'll receive also TouchUpdate and TouchEnd events
-        return true;
+        if (d->page->event(event))
+            return true;
     }
 
     return QGraphicsWidget::sceneEvent(event);
@@ -437,6 +409,9 @@ bool QGraphicsWebView::event(QEvent* event)
                     d->page->d->client->resetCursor();
             }
 #endif
+            if (event->type() == QEvent::Show
+                || event->type() == QEvent::Hide)
+                d->page->event(event);
         }
     }
     return QGraphicsWidget::event(event);
@@ -526,7 +501,7 @@ void QGraphicsWebView::setPage(QWebPage* page)
 
     By default, this property contains an empty, invalid URL.
 
-    \sa load(), urlChanged()
+    \sa load()
 */
 
 void QGraphicsWebView::setUrl(const QUrl &url)
@@ -547,8 +522,6 @@ QUrl QGraphicsWebView::url() const
     \brief the title of the web page currently viewed
 
     By default, this property contains an empty string.
-
-    \sa titleChanged()
 */
 QString QGraphicsWebView::title() const
 {
@@ -564,7 +537,10 @@ QString QGraphicsWebView::title() const
 
     By default, this property contains a null icon.
 
-    \sa iconChanged(), QWebSettings::iconForUrl()
+    In order for icons to be loaded, you will need to set an icon database path
+    using QWebSettings::setIconDatabasePath().
+
+    \sa QWebSettings::iconForUrl(), QWebSettings::setIconDatabasePath()
 */
 QIcon QGraphicsWebView::icon() const
 {
@@ -677,7 +653,7 @@ void QGraphicsWebView::reload()
 
     \note The view remains the same until enough data has arrived to display the new \a url.
 
-    \sa setUrl(), url(), urlChanged()
+    \sa setUrl(), url()
 */
 void QGraphicsWebView::load(const QUrl& url)
 {
@@ -693,7 +669,7 @@ void QGraphicsWebView::load(const QUrl& url)
 
     \note The view remains the same until enough data has arrived to display the new url.
 
-    \sa url(), urlChanged()
+    \sa url()
 */
 
 void QGraphicsWebView::load(const QNetworkRequest& request, QNetworkAccessManager::Operation operation, const QByteArray& body)

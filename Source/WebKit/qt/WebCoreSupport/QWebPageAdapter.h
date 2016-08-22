@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+ * Copyright (C) 2015 The Qt Company Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -47,6 +47,8 @@ QT_END_NAMESPACE
 
 namespace WebCore {
 class ChromeClientQt;
+class DeviceOrientationClient;
+class DeviceMotionClient;
 class GeolocationClientQt;
 class Page;
 class UndoStep;
@@ -287,6 +289,8 @@ public:
     void setVisibilityState(VisibilityState);
     VisibilityState visibilityState() const;
 
+    void setPluginsVisible(bool);
+
     static QWebPageAdapter* kit(WebCore::Page*);
     WebCore::ViewportArguments viewportArguments() const;
     void registerUndoStep(WTF::PassRefPtr<WebCore::UndoStep>);
@@ -374,6 +378,7 @@ public:
     };
 
     ViewportAttributes viewportAttributesForSize(const QSize& availableSize, const QSize& deviceSize) const;
+    void setDevicePixelRatio(float devicePixelRatio);
 
     QWebSettings *settings;
 
@@ -388,6 +393,7 @@ public:
     QBasicTimer tripleClickTimer;
 
     bool clickCausedFocus;
+    bool mousePressed;
     bool m_useNativeVirtualKeyAsDOMKey;
     quint64 m_totalBytes;
     quint64 m_bytesReceived;
@@ -395,6 +401,8 @@ public:
 
 private:
     QNetworkAccessManager *networkManager;
+    WebCore::DeviceOrientationClient* m_deviceOrientationClient;
+    WebCore::DeviceMotionClient* m_deviceMotionClient;
 
 public:
     static bool drtRun;

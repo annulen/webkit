@@ -52,6 +52,7 @@ public:
 
     typedef void (QNetworkReplyHandler::*EnqueuedCall)();
     void push(EnqueuedCall method);
+    void requeue(EnqueuedCall method);
     void clear() { m_enqueuedCalls.clear(); }
 
     void lock();
@@ -178,13 +179,14 @@ public:
 
     bool isSequential() const;
     qint64 getFormDataSize() const { return m_fileSize + m_dataSize; }
+    virtual bool reset();
 
 protected:
     qint64 readData(char*, qint64);
     qint64 writeData(const char*, qint64);
 
 private:
-    void prepareFormElements(FormData*);
+    void prepareFormElements();
     void moveToNextElement();
     qint64 computeSize();
     void openFileForCurrentElement();
@@ -196,6 +198,7 @@ private:
     qint64 m_currentDelta;
     qint64 m_fileSize;
     qint64 m_dataSize;
+    RefPtr<FormData> m_formData;
 };
 
 }

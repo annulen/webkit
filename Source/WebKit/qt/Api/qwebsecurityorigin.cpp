@@ -121,11 +121,7 @@ int QWebSecurityOrigin::port() const
 */
 qint64 QWebSecurityOrigin::databaseUsage() const
 {
-#if ENABLE(SQL_DATABASE)
-    return DatabaseManager::manager().usageForOrigin(d->origin.get());
-#else
-    return 0;
-#endif
+    return DatabaseManager::singleton().usageForOrigin(d->origin.get());
 }
 
 /*!
@@ -133,11 +129,7 @@ qint64 QWebSecurityOrigin::databaseUsage() const
 */
 qint64 QWebSecurityOrigin::databaseQuota() const
 {
-#if ENABLE(SQL_DATABASE)
-    return DatabaseManager::manager().quotaForOrigin(d->origin.get());
-#else
-    return 0;
-#endif
+    return DatabaseManager::singleton().quotaForOrigin(d->origin.get());
 }
 
 /*!
@@ -149,9 +141,7 @@ qint64 QWebSecurityOrigin::databaseQuota() const
 */
 void QWebSecurityOrigin::setDatabaseQuota(qint64 quota)
 {
-#if ENABLE(SQL_DATABASE)
-    DatabaseManager::manager().setQuota(d->origin.get(), quota);
-#endif
+    DatabaseManager::singleton().setQuota(d->origin.get(), quota);
 }
 
 void QWebSecurityOrigin::setApplicationCacheQuota(qint64 quota)
@@ -180,15 +170,13 @@ QList<QWebSecurityOrigin> QWebSecurityOrigin::allOrigins()
 {
     QList<QWebSecurityOrigin> webOrigins;
 
-#if ENABLE(SQL_DATABASE)
     Vector<RefPtr<SecurityOrigin> > coreOrigins;
-    DatabaseManager::manager().origins(coreOrigins);
+    DatabaseManager::singleton().origins(coreOrigins);
 
     for (unsigned i = 0; i < coreOrigins.size(); ++i) {
         QWebSecurityOriginPrivate* priv = new QWebSecurityOriginPrivate(coreOrigins[i].get());
         webOrigins.append(priv);
     }
-#endif
 
     return webOrigins;
 }
@@ -200,10 +188,9 @@ QList<QWebDatabase> QWebSecurityOrigin::databases() const
 {
     QList<QWebDatabase> databases;
 
-#if ENABLE(SQL_DATABASE)
     Vector<String> nameVector;
 
-    if (!DatabaseManager::manager().databaseNamesForOrigin(d->origin.get(), nameVector))
+    if (!DatabaseManager::singleton().databaseNamesForOrigin(d->origin.get(), nameVector))
         return databases;
     for (unsigned i = 0; i < nameVector.size(); ++i) {
         QWebDatabasePrivate* priv = new QWebDatabasePrivate();
@@ -212,7 +199,6 @@ QList<QWebDatabase> QWebSecurityOrigin::databases() const
         QWebDatabase webDatabase(priv);
         databases.append(webDatabase);
     }
-#endif
 
     return databases;
 }
@@ -224,7 +210,7 @@ QList<QWebDatabase> QWebSecurityOrigin::databases() const
     to the \c file: scheme.
 
     Cross domain restrictions depend on the two web settings QWebSettings::LocalContentCanAccessFileUrls
-    and QWebSettings::LocalContentCanAccessFileUrls. By default all local schemes are concidered to be
+    and QWebSettings::LocalContentCanAccessRemoteUrls. By default all local schemes are considered to be
     in the same security origin, and local schemes can not access remote content.
 */
 void QWebSecurityOrigin::addLocalScheme(const QString& scheme)

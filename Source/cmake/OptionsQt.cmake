@@ -2,6 +2,9 @@ include(FeatureSummary)
 include(ECMPackageConfigHelpers)
 include(ECMQueryQmake)
 
+set(ECM_MODULE_DIR ${CMAKE_MODULE_PATH})
+include(KDEInstallDirs)
+
 macro(macro_process_qtbase_prl_file qt_target_component)
     if (TARGET ${qt_target_component})
         get_target_property(_lib_name ${qt_target_component} NAME)
@@ -29,7 +32,7 @@ endmacro()
 
 set(PROJECT_VERSION_MAJOR 5)
 set(PROJECT_VERSION_MINOR 602)
-set(PROJECT_VERSION_MICRO 0)
+set(PROJECT_VERSION_MICRO 1)
 set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_MICRO})
 set(PROJECT_VERSION_STRING "${PROJECT_VERSION}")
 
@@ -333,16 +336,18 @@ endif ()
 
 SET_AND_EXPOSE_TO_BUILD(WTF_PLATFORM_X11 ${ENABLE_X11_TARGET})
 
-# MOZ_X11 and XP_UNIX are required by npapi.h. Their value is not checked;
-# only their definedness is. They should only be defined in the true case.
-if (${ENABLE_X11_TARGET})
-    SET_AND_EXPOSE_TO_BUILD(MOZ_X11 1)
-    set(PLUGIN_BACKEND_XLIB 1)
-endif ()
-if (${WTF_OS_UNIX})
-    SET_AND_EXPOSE_TO_BUILD(XP_UNIX 1)
-    SET_AND_EXPOSE_TO_BUILD(ENABLE_NETSCAPE_PLUGIN_METADATA_CACHE 1)
-    SET_AND_EXPOSE_TO_BUILD(ENABLE_PLUGIN_PACKAGE_SIMPLE_HASH 1)
+if (ENABLE_NETSCAPE_PLUGIN_API)
+    # MOZ_X11 and XP_UNIX are required by npapi.h. Their value is not checked;
+    # only their definedness is. They should only be defined in the true case.
+    if (${ENABLE_X11_TARGET})
+        SET_AND_EXPOSE_TO_BUILD(MOZ_X11 1)
+        set(PLUGIN_BACKEND_XLIB 1)
+    endif ()
+    if (${WTF_OS_UNIX})
+        SET_AND_EXPOSE_TO_BUILD(XP_UNIX 1)
+        SET_AND_EXPOSE_TO_BUILD(ENABLE_NETSCAPE_PLUGIN_METADATA_CACHE 1)
+        SET_AND_EXPOSE_TO_BUILD(ENABLE_PLUGIN_PACKAGE_SIMPLE_HASH 1)
+    endif ()
 endif ()
 
 if (ENABLE_X11_TARGET)

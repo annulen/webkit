@@ -37,7 +37,7 @@ namespace WebCore {
 
     This implementation returns the following value:
 
-    "Mozilla/5.0 (%Platform%%Security%%Subplatform%) AppleWebKit/%WebKitVersion% (KHTML, like Gecko) %AppVersion Safari/%WebKitVersion%"
+    "Mozilla/5.0 (%Platform%%Security%%Subplatform%) AppleWebKit/%WebKitVersion% (KHTML, like Gecko) %AppVersion Version/9.0 Safari/%WebKitVersion%"
 
     In this string the following values are replaced the first time the function is called:
     \list
@@ -45,7 +45,7 @@ namespace WebCore {
     \li %Security% expands to "N; " if SSL is disabled.
     \li %Subplatform% expands to the operating system version (e.g. "Windows NT 6.1" or "Intel Mac OS X 10.5").
     \li %WebKitVersion% is the version of WebKit the application was compiled against.
-    /endlist
+    \endlist
 
     The following value is replaced each time the funciton is called
     \list
@@ -58,24 +58,24 @@ String UserAgentQt::standardUserAgent(const String &applicationNameForUserAgent,
 
     if (ua.isNull()) {
 
-        ua = QLatin1String("Mozilla/5.0 (%1%2%3) AppleWebKit/%4 (KHTML, like Gecko) %99 Safari/%5");
+        ua = QStringLiteral("Mozilla/5.0 (%1%2%3) AppleWebKit/%4 (KHTML, like Gecko) %99 Version/9.0 Safari/%5");
 
         // Platform.
-        ua = ua.arg(QLatin1String(
+        ua = ua.arg(
 #if OS(MAC_OS_X)
-            "Macintosh; "
+            QStringLiteral("Macintosh; ")
 #elif OS(WINDOWS)
-            ""
+            QStringLiteral("")
 #else
-            (QGuiApplication::platformName() == QLatin1String("xcb")) ? "X11; " : "Unknown; "
+            (QGuiApplication::platformName() == QLatin1String("xcb")) ? QStringLiteral("X11; ") : QStringLiteral("Unknown; ")
 #endif
-        ));
+        );
 
 
         // Security strength.
         QString securityStrength;
-#if defined(QT_NO_OPENSSL)
-        securityStrength = QLatin1String("N; ");
+#if defined(QT_NO_SSL)
+        securityStrength = QStringLiteral("N; ");
 #endif
         ua = ua.arg(securityStrength);
 
@@ -138,7 +138,7 @@ String UserAgentQt::standardUserAgent(const String &applicationNameForUserAgent,
             appName.append(QLatin1Char('/') + appVer);
     } else {
         // Qt version.
-        appName = QLatin1String("Qt/") + QLatin1String(qVersion());
+        appName = QStringLiteral("Qt/") + QLatin1String(qVersion());
     }
 
     return ua.arg(appName);

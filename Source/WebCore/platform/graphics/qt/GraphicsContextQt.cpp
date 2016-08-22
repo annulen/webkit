@@ -10,7 +10,7 @@
  * Copyright (C) 2008 Dirk Schulze <vbs85@gmx.de>
  * Copyright (C) 2010, 2011 Sencha, Inc.
  * Copyright (C) 2011 Andreas Kling <kling@webkit.org>
- * Copyright (C) 2013 Digia Plc. and/or its subsidiary(-ies).
+ * Copyright (C) 2015 The Qt Company Ltd.
  *
  * All rights reserved.
  *
@@ -55,6 +55,7 @@
 #include "ShadowBlur.h"
 #include "TransformationMatrix.h"
 #include "TransparencyLayer.h"
+#include "URL.h"
 
 #include <QBrush>
 #include <QGradient>
@@ -66,7 +67,9 @@
 #include <QPixmap>
 #include <QPolygonF>
 #include <QStack>
+#include <QUrl>
 #include <QVector>
+#include <private/qpdf_p.h>
 #include <wtf/MathExtras.h>
 
 #if OS(WINDOWS)
@@ -333,12 +336,14 @@ PlatformGraphicsContext* GraphicsContext::platformContext() const
     return m_data->p();
 }
 
-AffineTransform GraphicsContext::getCTM(IncludeDeviceScale) const
+AffineTransform GraphicsContext::getCTM(IncludeDeviceScale includeScale) const
 {
     if (paintingDisabled())
         return AffineTransform();
 
-    const QTransform& matrix = platformContext()->combinedTransform();
+    const QTransform& matrix = (includeScale == DefinitelyIncludeDeviceScale)
+        ? platformContext()->combinedTransform()
+        : platformContext()->worldTransform();
     return AffineTransform(matrix.m11(), matrix.m12(), matrix.m21(),
                            matrix.m22(), matrix.dx(), matrix.dy());
 }
@@ -536,7 +541,7 @@ void GraphicsContext::drawPattern(Image& image, const FloatRect& tileRect, const
     QTransform transform(patternTransform);
 
     // If this would draw more than one scaled tile, we scale the pixmap first and then use the result to draw.
-    if (transform.type() == QTransform::TxScale) {
+    if (transform.type() == QTransform::TxScale && p->transform().type() < QTransform::TxScale) {
         QRectF tileRectInTargetCoords = (transform * QTransform().translate(phase.x(), phase.y())).mapRect(tr);
 
         bool tileWillBePaintedOnlyOnce = tileRectInTargetCoords.contains(dr);
@@ -668,28 +673,32 @@ void GraphicsContext::fillPath(const Path& path)
         p->fillPath(platformPath, p->brush());
 }
 
-inline static void fillPathStroke(QPainter* painter, QPainterPathStroker& pathStroker, const QPainterPath& platformPath, const QBrush& brush)
+inline static void fillPathStroke(QPainter* painter, const QPainterPath& platformPath, const QPen& pen)
 {
-    QPainterPath stroke = pathStroker.createStroke(platformPath);
-    painter->fillPath(stroke, brush);
+    if (pen.color().alphaF() < 1.0) {
+        QPainterPathStroker pathStroker;
+        pathStroker.setJoinStyle(pen.joinStyle());
+        pathStroker.setDashOffset(pen.dashOffset());
+        pathStroker.setDashPattern(pen.dashPattern());
+        pathStroker.setMiterLimit(pen.miterLimit());
+        pathStroker.setCapStyle(pen.capStyle());
+        pathStroker.setWidth(pen.widthF());
+
+        QPainterPath stroke = pathStroker.createStroke(platformPath);
+        painter->fillPath(stroke, pen.brush());
+    } else {
+        painter->strokePath(platformPath, pen);
+    }
 }
 
 void GraphicsContext::strokePath(const Path& path)
 {
     if (paintingDisabled())
         return;
-
     QPainter* p = m_data->p();
     QPen pen(p->pen());
     QPainterPath platformPath = path.platformPath();
     platformPath.setFillRule(toQtFillRule(fillRule()));
-    QPainterPathStroker pathStroker;
-    pathStroker.setJoinStyle(pen.joinStyle());
-    pathStroker.setDashOffset(pen.dashOffset());
-    pathStroker.setDashPattern(pen.dashPattern());
-    pathStroker.setMiterLimit(pen.miterLimit());
-    pathStroker.setCapStyle(pen.capStyle());
-    pathStroker.setWidth(pen.widthF());
 
     if (hasShadow()) {
         if (mustUseShadowBlur() || m_state.strokePattern || m_state.strokeGradient)
@@ -703,9 +712,12 @@ void GraphicsContext::strokePath(const Path& path)
                 if (m_state.strokeGradient) {
                     QBrush brush(*m_state.strokeGradient->platformGradient());
                     brush.setTransform(m_state.strokeGradient->gradientSpaceTransform());
-                    fillPathStroke(shadowPainter, pathStroker, platformPath, brush);
-                } else
-                    fillPathStroke(shadowPainter, pathStroker, platformPath, pen.brush());
+                    QPen shadowPen(pen);
+                    shadowPen.setBrush(brush);
+                    fillPathStroke(shadowPainter, platformPath, shadowPen);
+                } else {
+                    fillPathStroke(shadowPainter, platformPath, pen);
+                }
                 shadow.endShadowLayer(*this);
             }
         } else {
@@ -715,20 +727,22 @@ void GraphicsContext::strokePath(const Path& path)
             shadowColor.setAlphaF(shadowColor.alphaF() * pen.color().alphaF());
             QPen shadowPen(pen);
             shadowPen.setColor(shadowColor);
-            fillPathStroke(p, pathStroker, platformPath, shadowPen.brush());
+            fillPathStroke(p, platformPath, shadowPen);
             p->translate(-offset);
         }
     }
 
     if (m_state.strokePattern) {
         QBrush brush = m_state.strokePattern->createPlatformPattern();
-        fillPathStroke(p, pathStroker, platformPath, brush);
+        pen.setBrush(brush);
+        fillPathStroke(p, platformPath, pen);
     } else if (m_state.strokeGradient) {
         QBrush brush(*m_state.strokeGradient->platformGradient());
         brush.setTransform(m_state.strokeGradient->gradientSpaceTransform());
-        fillPathStroke(p, pathStroker, platformPath, brush);
+        pen.setBrush(brush);
+        fillPathStroke(p, platformPath, pen);
     } else
-        fillPathStroke(p, pathStroker, platformPath, pen.brush());
+        fillPathStroke(p, platformPath, pen);
 }
 
 static inline void drawRepeatPattern(QPainter* p, PassRefPtr<Pattern> pattern, const FloatRect& rect)
@@ -752,9 +766,6 @@ static inline void drawRepeatPattern(QPainter* p, PassRefPtr<Pattern> pattern, c
     QRegion oldClip;
     if (p->hasClipping())
         oldClip = p->clipRegion();
-
-    // The only type of transforms supported for the brush are translations.
-    ASSERT(!brush.transform().isRotating());
 
     QRectF clip = targetRect;
     QRectF patternRect = brush.transform().mapRect(QRectF(0, 0, w, h));
@@ -1548,7 +1559,7 @@ TransformationMatrix GraphicsContext::get3DTransform() const
     if (paintingDisabled())
         return TransformationMatrix();
 
-    return platformContext()->combinedTransform();
+    return platformContext()->worldTransform();
 }
 
 void GraphicsContext::concat3DTransform(const TransformationMatrix& transform)
@@ -1568,9 +1579,18 @@ void GraphicsContext::set3DTransform(const TransformationMatrix& transform)
 }
 #endif
 
-void GraphicsContext::setURLForRect(const URL&, const IntRect&)
+void GraphicsContext::setURLForRect(const URL& url, const IntRect& rect)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    if (paintingDisabled())
+        return;
+
+    QPainter* p = m_data->p();
+    if (p->paintEngine()->type() == QPaintEngine::Pdf)
+        static_cast<QPdfEngine *>(p->paintEngine())->drawHyperlink(p->worldTransform().mapRect(rect), url);
+#else
     notImplemented();
+#endif
 }
 
 void GraphicsContext::setPlatformStrokeColor(const Color& color)

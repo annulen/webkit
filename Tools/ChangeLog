@@ -1,3 +1,47 @@
+2016-08-15  Konstantin Tokarev  <annulen@yandex.ru>
+
+        Allow using make-dist with non-GTK ports
+        https://bugs.webkit.org/show_bug.cgi?id=160842
+
+        Reviewed by Michael Catanzaro.
+
+        This patch adds support for setting base name of tarball and argument
+        passed to cmake's -DPORT= via command line arguments.
+
+        * gtk/make-dist.py:
+        (Distcheck.configure):
+        (Distcheck.check):
+        (get_tarball_root_and_output_filename_from_arguments):
+
+2016-08-09  Gyuyoung Kim  <gyuyoung.kim@webkit.org>
+
+        Do not check if WebKitLibraries folder exists on EFL and GTK
+        https://bugs.webkit.org/show_bug.cgi?id=160659
+
+        Reviewed by Csaba Osztrogonác.
+
+        Though WebKitLibraries is only needed by mac and win ports,
+        EFL and GTK ports have checked whether it exists.
+
+        * Scripts/build-webkit:
+
+2016-08-05  Konstantin Tokarev  <annulen@yandex.ru>
+
+        Print test name in "Last character read from DRT..." error message.
+        https://bugs.webkit.org/show_bug.cgi?id=160559
+
+        Reviewed by Michael Catanzaro.
+
+        * Scripts/webkitpy/port/driver.py:
+        (Driver.run_test):
+        (Driver._read_first_block):
+        (Driver._read_optional_image_block):
+        (Driver._read_block):
+        * Scripts/webkitpy/port/driver_unittest.py:
+        (DriverTest.test_read_block):
+        (DriverTest.test_read_binary_block):
+        (DriverTest.test_read_base64_block):
+
 2016-07-01  Konstantin Tokarev  <annulen@yandex.ru>
 
         [cmake] Build TestNetscapePlugin only if NPAPI is enabled.

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies)
  * Copyright (c) 2012 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+ * Copyright (C) 2015 The Qt Company Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -83,6 +83,11 @@
 #include <wtf/MainThread.h>
 #include <wtf/Vector.h>
 #include <wtf/text/WTFString.h>
+
+#ifdef HAVE_WEBCHANNEL
+#include <QtWebChannel/QQmlWebChannel>
+#include "qwebchannelwebkittransport_p.h"
+#endif
 
 using namespace WebCore;
 using namespace WebKit;
@@ -433,7 +438,7 @@ void QQuickWebViewPrivate::didFailLoad(WKPageRef, WKFrameRef frame, WKErrorRef e
     }
 
     int errorCode = error.errorCode();
-    if (errorCode == kWKErrorCodeFrameLoadInterruptedByPolicyChange && errorCode == kWKErrorCodePlugInWillHandleLoad) {
+    if (errorCode == kWKErrorCodeFrameLoadInterruptedByPolicyChange || errorCode == kWKErrorCodePlugInWillHandleLoad) {
         QWebLoadRequest loadRequest(q->url(), QQuickWebView::LoadSucceededStatus);
         q->emitUrlChangeIfNeeded();
         emit q->loadingChanged(&loadRequest);
@@ -522,6 +527,7 @@ void QQuickWebViewPrivate::didChangeBackForwardList(WKPageRef, WKBackForwardList
 void QQuickWebViewPrivate::setTransparentBackground(bool enable)
 {
     webPageProxy->setDrawsTransparentBackground(enable);
+    webPageProxy->setDrawsBackground(!enable);
 }
 
 bool QQuickWebViewPrivate::transparentBackground() const
@@ -615,6 +621,7 @@ void QQuickWebViewPrivate::didRelaunchProcess()
 
         updateViewportSize();
         updateUserScripts();
+        updateUserStyleSheets();
         updateSchemeDelegates();
     }
 
@@ -868,27 +875,32 @@ void QQuickWebViewPrivate::setNavigatorQtObjectEnabled(bool enabled)
     WKPagePostMessageToInjectedBundle(webPage.get(), messageName, wkEnabled.get());
 }
 
-static WKRetainPtr<WKStringRef> readUserScript(const QUrl& url)
+static WKRetainPtr<WKStringRef> readUserFile(const QUrl& url, const char* userFileType)
 {
+    if (!url.isValid()) {
+        qWarning("QQuickWebView: Couldn't open '%s' as %s because URL is invalid.", qPrintable(url.toString()), userFileType);
+        return 0;
+    }
+
     QString path;
     if (url.isLocalFile())
         path = url.toLocalFile();
     else if (url.scheme() == QLatin1String("qrc"))
         path = QStringLiteral(":") + url.path();
     else {
-        qWarning("QQuickWebView: Couldn't open '%s' as user script because only file:/// and qrc:/// URLs are supported.", qPrintable(url.toString()));
+        qWarning("QQuickWebView: Couldn't open '%s' as %s because only file:/// and qrc:/// URLs are supported.", qPrintable(url.toString()), userFileType);
         return 0;
     }
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning("QQuickWebView: Couldn't open '%s' as user script due to error '%s'.", qPrintable(url.toString()), qPrintable(file.errorString()));
+        qWarning("QQuickWebView: Couldn't open '%s' as %s due to error '%s'.", qPrintable(url.toString()), userFileType, qPrintable(file.errorString()));
         return 0;
     }
 
     QByteArray contents = file.readAll();
     if (contents.isEmpty())
-        qWarning("QQuickWebView: Ignoring '%s' as user script because file is empty.", qPrintable(url.toString()));
+        qWarning("QQuickWebView: Ignoring '%s' as %s because file is empty.", qPrintable(url.toString()), userFileType);
 
     return adoptWK(WKStringCreateWithUTF8CString(contents.constData()));
 }
@@ -899,17 +911,25 @@ void QQuickWebViewPrivate::updateUserScripts()
     // each Page/WebView pair we create.
     WKPageGroupRemoveAllUserScripts(pageGroup.get());
 
-    for (unsigned i = 0; i < userScripts.size(); ++i) {
-        const QUrl& url = userScripts.at(i);
-        if (!url.isValid()) {
-            qWarning("QQuickWebView: Couldn't open '%s' as user script because URL is invalid.", qPrintable(url.toString()));
-            continue;
-        }
-
-        WKRetainPtr<WKStringRef> contents = readUserScript(url);
+    foreach (const QUrl& url, userScripts) {
+        WKRetainPtr<WKStringRef> contents = readUserFile(url, "user script");
         if (!contents || WKStringIsEmpty(contents.get()))
             continue;
         WKPageGroupAddUserScript(pageGroup.get(), contents.get(), /*baseURL*/ 0, /*whitelistedURLPatterns*/ 0, /*blacklistedURLPatterns*/ 0, kWKInjectInTopFrameOnly, kWKInjectAtDocumentEnd);
+    }
+}
+
+void QQuickWebViewPrivate::updateUserStyleSheets()
+{
+    // This feature works per-WebView because we keep an unique page group for
+    // each Page/WebView pair we create.
+    WKPageGroupRemoveAllUserStyleSheets(pageGroup.get());
+
+    foreach (const QUrl& url, userStyleSheets) {
+        WKRetainPtr<WKStringRef> contents = readUserFile(url, "user style sheet");
+        if (!contents || WKStringIsEmpty(contents.get()))
+            continue;
+        WKPageGroupAddUserStyleSheet(pageGroup.get(), contents.get(), /*baseURL*/ 0, /*whitelistedURLPatterns*/ 0, /*blacklistedURLPatterns*/ 0, kWKInjectInTopFrameOnly);
     }
 }
 
@@ -958,6 +978,14 @@ void QQuickWebViewPrivate::didReceiveMessageFromNavigatorQtObject(WKStringRef me
     variantMap.insert(QLatin1String("origin"), q_ptr->url());
     emit q_ptr->experimental()->messageReceived(variantMap);
 }
+
+#ifdef HAVE_WEBCHANNEL
+void QQuickWebViewPrivate::didReceiveMessageFromNavigatorQtWebChannelTransportObject(WKStringRef message)
+{
+    // TODO: can I convert a WKStringRef to a UTF8 QByteArray directly?
+    q_ptr->experimental()->m_webChannelTransport->receiveMessage(WKStringCopyQString(message).toUtf8());
+}
+#endif
 
 CoordinatedGraphicsScene* QQuickWebViewPrivate::coordinatedGraphicsScene()
 {
@@ -1063,13 +1091,25 @@ void QQuickWebViewFlickablePrivate::pageDidRequestScroll(const QPoint& pos)
         m_pageViewportController->pageDidRequestScroll(pos);
 }
 
+void QQuickWebViewFlickablePrivate::handleMouseEvent(QMouseEvent* event)
+{
+    pageEventHandler->handleInputEvent(event);
+}
+
 QQuickWebViewExperimental::QQuickWebViewExperimental(QQuickWebView *webView, QQuickWebViewPrivate* webViewPrivate)
     : QObject(webView)
     , q_ptr(webView)
     , d_ptr(webViewPrivate)
     , schemeParent(new QObject(this))
     , m_test(new QWebKitTest(webViewPrivate, this))
+#ifdef HAVE_WEBCHANNEL
+    , m_webChannel(new QQmlWebChannel(this))
+    , m_webChannelTransport(new QWebChannelWebKitTransport(this))
+#endif
 {
+#ifdef HAVE_WEBCHANNEL
+    m_webChannel->connectTo(m_webChannelTransport);
+#endif
 }
 
 QQuickWebViewExperimental::~QQuickWebViewExperimental()
@@ -1158,6 +1198,29 @@ bool QQuickWebViewExperimental::flickableViewportEnabled()
     return s_flickableViewportEnabled;
 }
 
+#ifdef HAVE_WEBCHANNEL
+QQmlWebChannel* QQuickWebViewExperimental::webChannel() const
+{
+    return m_webChannel;
+}
+
+void QQuickWebViewExperimental::setWebChannel(QQmlWebChannel* channel)
+{
+    if (channel == m_webChannel)
+        return;
+
+    if (m_webChannel)
+        m_webChannel->disconnectFrom(m_webChannelTransport);
+
+    m_webChannel = channel;
+
+    if (m_webChannel)
+        m_webChannel->connectTo(m_webChannelTransport);
+
+    emit webChannelChanged(channel);
+}
+#endif
+
 /*!
     \internal
 
@@ -1176,6 +1239,16 @@ void QQuickWebViewExperimental::postMessage(const QString& message)
     WKRetainPtr<WKStringRef> contents = adoptWK(WKStringCreateWithQString(message));
     WKPagePostMessageToInjectedBundle(d->webPage.get(), messageName, contents.get());
 }
+
+#ifdef HAVE_WEBCHANNEL
+void QQuickWebViewExperimental::postQtWebChannelTransportMessage(const QByteArray& message)
+{
+    Q_D(QQuickWebView);
+    static WKStringRef messageName = WKStringCreateWithUTF8CString("MessageToNavigatorQtWebChannelTransportObject");
+    WKRetainPtr<WKStringRef> contents = adoptWK(WKStringCreateWithUTF8CString(message.constData()));
+    WKPagePostMessageToInjectedBundle(d->webPage.get(), messageName, contents.get());
+}
+#endif
 
 QQmlComponent* QQuickWebViewExperimental::alertDialog() const
 {
@@ -1465,6 +1538,22 @@ void QQuickWebViewExperimental::setUserScripts(const QList<QUrl>& userScripts)
     emit userScriptsChanged();
 }
 
+QList<QUrl> QQuickWebViewExperimental::userStyleSheets() const
+{
+    Q_D(const QQuickWebView);
+    return d->userStyleSheets;
+}
+
+void QQuickWebViewExperimental::setUserStyleSheets(const QList<QUrl>& userStyleSheets)
+{
+    Q_D(QQuickWebView);
+    if (d->userStyleSheets == userStyleSheets)
+        return;
+    d->userStyleSheets = userStyleSheets;
+    d->updateUserStyleSheets();
+    emit userStyleSheetsChanged();
+}
+
 QUrl QQuickWebViewExperimental::remoteInspectorUrl() const
 {
 #if ENABLE(INSPECTOR_SERVER)
@@ -1576,34 +1665,68 @@ QQuickWebPage* QQuickWebViewExperimental::page()
 }
 
 /*!
-    \page index.html
-    \title QtWebKit: QML WebView version 3.0
+    \page qtwebkit-index.html
+    \title Qt WebKit
 
-    The WebView API allows QML applications to render regions of dynamic
-    web content. A \e{WebView} component may share the screen with other
-    QML components or encompass the full screen as specified within the
-    QML application.
+    The Qt WebKit module provides the WebView API, which allows QML applications
+    to render regions of dynamic web content. A \e{WebView} component may share
+    the screen with other QML components or encompass the full screen as
+    specified within the QML application.
 
-    QML WebView version 3.0 is incompatible with previous QML \l
-    {QtWebKit1::WebView} {WebView} API versions.  It allows an
-    application to load pages into the WebView, either by URL or with
-    an HTML string, and navigate within session history.  By default,
-    links to different pages load within the same WebView, but applications
-    may intercept requests to delegate links to other functions.
+    \section1 Getting Started
 
-    This sample QML application loads a web page, responds to session
-    history context, and intercepts requests for external links:
+    To use WebView in your QML document, add the following import statement:
+
+    \code
+    import QtWebKit 3.0
+    \endcode
+
+    \note Qt WebKit 3.0 is incompatible with previous Qt WebKit versions.
+
+    \section1 Examples
+
+    There are several Qt WebKit examples located in the
+    \l{Qt WebKit Examples} page.
+
+    \section1 See Also
+
+    \list
+     \li \l {Qt WebKit QML Types}{QML Types}
+    \endlist
+
+*/
+
+
+/*!
+    \qmltype WebView
+    \instantiates QQuickWebView
+    \inqmlmodule QtWebKit
+    \brief A WebView renders web content within a QML application.
+
+    \image webview.png
+
+    WebView allows an application to load pages either by URL or an HTML
+    string, and navigate within the session history. By default, links to
+    different pages are loaded within the same WebView, but applications
+    can choose to delegate those links to other functions.
+
+    The following example loads a web page, responds to session
+    history context, and intercepts requests for external links. It also makes
+    use of \l ScrollView from \l {Qt Quick Controls} to add scroll bars for
+    the content area.
 
     \code
     import QtQuick 2.0
+    import QtQuick.Controls 1.0
     import QtWebKit 3.0
 
-    Page {
+    ScrollView {
+        width: 1280
+        height: 720
         WebView {
             id: webview
             url: "http://qt-project.org"
-            width: parent.width
-            height: parent.height
+            anchors.fill: parent
             onNavigationRequested: {
                 // detect URL scheme prefix, most likely an external link
                 var schemaRE = /^\w+:/;
@@ -1617,20 +1740,6 @@ QQuickWebPage* QQuickWebViewExperimental::page()
         }
     }
     \endcode
-
-    \section1 Examples
-
-    There are several Qt WebKit examples located in the
-    \l{Qt WebKit Examples} page.
-
-*/
-
-
-/*!
-    \qmltype WebView
-    \instantiates QQuickWebView
-    \inqmlmodule QtWebKit 3.0
-    \brief A WebView renders web content within a QML application
 */
 
 QQuickWebView::QQuickWebView(QQuickItem* parent)
@@ -1909,7 +2018,7 @@ QVariant QQuickWebView::inputMethodQuery(Qt::InputMethodQuery property) const
     case Qt::ImMaximumTextLength:
         return QVariant(); // No limit.
     case Qt::ImHints:
-        return int(Qt::InputMethodHints(state.inputMethodHints));
+        return QVariant(static_cast<int>(state.inputMethodHints));
     default:
         // Rely on the base implementation for ImEnabled, ImHints and ImPreferredLanguage.
         return QQuickFlickable::inputMethodQuery(property);
@@ -2175,6 +2284,10 @@ void QQuickWebView::handleFlickableMouseRelease(const QPointF& position, qint64 
     was originally retrieved from \c http://www.example.com/documents/overview.html
     and that was the base url, then an image referenced with the relative url \c diagram.png
     would be looked for at \c{http://www.example.com/documents/diagram.png}.
+
+    It is important to keep in mind that the \a html string will be converted to UTF-16
+    internally. Textual resources, such as scripts or style sheets, will be treated as
+    UTF-16 as well, unless they have an explicit charset property in their referencing tag.
 
     If an \a unreachableUrl is passed it is used as the url for the loaded
     content. This is typically used to display error pages for a failed

@@ -2,7 +2,7 @@
     Copyright (C) 2008 Holger Hans Peter Freyther
     Copyright (C) 2009 Torch Mobile Inc. http://www.torchmobile.com/
     Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies)
-    Copyright (C) 2013 Digia Plc. and/or its subsidiary(-ies)
+    Copyright (C) 2015 The Qt Company Ltd
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -29,26 +29,54 @@
 
 namespace WebCore {
 
+// See http://www.w3.org/TR/css3-fonts/#font-weight-prop
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+static inline QFont::Weight toQFontWeight(FontWeight fontWeight)
+{
+    switch (fontWeight) {
+    case FontWeight100:
+        return QFont::Thin;
+    case FontWeight200:
+        return QFont::ExtraLight;
+    case FontWeight300:
+        return QFont::Light;
+    case FontWeight400:
+        return QFont::Normal;
+    case FontWeight500:
+        return QFont::Medium;
+    case FontWeight600:
+        return QFont::DemiBold;
+    case FontWeight700:
+        return QFont::Bold;
+    case FontWeight800:
+        return QFont::ExtraBold;
+    case FontWeight900:
+        return QFont::Black;
+    }
+    Q_UNREACHABLE();
+}
+#else
 static inline QFont::Weight toQFontWeight(FontWeight fontWeight)
 {
     switch (fontWeight) {
     case FontWeight100:
     case FontWeight200:
+    case FontWeight300:
         return QFont::Light; // QFont::Light == Weight of 25
+    case FontWeight400:
+    case FontWeight500:
+        return QFont::Normal; // QFont::Normal == Weight of 50
     case FontWeight600:
         return QFont::DemiBold; // QFont::DemiBold == Weight of 63
     case FontWeight700:
-    case FontWeight800:
         return QFont::Bold; // QFont::Bold == Weight of 75
+    case FontWeight800:
     case FontWeight900:
         return QFont::Black; // QFont::Black == Weight of 87
-    case FontWeight300:
-    case FontWeight400:
-    case FontWeight500:
-    default:
-        return QFont::Normal; // QFont::Normal == Weight of 50
     }
+    Q_UNREACHABLE();
 }
+#endif
 
 static inline bool isEmptyValue(const float size, const bool bold, const bool oblique)
 {

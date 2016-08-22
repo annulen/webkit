@@ -3,6 +3,7 @@
     \title Qt WebKit Widgets C++ Classes
     \brief Provides a web browser engine as well as C++ classes to render and
     interact with web content
+    \qtvariable webkitwidgets
 
     To include the definitions of the module's classes, use the
     following directive:
@@ -19,6 +20,7 @@
 /*!
     \qmlmodule QtWebKit 3.0
     \title Qt WebKit QML Types
+    \ingroup qmlmodules
     \brief Provides QML types for rendering web content within a QML application
 
     The QML types can be imported into your applciation using the following
@@ -58,7 +60,7 @@
     attribute on HTML elements.
 
     QtWebKit has been enhanced to become more attractive on the mobile front as well.
-    For more information see \l{QtWebKit Goes Mobile}.
+    For more information see \l{Qt WebKit Goes Mobile}.
 
     Qt WebKit is based on the Open Source WebKit engine. More information about
     WebKit itself can be found on the \l{WebKit Open Source Project} Web site.
@@ -86,10 +88,6 @@
 
     \note Web site icons, also known as "FavIcons", are currently not supported
     on Windows. We plan to address this in a future release.
-
-    \note WebKit has certain minimum requirements that must be met on
-    Embedded Linux systems. See the \l{Qt for Embedded Linux Requirements}
-    document for more information.
 
     \section1 Architecture
 
@@ -177,7 +175,7 @@
     \endtable
 
     \table
-    \header \li Mac OS X
+    \header \li \macos
     \row \li
     \list
     \li \c{Library/Internet Plug-Ins} in the user's home directory
@@ -222,4 +220,14 @@
     the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
     Boston, MA 02110-1301, USA.
     \endlegalese
+*/
+
+/*!
+    \externalpage http://www.w3.org/TR/selectors/
+    \title Standard CSS selector
+*/
+
+/*!
+    \externalpage http://www.w3.org/TR/selectors-api/
+    \title DOM Selectors API
 */

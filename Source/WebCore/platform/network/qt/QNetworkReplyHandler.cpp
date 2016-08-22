@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008, 2012 Digia Plc. and/or its subsidiary(-ies)
+    Copyright (C) 2015 The Qt Company Ltd
     Copyright (C) 2007 Staikos Computing Services Inc.  <info@staikos.net>
     Copyright (C) 2008 Holger Hans Peter Freyther
 
@@ -49,10 +49,11 @@ FormDataIODevice::FormDataIODevice(FormData* data)
     , m_currentDelta(0)
     , m_fileSize(0)
     , m_dataSize(0)
+    , m_formData(data)
 {
     setOpenMode(FormDataIODevice::ReadOnly);
 
-    prepareFormElements(data);
+    prepareFormElements();
     prepareCurrentElement();
     computeSize();
 }
@@ -62,19 +63,29 @@ FormDataIODevice::~FormDataIODevice()
     delete m_currentFile;
 }
 
-void FormDataIODevice::prepareFormElements(FormData* formData)
+bool FormDataIODevice::reset()
 {
-    if (!formData)
+    if (m_currentFile)
+        m_currentFile->close();
+
+    m_currentDelta = 0;
+    m_formElements = m_formData->elements();
+
+    prepareCurrentElement();
+    return true;
+}
+
+void FormDataIODevice::prepareFormElements()
+{
+    if (!m_formData)
         return;
 
-    RefPtr<FormData> formDataRef(formData);
-
 #if ENABLE(BLOB)
-    formDataRef = formDataRef->resolveBlobReferences();
+    m_formData = m_formData->resolveBlobReferences();
 #endif
 
     // Take a deep copy of the FormDataElements
-    m_formElements = formDataRef->elements();
+    m_formElements = m_formData->elements();
 }
 
 
@@ -212,6 +223,12 @@ QNetworkReplyHandlerCallQueue::QNetworkReplyHandlerCallQueue(QNetworkReplyHandle
 void QNetworkReplyHandlerCallQueue::push(EnqueuedCall method)
 {
     m_enqueuedCalls.append(method);
+    flush();
+}
+
+void QNetworkReplyHandlerCallQueue::requeue(EnqueuedCall method)
+{
+    m_enqueuedCalls.prepend(method);
     flush();
 }
 
@@ -446,7 +463,7 @@ QNetworkReplyHandler::QNetworkReplyHandler(ResourceHandle* handle, LoadType load
         m_method = QNetworkAccessManager::PostOperation;
     else if (r.httpMethod() == "PUT")
         m_method = QNetworkAccessManager::PutOperation;
-    else if (r.httpMethod() == "DELETE")
+    else if (r.httpMethod() == "DELETE" && !r.httpBody()) // A delete with a body is a custom operation.
         m_method = QNetworkAccessManager::DeleteOperation;
     else
         m_method = QNetworkAccessManager::CustomOperation;
@@ -646,17 +663,32 @@ void QNetworkReplyHandler::forwardData()
 {
     ASSERT(m_replyWrapper && m_replyWrapper->reply() && !wasAborted() && !m_replyWrapper->wasRedirected());
 
-    QByteArray data = m_replyWrapper->reply()->read(m_replyWrapper->reply()->bytesAvailable());
+    // reply may be closed if reply->close() or reply->abort() is called
+    if (!m_replyWrapper->reply()->isReadable())
+        return;
 
     ResourceHandleClient* client = m_resourceHandle->client();
     if (!client)
         return;
 
-    // FIXME: https://bugs.webkit.org/show_bug.cgi?id=19793
-    // -1 means we do not provide any data about transfer size to inspector so it would use
-    // Content-Length headers or content size to show transfer size.
-    if (!data.isEmpty())
-        client->didReceiveData(m_resourceHandle, data.constData(), data.length(), -1);
+    qint64 bytesAvailable = m_replyWrapper->reply()->bytesAvailable();
+    char* buffer = new char[8128]; // smaller than 8192 to fit within 8k including overhead.
+    while (bytesAvailable > 0 && !m_queue.deferSignals()) {
+        qint64 readSize = m_replyWrapper->reply()->read(buffer, 8128);
+        if (readSize <= 0)
+            break;
+        bytesAvailable -= readSize;
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=19793
+        // -1 means we do not provide any data about transfer size to inspector so it would use
+        // Content-Length headers or content size to show transfer size.
+        client->didReceiveData(m_resourceHandle, buffer, readSize, -1);
+        // Check if the request has been aborted or this reply-handler was otherwise released.
+        if (wasAborted() || !m_replyWrapper)
+            break;
+    }
+    delete[] buffer;
+    if (bytesAvailable > 0 && m_replyWrapper)
+        m_queue.requeue(&QNetworkReplyHandler::forwardData);
 }
 
 void QNetworkReplyHandler::uploadProgress(qint64 bytesSent, qint64 bytesTotal)

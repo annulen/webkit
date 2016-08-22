@@ -2,6 +2,12 @@ include(ECMGenerateHeaders)
 include(ECMGeneratePkgConfigFile)
 include(ECMGeneratePriFile)
 
+macro(generate_header _file _var _content)
+    file(GENERATE OUTPUT ${_file} CONTENT ${_content})
+    list(APPEND ${_var} ${_file})
+    set_source_files_properties(${_file} PROPERTIES GENERATED TRUE)
+endmacro()
+
 list(APPEND WebKit_INCLUDE_DIRECTORIES
     "${WEBCORE_DIR}"
     "${DERIVED_SOURCES_DIR}"
@@ -336,11 +342,35 @@ set(WebKit_PUBLIC_HEADERS
     ${QtWebKit_FORWARDING_HEADERS}
 )
 
+generate_header("${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKit/qtwebkitversion.h"
+    WebKit_PUBLIC_HEADERS
+    "#ifndef QT_QTWEBKIT_VERSION_H
+#define QT_QTWEBKIT_VERSION_H
+
+#define QTWEBKIT_VERSION_STR \"${PROJECT_VERSION_STRING}\"
+#define QTWEBKIT_VERSION 0x05f00${PROJECT_VERSION_MICRO}
+
+#endif
+")
+
+generate_header("${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKit/QtWebKitVersion"
+    WebKit_PUBLIC_HEADERS
+    "#include \"qtwebkitversion.h\"")
+
+generate_header("${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKit/QtWebKitDepends"
+    WebKit_PUBLIC_HEADERS
+    "#ifdef __cplusplus /* create empty PCH in C mode */
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+#include <QtNetwork/QtNetwork>
+#endif
+")
+
 install(
     FILES
         ${WebKit_PUBLIC_HEADERS}
     DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/include/QtWebKit
+        ${KDE_INSTALL_INCLUDEDIR}/QtWebKit
 )
 
 file(GLOB WebKit_PRIVATE_HEADERS qt/Api/*_p.h)
@@ -348,23 +378,23 @@ install(
     FILES
         ${WebKit_PRIVATE_HEADERS}
     DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/include/QtWebKit/${PROJECT_VERSION}/QtWebKit/private
+        ${KDE_INSTALL_INCLUDEDIR}/QtWebKit/${PROJECT_VERSION}/QtWebKit/private
 )
 
-set(WEBKIT_PKGCONGIG_DEPS "Qt5Core Qt5Gui Qt5Network")
+set(WEBKIT_PKGCONFIG_DEPS "Qt5Core Qt5Gui Qt5Network")
 set(WEBKIT_PRI_DEPS "core gui network")
 set(WEBKIT_PRI_RUNTIME_DEPS "sensors positioning qml quick webchannel core_private gui_private")
 set(WEBKIT_PRI_EXTRA_LIBS "")
-set(WEBKITWIDGETS_PKGCONGIG_DEPS "Qt5Core Qt5Gui Qt5Network Qt5Widgets Qt5WebKit")
+set(WEBKITWIDGETS_PKGCONFIG_DEPS "Qt5Core Qt5Gui Qt5Network Qt5Widgets Qt5WebKit")
 set(WEBKITWIDGETS_PRI_DEPS "core gui network widgets webkit")
 set(WEBKITWIDGETS_PRI_RUNTIME_DEPS "sensors positioning widgets_private opengl sql core_private gui_private")
 if (QT_STATIC_BUILD)
     if (MSVC)
         set(LIB_PREFIX "lib")
     endif ()
-    set(WEBKIT_PKGCONGIG_DEPS "${WEBKIT_PKGCONGIG_DEPS} Qt5Sql")
+    set(WEBKIT_PKGCONFIG_DEPS "${WEBKIT_PKGCONFIG_DEPS} Qt5Sql")
     set(WEBKIT_PRI_DEPS "${WEBKIT_PRI_DEPS} sql")
-    set(WEBKITWIDGETS_PKGCONGIG_DEPS "${WEBKITWIDGETS_PKGCONGIG_DEPS} Qt5PrintSupport")
+    set(WEBKITWIDGETS_PKGCONFIG_DEPS "${WEBKITWIDGETS_PKGCONFIG_DEPS} Qt5PrintSupport")
     set(WEBKITWIDGETS_PRI_DEPS "${WEBKITWIDGETS_PRI_DEPS} printsupport")
     set(EXTRA_LIBS_NAMES "WTF" "JavaScriptCore" "WebCore" "xml2")
     if (NOT USE_SYSTEM_MALLOC)
@@ -379,7 +409,7 @@ if (QT_STATIC_BUILD)
         list(APPEND EXTRA_LIBS_NAMES "icu")
     endif ()
     foreach (LIB_NAME ${EXTRA_LIBS_NAMES})
-        set(WEBKIT_PKGCONGIG_DEPS "${WEBKIT_PKGCONGIG_DEPS} ${LIB_PREFIX}${LIB_NAME}")
+        set(WEBKIT_PKGCONFIG_DEPS "${WEBKIT_PKGCONFIG_DEPS} ${LIB_PREFIX}${LIB_NAME}")
         set(WEBKIT_PRI_EXTRA_LIBS "${WEBKIT_PRI_EXTRA_LIBS}-l${LIB_PREFIX}${LIB_NAME} ")
     endforeach ()
 else ()
@@ -389,8 +419,7 @@ endif ()
 
 ecm_generate_pkgconfig_file(
     BASE_NAME Qt5WebKit
-    LIB_INSTALL_DIR "lib"
-    DEPS "${WEBKIT_PKGCONGIG_DEPS}"
+    DEPS "${WEBKIT_PKGCONFIG_DEPS}"
     FILENAME_VAR WebKit_PKGCONFIG_FILENAME
     INSTALL
 )
@@ -398,8 +427,8 @@ ecm_generate_pkgconfig_file(
 ecm_generate_pri_file(
     BASE_NAME webkit
     LIB_NAME QtWebKit
-    INCLUDE_INSTALL_DIR "include"
-    INCLUDE_INSTALL_DIR2 "include/QtWebKit"
+    INCLUDE_INSTALL_DIR ${KDE_INSTALL_INCLUDEDIR}
+    INCLUDE_INSTALL_DIR2 "${KDE_INSTALL_INCLUDEDIR}/QtWebKit"
     DEPS "${WEBKIT_PRI_DEPS}"
     RUNTIME_DEPS "${WEBKIT_PRI_RUNTIME_DEPS}"
     DEFINES QT_WEBKIT_LIB
@@ -496,11 +525,37 @@ set(WebKitWidgets_PUBLIC_HEADERS
     ${QtWebKitWidgets_FORWARDING_HEADERS}
 )
 
+generate_header("${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKitWidgets/qtwebkitwidgetsversion.h"
+    WebKitWidgets_PUBLIC_HEADERS
+    "#ifndef QT_QTWEBKITWIDGETS_VERSION_H
+#define QT_QTWEBKITWIDGETS_VERSION_H
+
+#define QTWEBKITWIDGETS_VERSION_STR \"${PROJECT_VERSION_STRING}\"
+#define QTWEBKITWIDGETS_VERSION 0x05f00${PROJECT_VERSION_MICRO}
+
+#endif
+")
+
+generate_header("${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKitWidgets/QtWebKitWidgetsVersion"
+    WebKitWidgets_PUBLIC_HEADERS
+    "#include \"qtwebkitwidgetsversion.h\"")
+
+generate_header("${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKitWidgets/QtWebKitWidgetsDepends"
+    WebKitWidgets_PUBLIC_HEADERS
+    "#ifdef __cplusplus /* create empty PCH in C mode */
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+#include <QtWidgets/QtWidgets>
+#include <QtNetwork/QtNetwork>
+#include <QtWebKit/QtWebKit>
+#endif
+")
+
 install(
     FILES
         ${WebKitWidgets_PUBLIC_HEADERS}
     DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/include/QtWebKitWidgets
+        ${KDE_INSTALL_INCLUDEDIR}/QtWebKitWidgets
 )
 
 file(GLOB WebKitWidgets_PRIVATE_HEADERS qt/WidgetApi/*_p.h)
@@ -508,12 +563,11 @@ install(
     FILES
         ${WebKitWidgets_PRIVATE_HEADERS}
     DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/include/QtWebKitWidgets/${PROJECT_VERSION}/QtWebKitWidgets/private
+        ${KDE_INSTALL_INCLUDEDIR}/QtWebKitWidgets/${PROJECT_VERSION}/QtWebKitWidgets/private
 )
 
 ecm_generate_pkgconfig_file(
     BASE_NAME Qt5WebKitWidgets
-    LIB_INSTALL_DIR "lib"
     DEPS "${WEBKITWIDGETS_PKGCONFIG_DEPS}"
     FILENAME_VAR WebKitWidgets_PKGCONFIG_FILENAME
     INSTALL
@@ -522,8 +576,8 @@ ecm_generate_pkgconfig_file(
 ecm_generate_pri_file(
     BASE_NAME webkitwidgets
     LIB_NAME QtWebKitWidgets
-    INCLUDE_INSTALL_DIR "include"
-    INCLUDE_INSTALL_DIR2 "include/QtWebKitWidgets"
+    INCLUDE_INSTALL_DIR ${KDE_INSTALL_INCLUDEDIR}
+    INCLUDE_INSTALL_DIR2 "${KDE_INSTALL_INCLUDEDIR}/QtWebKitWidgets"
     DEPS "${WEBKITWIDGETS_PRI_DEPS}"
     RUNTIME_DEPS "${WEBKITWIDGETS_PRI_RUNTIME_DEPS}"
     DEFINES QT_WEBKITWIDGETS_LIB
@@ -592,7 +646,7 @@ add_dependencies(WebKitWidgets WebKit)
 set_target_properties(WebKitWidgets PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 install(TARGETS WebKitWidgets EXPORT Qt5WebKitWidgetsTargets
         DESTINATION "${LIB_INSTALL_DIR}"
-        INCLUDES DESTINATION "${CMAKE_INSTALL_PREFIX}/include/QtWebKitWidgets"
+        INCLUDES DESTINATION "${KDE_INSTALL_INCLUDEDIR}/QtWebKitWidgets"
 )
 
 if (USE_LINKER_VERSION_SCRIPT)

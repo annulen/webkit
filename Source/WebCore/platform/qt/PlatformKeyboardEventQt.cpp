@@ -119,10 +119,8 @@ String keyIdentifierForQtKeyCode(int keyCode)
     case Qt::Key_Return:
     case Qt::Key_Enter:
         return ASCIILiteral("Enter");
-    // 'Find'
     case Qt::Key_Help:
         return ASCIILiteral("Help");
-    // 'Info'
     case Qt::Key_Menu:
     case Qt::Key_MenuKB:
         return ASCIILiteral("Menu");
@@ -136,11 +134,10 @@ String keyIdentifierForQtKeyCode(int keyCode)
         return ASCIILiteral("Cancel");
     case Qt::Key_Escape:
         return ASCIILiteral("Esc");
-    // 'Exit'
     case Qt::Key_Zoom:
         return ASCIILiteral("Zoom");
     case Qt::Key_Comma:
-        return ASCIILiteral("Seperator");
+        return ASCIILiteral("Separator");
     case Qt::Key_Plus:
         return ASCIILiteral("Add");
     case Qt::Key_Minus:
@@ -213,7 +210,6 @@ String keyIdentifierForQtKeyCode(int keyCode)
         return ASCIILiteral("Insert");
     case Qt::Key_Paste:
         return ASCIILiteral("Paste");
-    // 'Undo'
     case Qt::Key_Dead_Grave:
         return ASCIILiteral("DeadGrave");
     case Qt::Key_Dead_Acute:
@@ -324,6 +320,20 @@ String keyIdentifierForQtKeyCode(int keyCode)
         return ASCIILiteral("Red");
     case Qt::Key_Yellow:
         return ASCIILiteral("Yellow");
+#if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
+    case Qt::Key_Find:
+        return ASCIILiteral("Find");
+    case Qt::Key_Info:
+        return ASCIILiteral("Info");
+    case Qt::Key_Exit:
+        return ASCIILiteral("Exit");
+    case Qt::Key_Undo:
+        return ASCIILiteral("Undo");
+    case Qt::Key_Guide:
+        return ASCIILiteral("Guide");
+    case Qt::Key_Settings:
+        return ASCIILiteral("Settings");
+#endif
     // Keys we have returned U+charcode for in the past.
     // FIXME: Change them to correct standard values if others do.
     case Qt::Key_Tab:
@@ -523,9 +533,10 @@ int windowsKeyCodeForKeyEvent(unsigned int keycode, bool isKeypad)
     case Qt::Key_Help:
         return VK_HELP; // (2F) HELP key
     case Qt::Key_0:
-    case Qt::Key_ParenLeft:
+    case Qt::Key_ParenRight:
         return VK_0; // (30) 0) key
     case Qt::Key_1:
+    case Qt::Key_Exclam:
         return VK_1; // (31) 1 ! key
     case Qt::Key_2:
     case Qt::Key_At:
@@ -549,7 +560,7 @@ int windowsKeyCodeForKeyEvent(unsigned int keycode, bool isKeypad)
     case Qt::Key_Asterisk:
         return VK_8; // (38) 8 key  '*'
     case Qt::Key_9:
-    case Qt::Key_ParenRight:
+    case Qt::Key_ParenLeft:
         return VK_9; // (39) 9 key '('
     case Qt::Key_A:
         return VK_A; // (41) A key case 'a': case 'A': return 0x41;
@@ -697,6 +708,7 @@ int windowsKeyCodeForKeyEvent(unsigned int keycode, bool isKeypad)
     case Qt::Key_BraceRight:
         return VK_OEM_6; // case ']': case '}': return 0xDD;
         // VK_OEM_7 (DE) Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the 'single-quote/double-quote' key
+    case Qt::Key_Apostrophe:
     case Qt::Key_QuoteDbl:
         return VK_OEM_7; // case '\'': case '"': return 0xDE;
         // VK_OEM_8 (DF) Used for miscellaneous characters; it can vary by keyboard.
