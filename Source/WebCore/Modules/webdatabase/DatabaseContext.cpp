@@ -198,7 +198,11 @@ bool DatabaseContext::allowDatabaseAccess() const
 {
     if (is<Document>(*m_scriptExecutionContext)) {
         Document& document = downcast<Document>(*m_scriptExecutionContext);
+#if PLATFORM(QT)
+        if (!document.page() || !document.page()->settings().offlineStorageDatabaseEnabled() || (document.page()->usesEphemeralSession() && !SchemeRegistry::allowsDatabaseAccessInPrivateBrowsing(document.securityOrigin()->protocol())))
+#else
         if (!document.page() || (document.page()->usesEphemeralSession() && !SchemeRegistry::allowsDatabaseAccessInPrivateBrowsing(document.securityOrigin()->protocol())))
+#endif
             return false;
         return true;
     }
