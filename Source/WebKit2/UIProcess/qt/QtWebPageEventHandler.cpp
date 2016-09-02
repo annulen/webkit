@@ -188,7 +188,7 @@ void QtWebPageEventHandler::handleDragEnterEvent(QDragEnterEvent* ev)
     QTransform fromItemTransform = m_webPage->transformFromItem();
     // FIXME: Should not use QCursor::pos()
     DragData dragData(ev->mimeData(), fromItemTransform.map(ev->pos()), QCursor::pos(), dropActionToDragOperation(ev->possibleActions()));
-    m_webPageProxy->dragEntered(&dragData);
+    m_webPageProxy->dragEntered(dragData);
     ev->acceptProposedAction();
 }
 
@@ -198,7 +198,7 @@ void QtWebPageEventHandler::handleDragLeaveEvent(QDragLeaveEvent* ev)
 
     // FIXME: Should not use QCursor::pos()
     DragData dragData(0, IntPoint(), QCursor::pos(), DragOperationNone);
-    m_webPageProxy->dragExited(&dragData);
+    m_webPageProxy->dragExited(dragData);
     m_webPageProxy->resetDragOperation();
 
     ev->setAccepted(accepted);
@@ -211,7 +211,7 @@ void QtWebPageEventHandler::handleDragMoveEvent(QDragMoveEvent* ev)
     QTransform fromItemTransform = m_webPage->transformFromItem();
     // FIXME: Should not use QCursor::pos()
     DragData dragData(ev->mimeData(), fromItemTransform.map(ev->pos()), QCursor::pos(), dropActionToDragOperation(ev->possibleActions()));
-    m_webPageProxy->dragUpdated(&dragData);
+    m_webPageProxy->dragUpdated(dragData);
     ev->setDropAction(dragOperationToDropAction(m_webPageProxy->dragSession().operation));
     if (m_webPageProxy->dragSession().operation != DragOperationNone)
         ev->accept();
@@ -227,7 +227,7 @@ void QtWebPageEventHandler::handleDropEvent(QDropEvent* ev)
     DragData dragData(ev->mimeData(), fromItemTransform.map(ev->pos()), QCursor::pos(), dropActionToDragOperation(ev->possibleActions()));
     SandboxExtension::Handle handle;
     SandboxExtension::HandleArray sandboxExtensionForUpload;
-    m_webPageProxy->performDrag(&dragData, String(), handle, sandboxExtensionForUpload);
+    m_webPageProxy->performDragOperation(dragData, String(), handle, sandboxExtensionForUpload);
     ev->setDropAction(dragOperationToDropAction(m_webPageProxy->dragSession().operation));
     ev->accept();
 
@@ -261,12 +261,14 @@ void QtWebPageEventHandler::deactivateTapHighlight()
 
 void QtWebPageEventHandler::handleSingleTapEvent(const QTouchEvent::TouchPoint& point)
 {
+#if ENABLE(GESTURE_EVENTS)
     deactivateTapHighlight();
     m_postponeTextInputStateChanged = true;
 
     QTransform fromItemTransform = m_webPage->transformFromItem();
     WebGestureEvent gesture(WebEvent::GestureSingleTap, fromItemTransform.map(point.pos()).toPoint(), point.screenPos().toPoint(), WebEvent::Modifiers(0), 0, IntSize(point.rect().size().toSize()), FloatPoint(0, 0));
     m_webPageProxy->handleGestureEvent(gesture);
+#endif
 }
 
 void QtWebPageEventHandler::handleDoubleTapEvent(const QTouchEvent::TouchPoint& point)
@@ -300,12 +302,12 @@ void QtWebPageEventHandler::handleKeyReleaseEvent(QKeyEvent* ev)
 
 void QtWebPageEventHandler::handleFocusInEvent(QFocusEvent*)
 {
-    m_webPageProxy->viewStateDidChange(WebPageProxy::ViewIsFocused | WebPageProxy::ViewWindowIsActive);
+    m_webPageProxy->viewStateDidChange(ViewState::IsFocused | ViewState::WindowIsActive);
 }
 
 void QtWebPageEventHandler::handleFocusLost()
 {
-    m_webPageProxy->viewStateDidChange(WebPageProxy::ViewIsFocused | WebPageProxy::ViewWindowIsActive);
+    m_webPageProxy->viewStateDidChange(ViewState::IsFocused | ViewState::WindowIsActive);
 }
 
 void QtWebPageEventHandler::setViewportController(PageViewportControllerClientQt* controller)
@@ -446,6 +448,7 @@ void QtWebPageEventHandler::handleWillSetInputMethodState()
 
 void QtWebPageEventHandler::doneWithGestureEvent(const WebGestureEvent& event, bool wasEventHandled)
 {
+#if ENABLE(GESTURE_EVENTS)
     if (event.type() != WebEvent::GestureSingleTap)
         return;
 
@@ -455,6 +458,7 @@ void QtWebPageEventHandler::doneWithGestureEvent(const WebGestureEvent& event, b
         return;
 
     updateTextInputState();
+#endif
 }
 
 void QtWebPageEventHandler::handleInputEvent(const QInputEvent* event)

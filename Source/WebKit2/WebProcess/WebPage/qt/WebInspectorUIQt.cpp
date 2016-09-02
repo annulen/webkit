@@ -24,19 +24,25 @@
  */
 
 #include "config.h"
-#include "WebURLResponse.h"
+#include "WebInspectorUI.h"
+
+#if ENABLE(INSPECTOR)
+
+#include <WebCore/NotImplemented.h>
+#include <wtf/text/WTFString.h>
 
 namespace WebKit {
 
-WebURLResponse::WebURLResponse(PlatformResponse)
+bool WebInspectorUI::canSave()
 {
-    ASSERT_NOT_REACHED();
+    return false;
 }
 
-PlatformResponse WebURLResponse::platformResponse() const
+String WebInspectorUI::localizedStringsURL()
 {
-    ASSERT_NOT_REACHED();
-    return 0;
+    return ASCIILiteral("qrc:///org/webkitgtk/inspector/Localizations/en.lproj/localizedStrings.js");
 }
 
 } // namespace WebKit
+
+#endif // ENABLE(INSPECTOR)

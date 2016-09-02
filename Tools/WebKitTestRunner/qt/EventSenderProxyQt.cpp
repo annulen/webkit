@@ -28,11 +28,11 @@
 
 #include "PlatformWebView.h"
 #include "TestController.h"
-#include <QGraphicsSceneMouseEvent>
+#include <QApplication>
 #include <QKeyEvent>
 #include <QtTest/QtTest>
-#include <WebKit2/WKPagePrivate.h>
-#include <WebKit2/WKStringQt.h>
+#include <WebKit/WKPagePrivate.h>
+#include <WebKit/WKStringQt.h>
 #include <qpa/qwindowsysteminterface.h>
 
 namespace WTR {

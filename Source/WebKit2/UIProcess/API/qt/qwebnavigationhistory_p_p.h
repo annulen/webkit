@@ -29,9 +29,8 @@
 #include "qwebkitglobal.h"
 
 #include <QObject>
-#include <WebKit2/WKBase.h>
-#include <WebKit2/WKRetainPtr.h>
-#include <wtf/OwnPtr.h>
+#include <WebKit/WKBase.h>
+#include <WebKit/WKRetainPtr.h>
 #include <wtf/PassRefPtr.h>
 
 namespace WebKit {
@@ -63,8 +62,8 @@ public:
 
     WKRetainPtr<WKPageRef> m_page;
     WKRetainPtr<WKBackForwardListRef> m_backForwardList;
-    OwnPtr<QWebNavigationListModel> m_backNavigationModel;
-    OwnPtr<QWebNavigationListModel> m_forwardNavigationModel;
+    std::unique_ptr<QWebNavigationListModel> m_backNavigationModel;
+    std::unique_ptr<QWebNavigationListModel> m_forwardNavigationModel;
 };
 
 #endif /* qwebnavigationhistory_p_p_h */

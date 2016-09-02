@@ -36,8 +36,8 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
-#include <WebCore/RunLoop.h>
 #include <errno.h>
+#include <wtf/RunLoop.h>
 
 #ifndef NDEBUG
 #if !OS(WINDOWS)
@@ -72,14 +72,13 @@ static void sleep(unsigned seconds)
 #endif
 #endif
 
-class EnvHttpProxyFactory : public QNetworkProxyFactory
-{
+class EnvHttpProxyFactory : public QNetworkProxyFactory {
 public:
     EnvHttpProxyFactory() { }
 
     bool initializeFromEnvironment();
 
-    QList<QNetworkProxy> queryProxy(const QNetworkProxyQuery& query = QNetworkProxyQuery());
+    QList<QNetworkProxy> queryProxy(const QNetworkProxyQuery& = QNetworkProxyQuery());
 
 private:
     QList<QNetworkProxy> m_httpProxy;
@@ -132,9 +131,9 @@ static void initializeProxy()
     if (proxylist.count() == 1) {
         QNetworkProxy proxy = proxylist.first();
         if (proxy == QNetworkProxy::NoProxy || proxy == QNetworkProxy::DefaultProxy) {
-            OwnPtr<EnvHttpProxyFactory> proxyFactory = adoptPtr(new EnvHttpProxyFactory());
+            auto proxyFactory = std::make_unique<EnvHttpProxyFactory>();
             if (proxyFactory->initializeFromEnvironment()) {
-                QNetworkProxyFactory::setApplicationProxyFactory(proxyFactory.leakPtr());
+                QNetworkProxyFactory::setApplicationProxyFactory(proxyFactory.release());
                 return;
             }
         }
@@ -232,13 +231,13 @@ Q_DECL_EXPORT int WebProcessMainQt(QGuiApplication* app)
         qDebug() << "Error: connection identifier wrong.";
         return 1;
     }
-    CoreIPC::Connection::Identifier identifier;
+    IPC::Connection::Identifier identifier;
 #if OS(WINDOWS)
     // Convert to HANDLE
-    identifier = reinterpret_cast<CoreIPC::Connection::Identifier>(id);
+    identifier = reinterpret_cast<IPC::Connection::Identifier>(id);
 #else
     // Convert to int
-    identifier = static_cast<CoreIPC::Connection::Identifier>(id);
+    identifier = static_cast<IPC::Connection::Identifier>(id);
 #endif
 #endif
 
@@ -246,7 +245,7 @@ Q_DECL_EXPORT int WebProcessMainQt(QGuiApplication* app)
     WebKit::ChildProcessInitializationParameters parameters;
     parameters.connectionIdentifier = identifier;
 
-    WebKit::WebProcess::shared().initialize(parameters);
+    WebKit::WebProcess::singleton().initialize(parameters);
 
     RunLoop::run();
 

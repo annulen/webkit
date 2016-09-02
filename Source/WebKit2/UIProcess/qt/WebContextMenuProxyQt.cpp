@@ -31,16 +31,12 @@ using namespace WebCore;
 
 namespace WebKit {
 
-WebContextMenuProxyQt::WebContextMenuProxyQt(WebPageProxy*)
+WebContextMenuProxyQt::WebContextMenuProxyQt(const ContextMenuContextData& context, const UserData& userData)
+    : WebContextMenuProxy(context, userData)
 {
 }
 
-PassRefPtr<WebContextMenuProxyQt> WebContextMenuProxyQt::create(WebPageProxy* webPageProxy)
-{
-    return adoptRef(new WebContextMenuProxyQt(webPageProxy));
-}
-
-void WebContextMenuProxyQt::showContextMenu(const IntPoint& position, const Vector<WebContextMenuItemData>& items)
+void WebContextMenuProxyQt::showContextMenu(const IntPoint&, const Vector<WebContextMenuItemData>&)
 {
 }
 
@@ -51,4 +47,3 @@ void WebContextMenuProxyQt::hideContextMenu()
 #include "moc_WebContextMenuProxyQt.cpp"
 
 } // namespace WebKit
-

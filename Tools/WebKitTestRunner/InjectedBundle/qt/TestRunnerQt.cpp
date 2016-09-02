@@ -52,7 +52,7 @@ public:
 public Q_SLOTS:
     void timerFired()
     {
-        InjectedBundle::shared().testRunner()->waitToDumpWatchdogTimerFired();
+        InjectedBundle::singleton().testRunner()->waitToDumpWatchdogTimerFired();
     }
 
 private:
@@ -80,11 +80,8 @@ void TestRunner::initializeWaitToDumpWatchdogTimerIfNeeded()
 
     if (m_waitToDumpWatchdogTimer.isActive())
         return;
-    if (m_timeout > 0)
-        timerInterval = m_timeout;
-    else
-        timerInterval = waitToDumpWatchdogTimerInterval * 1000;
 
+    timerInterval = m_timeout;
     m_waitToDumpWatchdogTimer.start(timerInterval);
 }
 
@@ -107,10 +104,9 @@ JSRetainPtr<JSStringRef> TestRunner::pathToLocalResource(JSStringRef url)
     return url;
 }
 
-JSRetainPtr<JSStringRef> TestRunner::platformName()
+JSRetainPtr<JSStringRef> TestRunner::inspectorTestStubURL()
 {
-    JSRetainPtr<JSStringRef> platformName(Adopt, JSStringCreateWithUTF8CString("qt"));
-    return platformName;
+    return JSStringCreateWithUTF8CString("qrc:/webkit/inspector/UserInterface/TestStub.html");
 }
 
 } // namespace WTR

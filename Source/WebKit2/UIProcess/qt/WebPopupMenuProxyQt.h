@@ -29,7 +29,6 @@
 
 #include "WebPopupMenuProxy.h"
 #include <QtCore/QObject>
-#include <wtf/OwnPtr.h>
 
 QT_BEGIN_NAMESPACE
 class QQmlComponent;
@@ -50,9 +49,9 @@ public:
         MultipleSelection
     };
 
-    static PassRefPtr<WebPopupMenuProxyQt> create(WebPopupMenuProxy::Client* client, QQuickWebView* webView)
+    static Ref<WebPopupMenuProxyQt> create(WebPopupMenuProxy::Client& client, QQuickWebView* webView)
     {
-        return adoptRef(new WebPopupMenuProxyQt(client, webView));
+        return adoptRef(*new WebPopupMenuProxyQt(client, webView));
     }
     ~WebPopupMenuProxyQt();
 
@@ -65,12 +64,12 @@ private Q_SLOTS:
     void selectIndex(int);
 
 private:
-    WebPopupMenuProxyQt(WebPopupMenuProxy::Client*, QQuickWebView*);
+    WebPopupMenuProxyQt(WebPopupMenuProxy::Client&, QQuickWebView*);
     void createItem(QObject*);
     void createContext(QQmlComponent*, QObject*);
 
-    OwnPtr<QQmlContext> m_context;
-    OwnPtr<QQuickItem> m_itemSelector;
+    std::unique_ptr<QQmlContext> m_context;
+    std::unique_ptr<QQuickItem> m_itemSelector;
 
     QQuickWebView* m_webView;
     SelectionType m_selectionType;

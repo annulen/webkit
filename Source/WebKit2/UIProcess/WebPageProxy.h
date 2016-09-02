@@ -110,6 +110,7 @@ OBJC_CLASS _WKRemoteObjectRegistry;
 #endif
 
 #if PLATFORM(QT)
+#include "ArgumentCodersQt.h"
 #include "QtNetworkRequestData.h"
 #endif
 
@@ -865,7 +866,6 @@ public:
     bool isValid() const;
 
     const String& urlAtProcessExit() const { return m_urlAtProcessExit; }
-    FrameLoadState::LoadState loadStateAtProcessExit() const { return m_loadStateAtProcessExit; }
 
 #if ENABLE(DRAG_SUPPORT)
     WebCore::DragOperation currentDragOperation() const { return m_currentDragOperation; }
@@ -1147,8 +1147,8 @@ private:
     virtual void failedToShowPopupMenu() override;
 #endif
 #if PLATFORM(QT)
-    virtual void changeSelectedIndex(int32_t newSelectedIndex);
-    virtual void closePopupMenu();
+    void changeSelectedIndex(int32_t newSelectedIndex) override;
+    void closePopupMenu() override;
 #endif
 
     void didCreateMainFrame(uint64_t frameID);
@@ -1631,7 +1631,6 @@ private:
     String m_toolTip;
 
     String m_urlAtProcessExit;
-    FrameLoadState::LoadState m_loadStateAtProcessExit;
 
     EditorState m_editorState;
     bool m_isEditable;

@@ -67,7 +67,7 @@ static void initInspectorServer()
             return;
         }
 
-        bool success = WebInspectorServer::shared().listen(bindAddress, port);
+        bool success = WebInspectorServer::singleton().listen(bindAddress, port);
         if (success) {
             QString inspectorServerUrl = QString::fromLatin1("http://%1:%2").arg(bindAddress).arg(port);
             qWarning("Inspector server started successfully. Try pointing a WebKit browser to %s", qPrintable(inspectorServerUrl));
@@ -206,4 +206,3 @@ QString QtWebContext::preparedStoragePath(StorageType type)
 }
 
 } // namespace WebKit
-

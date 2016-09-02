@@ -209,14 +209,14 @@ IntRect QtPageClient::windowToScreen(const IntRect& rect)
     return rect;
 }
 
-PassRefPtr<WebPopupMenuProxy> QtPageClient::createPopupMenuProxy(WebPageProxy* webPageProxy)
+RefPtr<WebPopupMenuProxy> QtPageClient::createPopupMenuProxy(WebPageProxy& webPageProxy)
 {
     return WebPopupMenuProxyQt::create(webPageProxy, m_webView);
 }
 
-PassRefPtr<WebContextMenuProxy> QtPageClient::createContextMenuProxy(WebPageProxy* webPageProxy)
+std::unique_ptr<WebContextMenuProxy> QtPageClient::createContextMenuProxy(WebPageProxy&, const ContextMenuContextData& context, const UserData& userData)
 {
-    return WebContextMenuProxyQt::create(webPageProxy);
+    return std::make_unique<WebContextMenuProxyQt>(context, userData);
 }
 
 #if ENABLE(INPUT_TYPE_COLOR)
@@ -225,11 +225,6 @@ PassRefPtr<WebColorPicker> QtPageClient::createColorPicker(WebPageProxy* webPage
     return WebColorPickerQt::create(webPageProxy, m_webView, initialColor, elementRect);
 }
 #endif
-
-void QtPageClient::flashBackingStoreUpdates(const Vector<IntRect>&)
-{
-    notImplemented();
-}
 
 void QtPageClient::pageTransitionViewportReady()
 {

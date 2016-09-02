@@ -18,12 +18,11 @@
 */
 
 #include "config.h"
-
 #include "qwebpermissionrequest_p.h"
 
 #include "WKStringQt.h"
-#include <WebKit2/WKBase.h>
-#include <WebKit2/WKRetainPtr.h>
+#include <WebKit/WKBase.h>
+#include <WebKit/WKRetainPtr.h>
 
 class QWebPermissionRequestPrivate : public QSharedData {
 public:
@@ -118,4 +117,3 @@ QtWebSecurityOrigin* QWebPermissionRequest::securityOrigin()
 {
     return &(d->securityInfo);
 }
-

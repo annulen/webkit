@@ -39,12 +39,15 @@
 **
 ****************************************************************************/
 
+#include "config.h"
 #include "qwebchannelwebkittransport_p.h"
 
-#include <QJsonObject>
-#include <QJsonDocument>
+#ifdef HAVE_WEBCHANNEL
 
 #include "qquickwebview_p.h"
+
+#include <QJsonDocument>
+#include <QJsonObject>
 
 QWebChannelWebKitTransport::QWebChannelWebKitTransport(QQuickWebViewExperimental* experimental)
     : QWebChannelAbstractTransport(experimental)
@@ -72,3 +75,5 @@ void QWebChannelWebKitTransport::receiveMessage(const QByteArray& message)
     }
     emit messageReceived(doc.object(), this);
 }
+
+#endif // HAVE_WEBCHANNEL

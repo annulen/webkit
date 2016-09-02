@@ -72,7 +72,7 @@ void WebProcess::platformSetCacheModel(CacheModel cacheModel)
     unsigned cacheTotalCapacity = 0;
     unsigned cacheMinDeadCapacity = 0;
     unsigned cacheMaxDeadCapacity = 0;
-    double deadDecodedDataDeletionInterval = 0;
+    auto deadDecodedDataDeletionInterval = std::chrono::seconds { 0 };
     unsigned pageCacheCapacity = 0;
     unsigned long urlCacheMemoryCapacity = 0;
     unsigned long urlCacheDiskCapacity = 0;
@@ -84,10 +84,11 @@ void WebProcess::platformSetCacheModel(CacheModel cacheModel)
     if (diskCache)
         diskCache->setMaximumCacheSize(urlCacheDiskCapacity);
 
-    memoryCache()->setCapacities(cacheMinDeadCapacity, cacheMaxDeadCapacity, cacheTotalCapacity);
-    memoryCache()->setDeadDecodedDataDeletionInterval(deadDecodedDataDeletionInterval);
+    auto& memoryCache = MemoryCache::singleton();
+    memoryCache.setCapacities(cacheMinDeadCapacity, cacheMaxDeadCapacity, cacheTotalCapacity);
+    memoryCache.setDeadDecodedDataDeletionInterval(deadDecodedDataDeletionInterval);
 
-    pageCache()->setCapacity(pageCacheCapacity);
+    PageCache::singleton().setMaxSize(pageCacheCapacity);
 
     // FIXME: Implement hybrid in-memory- and disk-caching as e.g. the Mac port does.
 }
@@ -103,7 +104,7 @@ static void parentProcessDiedCallback(void*)
 }
 #endif
 
-void WebProcess::platformInitializeWebProcess(const WebProcessCreationParameters& parameters, CoreIPC::MessageDecoder&)
+void WebProcess::platformInitializeWebProcess(const WebProcessCreationParameters& parameters, IPC::MessageDecoder&)
 {
 #if ENABLE(SECCOMP_FILTERS)
     {
@@ -138,13 +139,10 @@ void WebProcess::platformInitializeWebProcess(const WebProcessCreationParameters
     }
 #endif
 
-    WebCore::RuntimeEnabledFeatures::sharedFeatures().setSpeechInputEnabled(false);
-
     // We'll only install the Qt builtin bundle if we don't have one given by the UI process.
     // Currently only WTR provides its own bundle.
     if (parameters.injectedBundlePath.isEmpty()) {
-        m_injectedBundle = InjectedBundle::create(String());
-        m_injectedBundle->setSandboxExtension(SandboxExtension::create(parameters.injectedBundlePathExtensionHandle));
+        InjectedBundle::create(parameters, transformHandlesToObjects(parameters.initializationUserData.object()).get());
         QtBuiltinBundle::shared().initialize(toAPI(m_injectedBundle.get()));
     }
 }

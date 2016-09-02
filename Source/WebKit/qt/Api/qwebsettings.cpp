@@ -179,6 +179,9 @@ void QWebSettingsPrivate::apply()
         settings->setMediaSourceEnabled(value);
 #endif
 
+        value = attributes.value(QWebSettings::MediaEnabled, global->attributes.value(QWebSettings::MediaEnabled));
+        settings->setMediaEnabled(value);
+
         value = attributes.value(QWebSettings::CSSRegionsEnabled,
                                  global->attributes.value(QWebSettings::CSSRegionsEnabled));
         WebCore::RuntimeEnabledFeatures::sharedFeatures().setCSSRegionsEnabled(value);
@@ -247,7 +250,7 @@ void QWebSettingsPrivate::apply()
 
         value = attributes.value(QWebSettings::OfflineStorageDatabaseEnabled,
                                       global->attributes.value(QWebSettings::OfflineStorageDatabaseEnabled));
-        WebCore::DatabaseManager::singleton().setIsAvailable(value);
+        settings->setOfflineStorageDatabaseEnabled(value);
 
         value = attributes.value(QWebSettings::OfflineWebApplicationCacheEnabled,
                                       global->attributes.value(QWebSettings::OfflineWebApplicationCacheEnabled));
@@ -552,6 +555,7 @@ QWebSettings::QWebSettings()
     d->attributes.insert(QWebSettings::WebGLEnabled, true);
     d->attributes.insert(QWebSettings::WebAudioEnabled, false);
     d->attributes.insert(QWebSettings::MediaSourceEnabled, false);
+    d->attributes.insert(QWebSettings::MediaEnabled, true);
     d->attributes.insert(QWebSettings::CSSRegionsEnabled, true);
     d->attributes.insert(QWebSettings::CSSGridLayoutEnabled, false);
     d->attributes.insert(QWebSettings::HyperlinkAuditingEnabled, false);

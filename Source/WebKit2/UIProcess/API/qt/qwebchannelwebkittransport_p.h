@@ -39,15 +39,15 @@
 **
 ****************************************************************************/
 
-#ifndef QWEBCHANNELWEBKITTRANSPORT_H
-#define QWEBCHANNELWEBKITTRANSPORT_H
+#pragma once
+
+#ifdef HAVE_WEBCHANNEL
 
 #include <QtWebChannel/QWebChannelAbstractTransport>
 
 class QQuickWebViewExperimental;
 
-class QWebChannelWebKitTransport : public QWebChannelAbstractTransport
-{
+class QWebChannelWebKitTransport : public QWebChannelAbstractTransport {
     Q_OBJECT
 public:
     explicit QWebChannelWebKitTransport(QQuickWebViewExperimental* experimental);
@@ -60,4 +60,4 @@ private:
     QQuickWebViewExperimental* m_experimental;
 };
 
-#endif // QWEBCHANNELWEBKITTRANSPORT_H
+#endif // HAVE_WEBCHANNEL

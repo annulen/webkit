@@ -30,12 +30,12 @@
 #include "qquickwebpage_p.h"
 #include "qquickwebview_p.h"
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QEventLoop>
 #include <QQmlProperty>
 #include <QtQuick/QQuickView>
 #include <QtQuick/private/qquickwindow_p.h>
-#include <WebKit2/WKImageQt.h>
+#include <WebKit/WKImageQt.h>
 #include <qpa/qwindowsysteminterface.h>
 
 namespace WTR {
@@ -105,6 +105,11 @@ PlatformWebView::~PlatformWebView()
     delete m_window;
     if (m_modalEventLoop)
         m_modalEventLoop->exit();
+}
+
+void PlatformWebView::setWindowIsKey(bool isKey)
+{
+    m_windowIsKey = isKey;
 }
 
 void PlatformWebView::resizeTo(unsigned width, unsigned height)

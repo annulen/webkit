@@ -27,21 +27,17 @@
 #include "QtPageClient.h"
 #include "QtWebPageUIClient.h"
 
-#include "qquickwebview_p.h"
 #include "qquickwebpage_p.h"
+#include "qquickwebview_p.h"
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QObject>
 #include <QtCore/QScopedPointer>
 #include <WebCore/ViewportArguments.h>
-#include <WebKit2/WKRetainPtr.h>
-#include <wtf/OwnPtr.h>
+#include <WebKit/WKRetainPtr.h>
 #include <wtf/RefPtr.h>
 
-namespace WebCore {
-class CoordinatedGraphicsScene;
-}
-
 namespace WebKit {
+class CoordinatedGraphicsScene;
 class DownloadProxy;
 class DrawingAreaProxy;
 class QtDialogRunner;
@@ -143,7 +139,7 @@ public:
     void didReceiveMessageFromNavigatorQtWebChannelTransportObject(WKStringRef message);
 #endif
 
-    WebCore::CoordinatedGraphicsScene* coordinatedGraphicsScene();
+    WebKit::CoordinatedGraphicsScene* coordinatedGraphicsScene();
     float deviceScaleFactor();
     void setIntrinsicDeviceScaleFactor(float);
 
@@ -189,8 +185,8 @@ protected:
 
     WebKit::QtPageClient pageClient;
     WebKit::DefaultUndoController undoController;
-    OwnPtr<QWebNavigationHistory> navigationHistory;
-    OwnPtr<QWebPreferences> preferences;
+    std::unique_ptr<QWebNavigationHistory> navigationHistory;
+    std::unique_ptr<QWebPreferences> preferences;
 
     QScopedPointer<WebKit::QtWebPagePolicyClient> pagePolicyClient;
     QScopedPointer<WebKit::QtWebPageUIClient> pageUIClient;

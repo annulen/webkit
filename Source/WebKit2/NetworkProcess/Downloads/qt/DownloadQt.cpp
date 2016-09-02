@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2010 Apple Inc. All rights reserved.
+ * Copyright (C) 2010, 2011 Apple Inc. All rights reserved.
+ * Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,19 +25,58 @@
  */
 
 #include "config.h"
-#include "WebURLRequest.h"
+#include "Download.h"
+
+#include "QtFileDownloader.h"
+#include "WebProcess.h"
+#include <WebCore/NotImplemented.h>
+#include <WebCore/QNetworkReplyHandler.h>
+#include <WebCore/ResourceHandle.h>
+#include <WebCore/ResourceHandleInternal.h>
+#include <WebCore/ResourceResponse.h>
+
+using namespace WebCore;
 
 namespace WebKit {
 
-WebURLRequest::WebURLRequest(PlatformRequest)
+void Download::start()
 {
-    ASSERT_NOT_REACHED();
+    QNetworkAccessManager* manager = WebProcess::singleton().networkAccessManager();
+    ASSERT(manager);
+    ASSERT(!m_qtDownloader);
+
+    m_qtDownloader = new QtFileDownloader(this, manager->get(m_request.toNetworkRequest()));
+    m_qtDownloader->init();
 }
 
-PlatformRequest WebURLRequest::platformRequest() const
+void Download::startWithHandle(ResourceHandle* handle, const ResourceResponse& resp)
 {
-    ASSERT_NOT_REACHED();
-    return 0;
+    ASSERT(!m_qtDownloader);
+    m_qtDownloader = new QtFileDownloader(this, handle->getInternal()->m_job->release());
+    m_qtDownloader->init();
+}
+
+void Download::cancel()
+{
+    ASSERT(m_qtDownloader);
+    m_qtDownloader->cancel();
+}
+
+void Download::platformInvalidate()
+{
+    ASSERT(m_qtDownloader);
+    m_qtDownloader->deleteLater();
+    m_qtDownloader = 0;
+}
+
+void Download::startTransfer(const String& destination)
+{
+    m_qtDownloader->startTransfer(destination);
+}
+
+void Download::platformDidFinish()
+{
+    notImplemented();
 }
 
 } // namespace WebKit

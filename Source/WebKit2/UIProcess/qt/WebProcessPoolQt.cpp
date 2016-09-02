@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 Apple Inc. All rights reserved.
+ * Copyright (C) 2010 University of Szeged
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -10,7 +11,7 @@
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
  *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS AS IS''
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
@@ -24,26 +25,52 @@
  */
 
 #include "config.h"
-#include "WebInspector.h"
+#include "WebProcessPool.h"
 
-#if ENABLE(INSPECTOR)
+#include "WKSharedAPICast.h"
+#include "WebProcessCreationParameters.h"
+#include <QProcess>
+#include <WebCore/ApplicationCacheStorage.h>
 
-#include <WebCore/NotImplemented.h>
-#include <wtf/text/WTFString.h>
+#if ENABLE(GEOLOCATION)
+#include "WebGeolocationManagerProxy.h"
+#include "WebGeolocationProviderQt.h"
+#endif
 
 namespace WebKit {
 
-bool WebInspector::canSave() const
+String WebProcessPool::legacyPlatformDefaultApplicationCacheDirectory()
 {
-    return false;
+    const String cacheDirectory = WebCore::cacheStorage().cacheDirectory();
+
+    if (cacheDirectory.isEmpty())
+        return diskCacheDirectory();
+
+    return cacheDirectory;
 }
 
-String WebInspector::localizedStringsURL() const
+void WebProcessPool::platformInitializeWebProcess(WebProcessCreationParameters& parameters)
 {
-    notImplemented();
+    qRegisterMetaType<QProcess::ExitStatus>("QProcess::ExitStatus");
+#if ENABLE(GEOLOCATION) && HAVE(QTPOSITIONING)
+    static WebGeolocationProviderQt* location = WebGeolocationProviderQt::create(toAPI(supplement<WebGeolocationManagerProxy>()));
+    WKGeolocationManagerSetProvider(toAPI(supplement<WebGeolocationManagerProxy>()), WebGeolocationProviderQt::provider(location));
+#endif
+}
+
+void WebProcessPool::platformInvalidateContext()
+{
+}
+
+
+String WebProcessPool::platformDefaultIconDatabasePath() const
+{
+    return String();
+}
+
+String WebProcessPool::platformDefaultLocalStorageDirectory() const
+{
     return String();
 }
 
 } // namespace WebKit
-
-#endif // ENABLE(INSPECTOR)

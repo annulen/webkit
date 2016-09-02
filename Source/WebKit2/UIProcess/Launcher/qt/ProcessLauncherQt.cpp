@@ -36,9 +36,9 @@
 #include <QProcess>
 #include <QString>
 #include <QtCore/qglobal.h>
-#include <WebCore/RunLoop.h>
 #include <wtf/HashSet.h>
 #include <wtf/PassRefPtr.h>
+#include <wtf/RunLoop.h>
 #include <wtf/Threading.h>
 #include <wtf/text/WTFString.h>
 
@@ -54,8 +54,8 @@
 #endif
 
 #if defined(Q_OS_LINUX)
-#include <sys/prctl.h>
 #include <signal.h>
+#include <sys/prctl.h>
 #endif
 
 #if OS(WINDOWS)
@@ -84,8 +84,7 @@ using namespace WebCore;
 
 namespace WebKit {
 
-class QtWebProcess : public QProcess
-{
+class QtWebProcess : public QProcess {
     Q_OBJECT
 public:
     QtWebProcess(QObject* parent = 0)
@@ -143,8 +142,8 @@ void ProcessLauncher::launchProcess()
 
     commandLine = commandLine.arg(serviceName);
 #elif OS(WINDOWS)
-    CoreIPC::Connection::Identifier connector, clientIdentifier;
-    if (!CoreIPC::Connection::createServerAndClientIdentifiers(connector, clientIdentifier)) {
+    IPC::Connection::Identifier connector, clientIdentifier;
+    if (!IPC::Connection::createServerAndClientIdentifiers(connector, clientIdentifier)) {
         // FIXME: What should we do here?
         ASSERT_NOT_REACHED();
     }
