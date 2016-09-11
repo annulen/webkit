@@ -17,6 +17,10 @@
 #ifndef WOFF2_PORT_H_
 #define WOFF2_PORT_H_
 
+#ifdef _WIN32
+#include <assert.h>
+#endif
+
 namespace woff2 {
 
 typedef unsigned int       uint32;
