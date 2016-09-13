@@ -1312,10 +1312,17 @@ add_subdirectory(shell)
 WEBKIT_WRAP_SOURCELIST(${JavaScriptCore_SOURCES})
 WEBKIT_FRAMEWORK(JavaScriptCore)
 
-if (${JavaScriptCore_LIBRARY_TYPE} STREQUAL "SHARED")
+if (${JavaScriptCore_LIBRARY_TYPE} STREQUAL "SHARED" OR QT_STATIC_BUILD)
     POPULATE_LIBRARY_VERSION(JAVASCRIPTCORE)
     set_target_properties(JavaScriptCore PROPERTIES VERSION ${JAVASCRIPTCORE_VERSION} SOVERSION ${JAVASCRIPTCORE_VERSION_MAJOR})
-    install(TARGETS JavaScriptCore DESTINATION "${LIB_INSTALL_DIR}")
+    if (QT_STATIC_BUILD)
+        install(TARGETS JavaScriptCore EXPORT WebKitTargets
+            DESTINATION "${LIB_INSTALL_DIR}"
+            INCLUDES DESTINATION "${CMAKE_INSTALL_PREFIX}/include/QtWebKitWidgets"
+        )
+    else ()
+        install(TARGETS JavaScriptCore DESTINATION "${LIB_INSTALL_DIR}")
+    endif ()
 endif ()
 
 # Force staging of shared scripts, even if they aren't directly used to build JavaScriptCore.

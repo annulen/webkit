@@ -3802,9 +3802,16 @@ endif ()
 
 target_link_libraries(WebCore ${WebCore_LIBRARIES})
 
-if (SHARED_CORE)
+if (SHARED_CORE OR QT_STATIC_BUILD)
     set_target_properties(WebCore PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
-    install(TARGETS WebCore DESTINATION "${LIB_INSTALL_DIR}")
+    if (QT_STATIC_BUILD)
+        install(TARGETS WebCore EXPORT WebKitTargets
+            DESTINATION "${LIB_INSTALL_DIR}"
+            INCLUDES DESTINATION "${CMAKE_INSTALL_PREFIX}/include/QtWebKitWidgets"
+        )
+    else ()
+        install(TARGETS WebCore DESTINATION "${LIB_INSTALL_DIR}")
+    endif ()
 endif ()
 
 # [ARM] Build SVGPathElement.cpp with -O2 due to a GCC bug
