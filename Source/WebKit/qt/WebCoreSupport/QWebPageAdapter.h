@@ -23,6 +23,7 @@
 #include "PlatformExportMacros.h"
 #include "QWebPageClient.h"
 #include "ViewportArguments.h"
+#include "qwebelement.h"
 #include "qwebhistory.h"
 
 #include <qbasictimer.h>
@@ -207,6 +208,7 @@ public:
 #if USE(QT_MULTIMEDIA)
     virtual QWebFullScreenVideoHandler* createFullScreenVideoHandler() = 0;
 #endif
+    virtual void fullScreenRequested(const QUrl&, const QWebElement&, bool) = 0;
     virtual void geolocationPermissionRequested(QWebFrameAdapter*) = 0;
     virtual void geolocationPermissionRequestCancelled(QWebFrameAdapter*) = 0;
     virtual void notificationsPermissionRequested(QWebFrameAdapter*) = 0;
