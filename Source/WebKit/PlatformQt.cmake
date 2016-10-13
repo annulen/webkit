@@ -479,6 +479,7 @@ set(WebKitWidgets_INCLUDE_DIRECTORIES
 set(WebKitWidgets_SOURCES
     qt/WidgetApi/qgraphicswebview.cpp
     qt/WidgetApi/qwebframe.cpp
+    qt/WidgetApi/qwebfullscreenrequest.cpp
     qt/WidgetApi/qwebinspector.cpp
     qt/WidgetApi/qwebpage.cpp
     qt/WidgetApi/qwebpage_p.cpp
@@ -528,6 +529,7 @@ ecm_generate_headers(
     HEADER_NAMES
         QGraphicsWebView
         QWebFrame,QWebHitTestResult
+        QWebFullScreenRequest
         QWebInspector
         QWebPage
         QWebView
@@ -709,6 +711,7 @@ if (COMPILER_IS_GCC_OR_CLANG)
 
         qt/WidgetApi/qgraphicswebview.cpp
         qt/WidgetApi/qwebframe.cpp
+        qt/WidgetApi/qwebfullscreenrequest.cpp
         qt/WidgetApi/qwebinspector.cpp
         qt/WidgetApi/qwebpage.cpp
         qt/WidgetApi/qwebview.cpp
