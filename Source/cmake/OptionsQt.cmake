@@ -10,7 +10,7 @@ if (CONANBUILDINFO_PATH)
     conan_basic_setup()
 endif ()
 
-set(STATIC_DEPENDENCIES_CMAKE_FILE "${CMAKE_BINARY_DIR}/Source/CMakeFiles/Qt5StaticDependencies.cmake")
+set(STATIC_DEPENDENCIES_CMAKE_FILE "${CMAKE_BINARY_DIR}/Qt5StaticDependencies.cmake")
 if (EXISTS ${STATIC_DEPENDENCIES_CMAKE_FILE})
     file(REMOVE ${STATIC_DEPENDENCIES_CMAKE_FILE})
 endif ()
