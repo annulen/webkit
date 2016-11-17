@@ -57,3 +57,8 @@ void QWebPagePrivate::recentlyAudibleChanged(bool recentlyAudible)
 {
     emit q->recentlyAudibleChanged(recentlyAudible);
 }
+
+void QWebPagePrivate::focusedElementChanged(const QWebElement& element)
+{
+    emit q->focusedElementChanged(element);
+}

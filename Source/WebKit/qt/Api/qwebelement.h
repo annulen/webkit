@@ -27,9 +27,11 @@
 #include <QtCore/qshareddata.h>
 
 #include "qwebkitglobal.h"
+
 namespace WebCore {
-    class Element;
-    class Node;
+class ChromeClientQt;
+class Element;
+class Node;
 }
 
 QT_BEGIN_NAMESPACE
@@ -149,6 +151,7 @@ private:
 
     static QWebElement enclosingElement(WebCore::Node*);
 
+    friend class WebCore::ChromeClientQt;
     friend class DumpRenderTreeSupportQt;
     friend class QWebFrameAdapter;
     friend class QWebElementCollection;

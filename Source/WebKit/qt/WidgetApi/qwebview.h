@@ -126,6 +126,7 @@ Q_SIGNALS:
     void selectionChanged();
     void iconChanged();
     void urlChanged(const QUrl&);
+    void focusedElementChanged(const QWebElement &element);
 
 protected:
     void resizeEvent(QResizeEvent*) Q_DECL_OVERRIDE;
