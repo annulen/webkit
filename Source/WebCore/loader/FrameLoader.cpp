@@ -3177,38 +3177,7 @@ void FrameLoader::applyUserAgent(ResourceRequest& request)
 
 bool FrameLoader::shouldInterruptLoadForXFrameOptions(const String& content, const URL& url, unsigned long requestIdentifier)
 {
-    Frame& topFrame = m_frame.tree().top();
-    if (&m_frame == &topFrame)
-        return false;
-
-    XFrameOptionsDisposition disposition = parseXFrameOptionsHeader(content);
-
-    switch (disposition) {
-    case XFrameOptionsSameOrigin: {
-        RefPtr<SecurityOrigin> origin = SecurityOrigin::create(url);
-        if (!origin->isSameSchemeHostPort(topFrame.document()->securityOrigin()))
-            return true;
-        for (Frame* frame = m_frame.tree().parent(); frame; frame = frame->tree().parent()) {
-            if (!origin->isSameSchemeHostPort(frame->document()->securityOrigin()))
-                break;
-        }
-        return false;
-    }
-    case XFrameOptionsDeny:
-        return true;
-    case XFrameOptionsAllowAll:
-        return false;
-    case XFrameOptionsConflict:
-        m_frame.document()->addConsoleMessage(MessageSource::JS, MessageLevel::Error, "Multiple 'X-Frame-Options' headers with conflicting values ('" + content + "') encountered when loading '" + url.stringCenterEllipsizedToLength() + "'. Falling back to 'DENY'.", requestIdentifier);
-        return true;
-    case XFrameOptionsInvalid:
-        m_frame.document()->addConsoleMessage(MessageSource::JS, MessageLevel::Error, "Invalid 'X-Frame-Options' header encountered when loading '" + url.stringCenterEllipsizedToLength() + "': '" + content + "' is not a recognized directive. The header will be ignored.", requestIdentifier);
-        return false;
-    case XFrameOptionsNone:
-        return false;
-    }
-    ASSERT_NOT_REACHED();
-    return false;
+	return false;
 }
 
 void FrameLoader::loadProvisionalItemFromCachedPage()
