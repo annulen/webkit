@@ -148,7 +148,7 @@ void QWebSettingsPrivate::apply()
         settings->setDNSPrefetchingEnabled(value);
 
         value = attributes.value(QWebSettings::JavascriptEnabled,
-                                      global->attributes.value(QWebSettings::JavascriptEnabled));
+                                 global->attributes.value(QWebSettings::JavascriptEnabled));
         settings->setScriptEnabled(value);
         value = attributes.value(QWebSettings::AcceleratedCompositingEnabled,
                                       global->attributes.value(QWebSettings::AcceleratedCompositingEnabled));
@@ -156,6 +156,12 @@ void QWebSettingsPrivate::apply()
         // FIXME: Temporary disabled until AC is fully working
         // settings->setAcceleratedCompositingEnabled(value);
         settings->setAcceleratedCompositingEnabled(false);
+
+#if ENABLE(ACCELERATED_2D_CANVAS)
+        value = value && attributes.value(QWebSettings::Accelerated2dCanvasEnabled,
+                                          global->attributes.value(QWebSettings::Accelerated2dCanvasEnabled));
+        settings->setAccelerated2dCanvasEnabled(value);
+#endif
 
         bool showDebugVisuals = qgetenv("WEBKIT_SHOW_COMPOSITING_DEBUG_VISUALS") == "1";
         settings->setShowDebugBorders(showDebugVisuals);
@@ -272,6 +278,10 @@ void QWebSettingsPrivate::apply()
                                       global->attributes.value(QWebSettings::XSSAuditingEnabled));
         settings->setXSSAuditorEnabled(value);
 
+        value = attributes.value(QWebSettings::WebSecurityEnabled,
+                                      global->attributes.value(QWebSettings::WebSecurityEnabled));
+        settings->setWebSecurityEnabled(value);
+
 #if USE(TILED_BACKING_STORE)
         value = attributes.value(QWebSettings::TiledBackingStoreEnabled,
                                       global->attributes.value(QWebSettings::TiledBackingStoreEnabled));
@@ -295,6 +305,11 @@ void QWebSettingsPrivate::apply()
         value = attributes.value(QWebSettings::SiteSpecificQuirksEnabled,
                                       global->attributes.value(QWebSettings::SiteSpecificQuirksEnabled));
         settings->setNeedsSiteSpecificQuirks(value);
+
+#if ENABLE(FULLSCREEN_API)
+        value = attributes.value(QWebSettings::FullScreenSupportEnabled, global->attributes.value(QWebSettings::FullScreenSupportEnabled));
+        settings->setFullScreenEnabled(value);
+#endif
 
         settings->setUsesPageCache(WebCore::PageCache::singleton().maxSize());
     } else {
@@ -508,6 +523,13 @@ QWebSettings* QWebSettings::globalSettings()
     \value CaretBrowsingEnabled This setting enables caret browsing. It is disabled by default.
     \value NotificationsEnabled Specifies whether support for the HTML 5 web notifications is enabled
         or not. This is enabled by default.
+    \value Accelerated2dCanvasEnabled Specifies whether the HTML5 2D canvas should be a OpenGL framebuffer.
+        This makes many painting operations faster, but slows down pixel access. This is disabled by default.
+    \value WebSecurityEnabled Specifies whether browser should enforce same-origin policy for scripts downloaded
+        from remote servers. This setting is set to true by default. Note that setting this flag to false is
+        strongly discouraged as it makes the browser more prone to malicious code. This setting is intended
+        primarily for site-specific browsers (i.e. when the user can't navigate to unsecure web page) and for testing
+        web applications before deployment.
 */
 
 /*!
@@ -565,6 +587,9 @@ QWebSettings::QWebSettings()
     d->attributes.insert(QWebSettings::ScrollAnimatorEnabled, false);
     d->attributes.insert(QWebSettings::CaretBrowsingEnabled, false);
     d->attributes.insert(QWebSettings::NotificationsEnabled, true);
+    d->attributes.insert(QWebSettings::Accelerated2dCanvasEnabled, false);
+    d->attributes.insert(QWebSettings::WebSecurityEnabled, true);
+    d->attributes.insert(QWebSettings::FullScreenSupportEnabled, true);
     d->offlineStorageDefaultQuota = 5 * 1024 * 1024;
     d->defaultTextEncoding = QLatin1String("iso-8859-1");
     d->thirdPartyCookiePolicy = AlwaysAllowThirdPartyCookies;

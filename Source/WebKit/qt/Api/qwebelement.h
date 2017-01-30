@@ -27,9 +27,11 @@
 #include <QtCore/qshareddata.h>
 
 #include "qwebkitglobal.h"
+
 namespace WebCore {
-    class Element;
-    class Node;
+class ChromeClientQt;
+class Element;
+class Node;
 }
 
 QT_BEGIN_NAMESPACE
@@ -37,6 +39,7 @@ class QPainter;
 QT_END_NAMESPACE
 
 class QWebFrame;
+class QWebFullScreenRequest;
 class QWebElementCollection;
 class QWebElementPrivate;
 
@@ -145,16 +148,21 @@ public:
 
 private:
     explicit QWebElement(WebCore::Element*);
-    explicit QWebElement(WebCore::Node*);
 
-    static QWebElement enclosingElement(WebCore::Node*);
+    void beginEnterFullScreen();
+    void endEnterFullScreen();
+    void beginExitFullScreen();
+    void endExitFullScreen();
 
+    friend class WebCore::ChromeClientQt;
     friend class DumpRenderTreeSupportQt;
-    friend class QWebFrameAdapter;
     friend class QWebElementCollection;
+    friend class QWebFrameAdapter;
+    friend class QWebFullScreenRequest;
     friend class QWebHitTestResult;
     friend class QWebHitTestResultPrivate;
     friend class QWebPage;
+    friend class QWebPageAdapter;
     friend class QWebPagePrivate;
     friend class QtWebElementRuntime;
 

@@ -8,6 +8,10 @@ macro(generate_header _file _var _content)
     set_source_files_properties(${_file} PROPERTIES GENERATED TRUE)
 endmacro()
 
+if (${JavaScriptCore_LIBRARY_TYPE} MATCHES STATIC)
+    add_definitions(-DSTATICALLY_LINKED_WITH_WTF -DSTATICALLY_LINKED_WITH_JavaScriptCore)
+endif ()
+
 list(APPEND WebKit_INCLUDE_DIRECTORIES
     "${WEBCORE_DIR}"
     "${DERIVED_SOURCES_DIR}"
@@ -163,6 +167,7 @@ list(APPEND WebKit_SOURCES
     qt/Api/qhttpheader.cpp
     qt/Api/qwebdatabase.cpp
     qt/Api/qwebelement.cpp
+    qt/Api/qwebfullscreenrequest.cpp
     qt/Api/qwebhistory.cpp
     qt/Api/qwebhistoryinterface.cpp
     qt/Api/qwebkitglobal.cpp
@@ -320,6 +325,7 @@ ecm_generate_headers(
     HEADER_NAMES
         QWebDatabase
         QWebElement,QWebElementCollection
+        QWebFullScreenRequest
         QWebHistory,QWebHistoryItem
         QWebHistoryInterface
         QWebKitPlatformPlugin,QWebHapticFeedbackPlayer,QWebFullScreenVideoHandler,QWebNotificationData,QWebNotificationPresenter,QWebSelectData,QWebSelectMethod,QWebSpellChecker,QWebTouchModifier
@@ -622,11 +628,11 @@ ecm_generate_pri_file(
 )
 install(FILES ${WebKitWidgets_PRI_FILENAME} DESTINATION ${ECM_MKSPECS_INSTALL_DIR})
 
-if (WIN32)
+if (MSVC)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         enable_language(ASM_MASM)
         list(APPEND WebKit_SOURCES
-            win/plugins/PaintHooks.asm
+            win/Plugins/PaintHooks.asm
         )
     endif ()
 
@@ -651,17 +657,6 @@ if (WIN32)
 
     list(APPEND WebKit_INCLUDE_DIRECTORIES
         ${DERIVED_SOURCES_WEBKIT_DIR}
-    )
-
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT /NODEFAULTLIB:MSVCRTD")
-
-    set(WebKit_POST_BUILD_COMMAND "${DERIVED_SOURCES_WEBKIT_DIR}/postBuild.cmd")
-    file(WRITE "${WebKit_POST_BUILD_COMMAND}" "@xcopy /y /d /i /f \"${CMAKE_CURRENT_SOURCE_DIR}/qt/Api/*.h\" \"${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebkit\" >nul 2>nul\n")
-    file(APPEND "${WebKit_POST_BUILD_COMMAND}" "@xcopy /y /d /i /f \"${CMAKE_CURRENT_SOURCE_DIR}/qt/WidgetApi/*.h\" \"${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebkitWidgets\" >nul 2>nul\n")
-    add_custom_command(TARGET WebKit POST_BUILD
-        COMMAND ${WebKit_POST_BUILD_COMMAND}
-        VERBATIM
-        DEPENDS ${WebKit_POST_BUILD_COMMAND}
     )
 
     ADD_PRECOMPILED_HEADER("WebKitWidgetsPrefix.h" "qt/WebKitWidgetsPrefix.cpp" WebKitWidgets_SOURCES)
@@ -689,6 +684,10 @@ install(TARGETS WebKitWidgets EXPORT Qt5WebKitWidgetsTargets
         RUNTIME DESTINATION "${BIN_INSTALL_DIR}"
 )
 
+if (NOT MSVC AND WIN32)
+    ADD_PREFIX_HEADER(WebKitWidgets "qt/WebKitWidgetsPrefix.h")
+endif ()
+
 if (USE_LINKER_VERSION_SCRIPT)
     set(VERSION_SCRIPT "${CMAKE_BINARY_DIR}/QtWebKitWidgets.version")
     add_custom_command(TARGET WebKitWidgets PRE_LINK
@@ -711,6 +710,7 @@ if (COMPILER_IS_GCC_OR_CLANG)
 
         qt/WidgetApi/qgraphicswebview.cpp
         qt/WidgetApi/qwebframe.cpp
+        qt/WidgetApi/qwebfullscreenrequest.cpp
         qt/WidgetApi/qwebinspector.cpp
         qt/WidgetApi/qwebpage.cpp
         qt/WidgetApi/qwebview.cpp

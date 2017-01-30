@@ -2000,7 +2000,6 @@ set(WebCore_SOURCES
     page/FrameSnapshotting.cpp
     page/FrameTree.cpp
     page/FrameView.cpp
-    page/GestureTapHighlighter.cpp
     page/History.cpp
     page/Location.cpp
     page/MainFrame.cpp
@@ -3758,6 +3757,10 @@ endif ()
 
 WEBKIT_FRAMEWORK(WebCore)
 
+if (NOT MSVC AND WIN32 AND ${PORT} STREQUAL "Qt")
+    ADD_PREFIX_HEADER(WebCore "${WEBCORE_DIR}/WebCorePrefix.h")
+endif ()
+
 # The -ftree-sra optimization (implicit with -O2) causes crashes when
 # allocating large chunks of memory using bmalloc on Intel 32bit.
 # See https://bugs.webkit.org/show_bug.cgi?id=146440
@@ -3775,6 +3778,10 @@ add_library(WebCoreTestSupport ${WebCoreTestSupport_LIBRARY_TYPE} ${WebCoreTestS
 add_dependencies(WebCoreTestSupport WebCore)
 target_link_libraries(WebCoreTestSupport ${WebCoreTestSupport_LIBRARIES})
 set_target_properties(WebCoreTestSupport PROPERTIES FOLDER "WebCore")
+
+if (NOT MSVC AND WIN32 AND ${PORT} STREQUAL "Qt")
+    ADD_PREFIX_HEADER(WebCoreTestSupport "testing/js/WebCoreTestSupportPrefix.h")
+endif ()
 
 if (WebCoreTestSupport_OUTPUT_NAME)
     set_target_properties(WebCoreTestSupport PROPERTIES OUTPUT_NAME ${WebCoreTestSupport_OUTPUT_NAME})

@@ -152,19 +152,6 @@ QWebElement::QWebElement(WebCore::Element* domElement)
 }
 
 /*!
-    \internal
-*/
-QWebElement::QWebElement(WebCore::Node* node)
-    : d(0)
-    , m_element(0)
-{
-    if (node && node->isHTMLElement()) {
-        m_element = static_cast<HTMLElement*>(node);
-        m_element->ref();
-    }
-}
-
-/*!
     Constructs a copy of \a other.
 */
 QWebElement::QWebElement(const QWebElement &other)
@@ -1422,23 +1409,6 @@ void QWebElement::replace(const QString &markup)
 }
 
 /*!
-    \internal
-    Walk \a node's parents until a valid QWebElement is found.
-    For example, a WebCore::Text node is not a valid Html QWebElement, but its
-    enclosing p tag is.
-*/
-QWebElement QWebElement::enclosingElement(WebCore::Node* node)
-{
-    QWebElement element(node);
-
-    while (element.isNull() && node) {
-        node = node->parentNode();
-        element = QWebElement(node);
-    }
-    return element;
-}
-
-/*!
     \fn inline bool QWebElement::operator==(const QWebElement& o) const;
 
     Returns true if this element points to the same underlying DOM object as
@@ -1500,6 +1470,38 @@ void QWebElement::render(QPainter* painter, const QRect& clip)
     view->paintContents(context, finalClipRect);
     view->setNodeToDraw(0);
     context.restore();
+}
+
+void QWebElement::beginEnterFullScreen()
+{
+#if ENABLE(FULLSCREEN_API)
+    if (m_element)
+        m_element->document().webkitWillEnterFullScreenForElement(m_element);
+#endif
+}
+
+void QWebElement::endEnterFullScreen()
+{
+#if ENABLE(FULLSCREEN_API)
+    if (m_element)
+        m_element->document().webkitDidEnterFullScreenForElement(m_element);
+#endif
+}
+
+void QWebElement::beginExitFullScreen()
+{
+#if ENABLE(FULLSCREEN_API)
+    if (m_element)
+        m_element->document().webkitWillExitFullScreenForElement(m_element);
+#endif
+}
+
+void QWebElement::endExitFullScreen()
+{
+#if ENABLE(FULLSCREEN_API)
+    if (m_element)
+        m_element->document().webkitDidExitFullScreenForElement(m_element);
+#endif
 }
 
 class QWebElementCollectionPrivate : public QSharedData

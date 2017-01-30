@@ -162,12 +162,18 @@
     || defined(_X86_)    \
     || defined(__THW_INTEL)
 #define WTF_CPU_X86 1
+
+#if defined(__SSE2__) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+#define WTF_CPU_X86_SSE2 1
+#endif
+
 #endif
 
 /* CPU(X86_64) - AMD64 / Intel64 / x86_64 64-bit */
 #if   defined(__x86_64__) \
     || defined(_M_X64)
 #define WTF_CPU_X86_64 1
+#define WTF_CPU_X86_SSE2 1
 #endif
 
 /* CPU(ARM64) - Apple */
@@ -595,6 +601,10 @@
 #define USE_CFURLCACHE 1
 #endif
 
+#if PLATFORM(QT) && OS(DARWIN)
+#define USE_CF 1
+#endif
+
 #if !defined(HAVE_ACCESSIBILITY)
 #if PLATFORM(COCOA) || PLATFORM(WIN) || PLATFORM(GTK) || PLATFORM(EFL)
 #define HAVE_ACCESSIBILITY 1
@@ -928,11 +938,6 @@
 
 #if USE(TEXTURE_MAPPER) && ENABLE(GRAPHICS_CONTEXT_3D) && !defined(USE_TEXTURE_MAPPER_GL)
 #define USE_TEXTURE_MAPPER_GL 1
-#endif
-
-/* Compositing on the UI-process in WebKit2 */
-#if USE(3D_GRAPHICS) && PLATFORM(QT)
-#define USE_COORDINATED_GRAPHICS 1
 #endif
 
 #if PLATFORM(COCOA)

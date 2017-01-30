@@ -21,6 +21,7 @@
 #define QWebPageAdapter_h
 
 #include "QWebPageClient.h"
+#include "qwebelement.h"
 #include "qwebhistory.h"
 
 #include <qbasictimer.h>
@@ -55,6 +56,7 @@ struct ViewportArguments;
 
 class QtPluginWidgetAdapter;
 class QWebFrameAdapter;
+class QWebFullScreenRequest;
 class QWebHistoryItem;
 class QWebHitTestResultPrivate;
 class QWebPageClient;
@@ -206,6 +208,7 @@ public:
 #if USE(QT_MULTIMEDIA)
     virtual QWebFullScreenVideoHandler* createFullScreenVideoHandler() = 0;
 #endif
+    virtual void fullScreenRequested(QWebFullScreenRequest) = 0;
     virtual void geolocationPermissionRequested(QWebFrameAdapter*) = 0;
     virtual void geolocationPermissionRequestCancelled(QWebFrameAdapter*) = 0;
     virtual void notificationsPermissionRequested(QWebFrameAdapter*) = 0;
@@ -286,6 +289,7 @@ public:
     virtual bool handleScrollbarContextMenuEvent(QContextMenuEvent*, bool, ScrollDirection*, ScrollGranularity*) = 0;
 
     virtual void recentlyAudibleChanged(bool) = 0;
+    virtual void focusedElementChanged(const QWebElement&) = 0;
 
     void setVisibilityState(VisibilityState);
     VisibilityState visibilityState() const;
@@ -383,6 +387,9 @@ public:
 
     bool isPlayingAudio() const;
 
+    const QWebElement& fullScreenElement() const;
+    void setFullScreenElement(const QWebElement&);
+
     QWebSettings *settings;
 
     WebCore::Page *page;
@@ -406,6 +413,10 @@ private:
     QNetworkAccessManager *networkManager;
     WebCore::DeviceOrientationClient* m_deviceOrientationClient;
     WebCore::DeviceMotionClient* m_deviceMotionClient;
+
+#if ENABLE(FULLSCREEN_API)
+    QWebElement m_fullScreenElement;
+#endif
 
 public:
     static bool drtRun;

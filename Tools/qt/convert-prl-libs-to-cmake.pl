@@ -27,12 +27,32 @@
 
 use File::Basename;
 use File::Spec;
+use Getopt::Long;
+use Text::ParseWords;
+
+use v5.10;
+
 use strict;
 use warnings;
 
-my ($qt_lib, $component_name, $out_name) = @ARGV;
+my $qt_lib;
+my $component_name;
+my $out_name;
+my $compiler;
 
-my ($qt_lib_base, $qt_lib_dir) = fileparse($qt_lib, qr{\..*});
+processArgs();
+
+sub processArgs {
+    GetOptions (
+        "lib=s" => \$qt_lib,
+        "component=s" => \$component_name,
+        "out=s" => \$out_name,
+        "compiler=s" => \$compiler
+    )
+}
+
+my $qt_lib_base = fileparse($qt_lib, qr{\..*});
+my $qt_lib_dir = dirname($qt_lib);
 my $prl_name = File::Spec->join($qt_lib_dir, "$qt_lib_base.prl");
 
 my $qmake_prl_libs;
@@ -53,7 +73,7 @@ unless($qmake_prl_libs) {
     exit;
 }
 
-my $prl_libs = squash_prl_libs (split /\s+/, $qmake_prl_libs);
+my $prl_libs = squash_prl_libs(shellwords($qmake_prl_libs));
 
 my $template = <<'END_CMAKE';
 get_target_property(_link_libs Qt5::${_component} INTERFACE_LINK_LIBRARIES)
@@ -83,13 +103,26 @@ close $out;
 sub squash_prl_libs {
     my @libs = @_;
     my @result;
-    for (my $i = 0; $i < $#libs; ++$i) {
+    for (my $i = 0; $i < scalar(@libs); ++$i) {
         my $lib = $libs[$i];
         if ($lib eq '-framework') {
             $lib = "$libs[$i] $libs[$i + 1]";
             ++$i;
         }
         $lib =~ s"\$\$\[QT_INSTALL_LIBS\]"$qt_lib_dir"g;
+
+        if (lc($compiler) eq 'msvc') {
+            # convert backslashes
+            $lib =~ s"\\"/"g;
+
+            # MSVC doesn't support -L and -l arguments
+            if ($lib =~ /^-L(.*)$/) {
+                $lib = "-LIBPATH:$1"
+            } else {
+                $lib =~ s/^-l//;
+            }
+        }
+
         push @result, $lib;
     }
     return join ';', @result;

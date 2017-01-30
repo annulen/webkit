@@ -36,8 +36,10 @@ list(APPEND WebCore_INCLUDE_DIRECTORIES
     "${WEBCORE_DIR}/platform/graphics/surfaces"
     "${WEBCORE_DIR}/platform/graphics/surfaces/qt"
     "${WEBCORE_DIR}/platform/graphics/qt"
+    "${WEBCORE_DIR}/platform/graphics/win"
     "${WEBCORE_DIR}/platform/network/qt"
     "${WEBCORE_DIR}/platform/text/qt"
+    "${WEBCORE_DIR}/platform/win"
     "${WTF_DIR}"
 )
 
@@ -63,8 +65,6 @@ list(APPEND WebCore_SOURCES
     platform/graphics/ImageSource.cpp
     platform/graphics/WOFFFileFormat.cpp
 
-    platform/graphics/gpu/qt/DrawingBufferQt.cpp
-
     platform/graphics/qt/ColorQt.cpp
     platform/graphics/qt/FloatPointQt.cpp
     platform/graphics/qt/FloatRectQt.cpp
@@ -78,12 +78,14 @@ list(APPEND WebCore_SOURCES
     platform/graphics/qt/GradientQt.cpp
     platform/graphics/qt/GraphicsContextQt.cpp
     platform/graphics/qt/IconQt.cpp
+    platform/graphics/qt/ImageBufferDataQt.cpp
     platform/graphics/qt/ImageBufferQt.cpp
     platform/graphics/qt/ImageDecoderQt.cpp
     platform/graphics/qt/ImageQt.cpp
     platform/graphics/qt/IntPointQt.cpp
     platform/graphics/qt/IntRectQt.cpp
     platform/graphics/qt/IntSizeQt.cpp
+    platform/graphics/qt/QFramebufferPaintDevice.cpp
     platform/graphics/qt/PathQt.cpp
     platform/graphics/qt/PatternQt.cpp
     platform/graphics/qt/StillImageQt.cpp
@@ -146,6 +148,14 @@ list(APPEND WebCore_SOURCES
 
     platform/text/qt/TextBreakIteratorInternalICUQt.cpp
 )
+
+if (COMPILER_IS_GCC_OR_CLANG)
+    set_source_files_properties(
+        platform/graphics/qt/ImageBufferDataQt.cpp
+    PROPERTIES
+        COMPILE_FLAGS -frtti
+    )
+endif ()
 
 if (ENABLE_DEVICE_ORIENTATION)
     list(APPEND WebCore_SOURCES
@@ -241,10 +251,14 @@ list(APPEND WebCore_USER_AGENT_STYLE_SHEETS
     ${WEBCORE_DIR}/css/themeQtNoListboxes.css
 )
 
+if (ENABLE_WEBKIT2)
+    list(APPEND WebCore_SOURCES
+        page/qt/GestureTapHighlighter.cpp
+    )
+endif ()
+
 if (ENABLE_OPENGL)
     list(APPEND WebCore_SOURCES
-        platform/graphics/OpenGLShims.cpp
-
         platform/graphics/opengl/Extensions3DOpenGLCommon.cpp
         platform/graphics/opengl/GraphicsContext3DOpenGLCommon.cpp
         platform/graphics/opengl/TemporaryOpenGLSetting.cpp
@@ -255,23 +269,16 @@ if (ENABLE_OPENGL)
             platform/graphics/opengl/Extensions3DOpenGLES.cpp
             platform/graphics/opengl/GraphicsContext3DOpenGLES.cpp
         )
-    elseif (${Qt5Gui_OPENGL_IMPLEMENTATION} STREQUAL GL)
+        list(APPEND WebCore_LIBRARIES
+            ${Qt5Gui_EGL_LIBRARIES}
+            ${Qt5Gui_OPENGL_LIBRARIES}
+        )
+    else ()
         list(APPEND WebCore_SOURCES
             platform/graphics/opengl/Extensions3DOpenGL.cpp
             platform/graphics/opengl/GraphicsContext3DOpenGL.cpp
         )
-    else ()
-        message(FATAL_ERROR "Unsupported Qt OpenGL implementation ${Qt5Gui_OPENGL_IMPLEMENTATION}")
     endif ()
-
-    list(APPEND WebCore_SYSTEM_INCLUDE_DIRECTORIES
-        ${Qt5Gui_EGL_INCLUDE_DIRS}
-        ${Qt5Gui_OPENGL_INCLUDE_DIRS}
-    )
-    list(APPEND WebCore_LIBRARIES
-        ${Qt5Gui_EGL_LIBRARIES}
-        ${Qt5Gui_OPENGL_LIBRARIES}
-    )
 endif ()
 
 if (USE_GLIB)
@@ -290,6 +297,16 @@ if (USE_GSTREAMER)
     include(platform/GStreamer.cmake)
     list(APPEND WebCore_SOURCES
         platform/graphics/gstreamer/ImageGStreamerQt.cpp
+    )
+endif ()
+
+if (USE_MEDIA_FOUNDATION)
+    list(APPEND WebCore_SOURCES
+        platform/graphics/win/MediaPlayerPrivateMediaFoundation.cpp
+    )
+    list(APPEND WebCore_LIBRARIES
+        mfuuid
+        strmbase
     )
 endif ()
 
@@ -356,12 +373,18 @@ if (HAVE_FONTCONFIG)
 endif ()
 
 # From PlatformWin.cmake
-if (WIN32)
 
+if (WIN32)
     if (${JavaScriptCore_LIBRARY_TYPE} MATCHES STATIC)
         add_definitions(-DSTATICALLY_LINKED_WITH_WTF -DSTATICALLY_LINKED_WITH_JavaScriptCore)
     endif ()
 
+    list(APPEND WebCore_SOURCES
+        platform/win/SystemInfo.cpp
+    )
+endif ()
+
+if (MSVC)
     list(APPEND WebCore_INCLUDE_DIRECTORIES
         "${CMAKE_BINARY_DIR}/../include/private"
         "${CMAKE_BINARY_DIR}/../include/private/JavaScriptCore"
@@ -389,24 +412,14 @@ if (WIN32)
         "${WEBCORE_DIR}/ForwardingHeaders"
         "${WEBCORE_DIR}/platform/win"
     )
+endif ()
 
+if (APPLE)
     list(APPEND WebCore_SOURCES
-        platform/win/SystemInfo.cpp
+        platform/VNodeTracker.cpp
+
+        platform/cf/SharedBufferCF.cpp
     )
-
-    file(MAKE_DIRECTORY ${DERIVED_SOURCES_DIR}/ForwardingHeaders/WebCore)
-
-    set(WebCore_PRE_BUILD_COMMAND "${CMAKE_BINARY_DIR}/DerivedSources/WebCore/preBuild.cmd")
-    file(WRITE "${WebCore_PRE_BUILD_COMMAND}" "@xcopy /y /s /d /f \"${WEBCORE_DIR}/ForwardingHeaders/*.h\" \"${DERIVED_SOURCES_DIR}/ForwardingHeaders/WebCore\" >nul 2>nul\n")
-    foreach (_directory ${WebCore_FORWARDING_HEADERS_DIRECTORIES})
-        file(APPEND "${WebCore_PRE_BUILD_COMMAND}" "@xcopy /y /d /f \"${WEBCORE_DIR}/${_directory}/*.h\" \"${DERIVED_SOURCES_DIR}/ForwardingHeaders/WebCore\" >nul 2>nul\n")
-    endforeach ()
-    foreach (_file ${WebCore_FORWARDING_HEADERS_FILES})
-        file(APPEND "${WebCore_PRE_BUILD_COMMAND}" "@xcopy /y /d /f \"${WEBCORE_DIR}/${_file}\" \"${DERIVED_SOURCES_DIR}/ForwardingHeaders/WebCore\" >nul 2>nul\n")
-    endforeach ()
-
-    set(WebCore_POST_BUILD_COMMAND "${CMAKE_BINARY_DIR}/DerivedSources/WebCore/postBuild.cmd")
-    file(WRITE "${WebCore_POST_BUILD_COMMAND}" "@xcopy /y /s /d /f \"${DERIVED_SOURCES_WEBCORE_DIR}/*.h\" \"${DERIVED_SOURCES_DIR}/ForwardingHeaders/WebCore\" >nul 2>nul\n")
 endif ()
 
 # From PlatformEfl.cmake

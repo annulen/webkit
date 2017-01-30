@@ -49,7 +49,7 @@
 #endif
 #endif
 
-#if USE(CF) || (PLATFORM(QT) && defined(Q_WS_MAC))
+#if USE(CF) || (PLATFORM(QT) && defined(Q_OS_MAC))
 typedef struct __CFBundle* CFBundleRef;
 typedef const struct __CFData* CFDataRef;
 #endif
@@ -75,7 +75,7 @@ typedef HMODULE PlatformModule;
 #elif PLATFORM(EFL)
 typedef Eina_Module* PlatformModule;
 #elif PLATFORM(QT)
-#if defined(Q_WS_MAC)
+#if defined(Q_OS_MAC)
 typedef CFBundleRef PlatformModule;
 #elif !defined(QT_NO_LIBRARY)
 typedef QLibrary* PlatformModule;
@@ -178,6 +178,7 @@ bool excludeFromBackup(const String&); // Returns true if successful.
 WEBCORE_EXPORT Vector<String> listDirectory(const String& path, const String& filter = String());
 
 WEBCORE_EXPORT CString fileSystemRepresentation(const String&);
+String stringFromFileSystemRepresentation(const char*);
 
 inline bool isHandleValid(const PlatformFileHandle& handle) { return handle != invalidPlatformFileHandle; }
 

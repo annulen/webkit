@@ -1,3 +1,172 @@
+2017-01-12  Zan Dobersek  <zdobersek@igalia.com>
+
+        [GTK] WebKitWebProcess at 100% CPU loading hyphenation dictionaries
+        https://bugs.webkit.org/show_bug.cgi?id=165601
+
+        Reviewed by Carlos Garcia Campos.
+
+        In HyphenationLibHyphen, retrieve the canonicalized absolute pathname of the dictionary file
+        in order to avoid storing symbolic links as the target files for specific locales. libhyphen
+        distributes its dictionary files by linking a set of similar locales files to a single file.
+        Not resolving those symbolic links means we'll be opening a single file via multiple
+        HyphenationDictionary objects, which is far from optimal.
+
+        To add insult to injury, these HyphenationDictionary objects were stored in a TinyLRUCache
+        with a slim capacity of 4. This meant that while already loading one single file through
+        multiple symlinks, because of continuous eviciton from this LRU cache the same symlinks
+        continued to be processed, in some cases resulting in opening the same dictionary file
+        hundreds or thousands of times. The capacity of this TinyLRUCache is increased to 32
+        to keep the amount of open libhyphen dictionaries capped at some reasonable number.
+
+        * platform/text/hyphen/HyphenationLibHyphen.cpp:
+        (WebCore::scanDirectoryForDicionaries):
+
+2017-01-08  Konstantin Tokarev  <annulen@yandex.ru>
+
+        Introduce CPU(X86_SSE2) instead of various SSE2 checks
+        https://bugs.webkit.org/show_bug.cgi?id=166808
+
+        Reviewed by Michael Catanzaro.
+
+        Now copyLCharsFromUCharSource can use SSE2 implementation on non-Darwin
+        OSes, and all SSE2 code paths are available for MSVC on x86 if /arch:SSE2
+        or higher is enabled, and for MSVC on x86_64.
+
+        No new tests needed.
+
+        * platform/audio/SincResampler.cpp:
+        (WebCore::SincResampler::process):
+        * platform/audio/VectorMath.cpp:
+        (WebCore::VectorMath::vsma):
+        (WebCore::VectorMath::vsmul):
+        (WebCore::VectorMath::vadd):
+        (WebCore::VectorMath::vmul):
+        (WebCore::VectorMath::zvmul):
+        (WebCore::VectorMath::vsvesq):
+        (WebCore::VectorMath::vmaxmgv):
+
+2016-09-26  Per Arne Vollan  <pvollan@apple.com>
+
+        [Win][Debug] Compile fix.
+        https://bugs.webkit.org/show_bug.cgi?id=162550
+
+        Reviewed by Alex Christensen.
+
+        Windows headers need the FragmentForwardIterator '==' operator in debug mode.
+
+        * rendering/SimpleLineLayout.cpp:
+        (WebCore::SimpleLineLayout::FragmentForwardIterator::operator==):
+
+2016-04-06  Per Arne Vollan  <peavo@outlook.com>
+
+        [WinCairo][MediaFoundation] Videos are always autoplaying.
+        https://bugs.webkit.org/show_bug.cgi?id=156284
+
+        Reviewed by Alex Christensen.
+
+        Videos are autoplaying because the MediaFoundation implementation always starts playback
+        after the load method has been called. When the load method has been called, we should
+        only start buffering data, not automatically start the playback. This has been fixed by
+        implementing the prepareToPlay method, and calling this instead of the play method.
+
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.cpp:
+        (WebCore::MediaPlayerPrivateMediaFoundation::MediaPlayerPrivateMediaFoundation):
+        (WebCore::MediaPlayerPrivateMediaFoundation::load):
+        (WebCore::MediaPlayerPrivateMediaFoundation::prepareToPlay):
+        (WebCore::MediaPlayerPrivateMediaFoundation::play):
+        (WebCore::MediaPlayerPrivateMediaFoundation::networkState):
+        (WebCore::MediaPlayerPrivateMediaFoundation::startSession):
+        (WebCore::MediaPlayerPrivateMediaFoundation::endGetEvent):
+        (WebCore::MediaPlayerPrivateMediaFoundation::updateReadyState):
+        (WebCore::MediaPlayerPrivateMediaFoundation::onTopologySet):
+        (WebCore::MediaPlayerPrivateMediaFoundation::onBufferingStarted):
+        (WebCore::MediaPlayerPrivateMediaFoundation::onBufferingStopped):
+        (WebCore::MediaPlayerPrivateMediaFoundation::onSessionEnded):
+        (WebCore::MediaPlayerPrivateMediaFoundation::Direct3DPresenter::updateDestRect):
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.h:
+
+2016-03-30  Per Arne Vollan  <peavo@outlook.com>
+
+        [WinCairo][MediaFoundation] Video size is not always set.
+        https://bugs.webkit.org/show_bug.cgi?id=156020
+
+        Reviewed by Darin Adler.
+
+        Getting the video display control object from the media session might fail the first time.
+        In case it fails, we should try again when setting the video size.
+
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.cpp:
+        (WebCore::MediaPlayerPrivateMediaFoundation::setSize):
+        (WebCore::MediaPlayerPrivateMediaFoundation::getVideoDisplay):
+        (WebCore::MediaPlayerPrivateMediaFoundation::onTopologySet):
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.h:
+
+2016-03-21  Per Arne Vollan  <peavo@outlook.com>
+
+        [WinCairo][MediaFoundation] Crash when media player is destroyed.
+        https://bugs.webkit.org/show_bug.cgi?id=155716
+
+        Reviewed by Alex Christensen.
+
+        Increase the reference count on the video presenter object in the ActivateObject method
+        to avoid referencing a deleted object when the media player is destroyed.
+
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.cpp:
+        (WebCore::MediaPlayerPrivateMediaFoundation::CustomVideoPresenter::ActivateObject):
+
+2016-03-14  Per Arne Vollan  <peavo@outlook.com>
+
+        [WinCairo][MediaFoundation] Implement float versions of MediaPlayer methods.
+        https://bugs.webkit.org/show_bug.cgi?id=155357
+
+        Reviewed by Brent Fulgham.
+
+        It is better to implement the float versions of some of the MediaPlayer methods,
+        since the default implementation of the double versions is to call the float version.
+        Also added override keyword to overridden methods.
+
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.cpp:
+        (WebCore::MediaPlayerPrivateMediaFoundation::seeking):
+        (WebCore::MediaPlayerPrivateMediaFoundation::seek):
+        (WebCore::MediaPlayerPrivateMediaFoundation::setRate):
+        (WebCore::MediaPlayerPrivateMediaFoundation::duration):
+        (WebCore::MediaPlayerPrivateMediaFoundation::currentTime):
+        (WebCore::MediaPlayerPrivateMediaFoundation::seekDouble): Deleted.
+        (WebCore::MediaPlayerPrivateMediaFoundation::setRateDouble): Deleted.
+        (WebCore::MediaPlayerPrivateMediaFoundation::durationDouble): Deleted.
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.h:
+
+2016-02-23  Per Arne Vollan  <peavo@outlook.com>
+
+        [WinCairo][MediaFoundation] Implement methods to set volume.
+        https://bugs.webkit.org/show_bug.cgi?id=154580
+
+        Reviewed by Alex Christensen.
+
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.cpp:
+        (WebCore::MediaPlayerPrivateMediaFoundation::paused):
+        (WebCore::MediaPlayerPrivateMediaFoundation::setVolume):
+        (WebCore::MediaPlayerPrivateMediaFoundation::supportsMuting):
+        (WebCore::MediaPlayerPrivateMediaFoundation::setMuted):
+        (WebCore::MediaPlayerPrivateMediaFoundation::networkState):
+        * platform/graphics/win/MediaPlayerPrivateMediaFoundation.h:
+
+2016-11-21  Konstantin Tokarev  <annulen@yandex.ru>
+
+        Disable #line markers in bison output on Windows
+        https://bugs.webkit.org/show_bug.cgi?id=164973
+
+        Reviewed by Darin Adler.
+
+        New bison versions since 3.0 have bug that causes unescaped paths
+        to be printed in #line directives. On Windows CMake passes absolute
+        paths to bison that have backslashes in them, leading to compiler
+        errors or warnings because of unrecognized escape sequences.
+
+        No new tests needed.
+
+        * css/makegrammar.pl:
+
 2016-10-17  Fujii Hironori  <Hironori.Fujii@sony.com>
 
         preprocessor.pm: cl.exe outputs processing filenames if Windows Perl is used
