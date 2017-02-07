@@ -217,9 +217,13 @@ endif ()
 
 if (SHARED_CORE)
     set(WebCoreTestSupport_LIBRARY_TYPE SHARED)
+    set(WebKit_LIBRARY_TYPE SHARED)
+    set(WebKitWidgets_LIBRARY_TYPE SHARED)
 else ()
     set(JavaScriptCore_LIBRARY_TYPE STATIC)
     set(WebCoreTestSupport_LIBRARY_TYPE STATIC)
+    set(WebKit_LIBRARY_TYPE STATIC)
+    set(WebKitWidgets_LIBRARY_TYPE STATIC)
 endif ()
 
 SET_AND_EXPOSE_TO_BUILD(USE_TEXTURE_MAPPER TRUE)

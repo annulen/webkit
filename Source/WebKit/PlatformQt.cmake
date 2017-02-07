@@ -464,12 +464,6 @@ ecm_generate_pri_file(
 )
 install(FILES ${WebKit_PRI_FILENAME} DESTINATION ${ECM_MKSPECS_INSTALL_DIR})
 
-if (QT_STATIC_BUILD)
-    set(WebKit_LIBRARY_TYPE STATIC)
-else ()
-    set(WebKit_LIBRARY_TYPE SHARED)
-endif ()
-
 if (APPLE)
     set(WebKit_OUTPUT_NAME QtWebKit)
 else ()
@@ -662,12 +656,6 @@ if (MSVC)
     ADD_PRECOMPILED_HEADER("WebKitWidgetsPrefix.h" "qt/WebKitWidgetsPrefix.cpp" WebKitWidgets_SOURCES)
 endif ()
 
-if (QT_STATIC_BUILD)
-    set(WebKitWidgets_LIBRARY_TYPE STATIC)
-else ()
-    set(WebKitWidgets_LIBRARY_TYPE SHARED)
-endif ()
-
 if (APPLE)
     set(WebKitWidgets_OUTPUT_NAME QtWebKitWidgets)
 else ()
@@ -719,4 +707,6 @@ if (COMPILER_IS_GCC_OR_CLANG)
     )
 endif ()
 
-add_subdirectory(qt/tests)
+if (ENABLE_TEST_SUPPORT)
+    add_subdirectory(qt/tests)
+endif ()
