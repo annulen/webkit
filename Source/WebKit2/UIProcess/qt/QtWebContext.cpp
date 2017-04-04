@@ -107,13 +107,16 @@ static void didReceiveMessageFromInjectedBundle(WKContextRef, WKStringRef messag
     ASSERT(WKGetTypeID(WKArrayGetItemAtIndex(body, 1)) == WKStringGetTypeID());
 
     WKPageRef page = static_cast<WKPageRef>(WKArrayGetItemAtIndex(body, 0));
-    WKStringRef str = static_cast<WKStringRef>(WKArrayGetItemAtIndex(body, 1));
 
-    if (WKStringIsEqualToUTF8CString(messageName, "MessageFromNavigatorQtObject"))
-        QQuickWebViewPrivate::get(page)->didReceiveMessageFromNavigatorQtObject(str);
+    if (WKStringIsEqualToUTF8CString(messageName, "MessageFromNavigatorQtObject")) {
+        WKStringRef data = static_cast<WKStringRef>(WKArrayGetItemAtIndex(body, 1));
+        QQuickWebViewPrivate::get(page)->didReceiveMessageFromNavigatorQtObject(data);
+    }
 #if ENABLE(QT_WEBCHANNEL)
-    else if (WKStringIsEqualToUTF8CString(messageName, "MessageFromNavigatorQtWebChannelTransportObject"))
-        QQuickWebViewPrivate::get(page)->didReceiveMessageFromNavigatorQtWebChannelTransportObject(str);
+    else if (WKStringIsEqualToUTF8CString(messageName, "MessageFromNavigatorQtWebChannelTransportObject")) {
+        WKDataRef data = static_cast<WKDataRef>(WKArrayGetItemAtIndex(body, 1));
+        QQuickWebViewPrivate::get(page)->didReceiveMessageFromNavigatorQtWebChannelTransportObject(data);
+    }
 #endif
 }
 

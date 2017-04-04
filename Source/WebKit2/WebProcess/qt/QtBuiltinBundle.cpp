@@ -127,7 +127,7 @@ void QtBuiltinBundle::handleMessageToNavigatorQtWebChannelTransport(WKBundlePage
 {
     ASSERT(messageBody);
     ASSERT(WKGetTypeID(messageBody) == WKStringGetTypeID());
-    WKStringRef contents = static_cast<WKStringRef>(messageBody);
+    WKDataRef contents = static_cast<WKDataRef>(messageBody);
 
     QtBuiltinBundlePage* bundlePage = m_pages.get(page);
     if (!bundlePage)
