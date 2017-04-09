@@ -390,20 +390,20 @@ install(
     COMPONENT Data
 )
 
-set(WEBKIT_PKGCONGIG_DEPS "Qt5Core Qt5Gui Qt5Network")
+set(WEBKIT_PKGCONFIG_DEPS "Qt5Core Qt5Gui Qt5Network")
 set(WEBKIT_PRI_DEPS "core gui network")
 set(WEBKIT_PRI_RUNTIME_DEPS "sensors positioning qml quick webchannel core_private gui_private")
 set(WEBKIT_PRI_EXTRA_LIBS "")
-set(WEBKITWIDGETS_PKGCONGIG_DEPS "Qt5Core Qt5Gui Qt5Network Qt5Widgets Qt5WebKit")
+set(WEBKITWIDGETS_PKGCONFIG_DEPS "Qt5Core Qt5Gui Qt5Network Qt5Widgets Qt5WebKit")
 set(WEBKITWIDGETS_PRI_DEPS "core gui network widgets webkit")
 set(WEBKITWIDGETS_PRI_RUNTIME_DEPS "sensors positioning widgets_private opengl sql core_private gui_private")
 if (QT_STATIC_BUILD)
     if (MSVC)
         set(LIB_PREFIX "lib")
     endif ()
-    set(WEBKIT_PKGCONGIG_DEPS "${WEBKIT_PKGCONGIG_DEPS} Qt5Sql")
+    set(WEBKIT_PKGCONFIG_DEPS "${WEBKIT_PKGCONFIG_DEPS} Qt5Sql")
     set(WEBKIT_PRI_DEPS "${WEBKIT_PRI_DEPS} sql")
-    set(WEBKITWIDGETS_PKGCONGIG_DEPS "${WEBKITWIDGETS_PKGCONGIG_DEPS} Qt5PrintSupport")
+    set(WEBKITWIDGETS_PKGCONFIG_DEPS "${WEBKITWIDGETS_PKGCONFIG_DEPS} Qt5PrintSupport")
     set(WEBKITWIDGETS_PRI_DEPS "${WEBKITWIDGETS_PRI_DEPS} printsupport")
     set(EXTRA_LIBS_NAMES WebCore JavaScriptCore WTF xml2)
     if (NOT USE_SYSTEM_MALLOC)
@@ -425,7 +425,7 @@ if (QT_STATIC_BUILD)
         list(APPEND EXTRA_LIBS_NAMES icucore)
     endif ()
     foreach (LIB_NAME ${EXTRA_LIBS_NAMES})
-        set(WEBKIT_PKGCONGIG_DEPS "${WEBKIT_PKGCONGIG_DEPS} ${LIB_PREFIX}${LIB_NAME}")
+        set(WEBKIT_PKGCONFIG_DEPS "${WEBKIT_PKGCONFIG_DEPS} ${LIB_PREFIX}${LIB_NAME}")
         set(WEBKIT_PRI_EXTRA_LIBS "${WEBKIT_PRI_EXTRA_LIBS} -l${LIB_PREFIX}${LIB_NAME}")
     endforeach ()
 else ()
@@ -433,9 +433,22 @@ else ()
     set(WEBKITWIDGETS_PRI_RUNTIME_DEPS "${WEBKITWIDGETS_PRI_RUNTIME_DEPS} printsupport")
 endif ()
 
+set(WEBKIT_BASE_NAME "webkit")
+set(WEBKIT_LIB_NAME "Qt5WebKit")
+set(WEBKITWIDGETS_BASE_NAME "webkitwidgets")
+set(WEBKITWIDGETS_LIB_NAME "Qt5WebKitWidgets")
+
+# Mac libraries use "Qt" prefix rather than "Qt5"
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(WEBKIT_LIB_NAME "QtWebKit")
+    set(WEBKITWIDGETS_LIB_NAME "QtWebKitWidgets")
+endif ()
+
 ecm_generate_pkgconfig_file(
-    BASE_NAME Qt5WebKit
-    DEPS "${WEBKIT_PKGCONGIG_DEPS}"
+    BASE_NAME ${WEBKIT_BASE_NAME}
+    LIB_NAME ${WEBKIT_LIB_NAME}
+    INCLUDE_INSTALL_DIR "${KDE_INSTALL_INCLUDEDIR}/QtWebKit"
+    DEPS "${WEBKIT_PKGCONFIG_DEPS}"
     FILENAME_VAR WebKit_PKGCONFIG_FILENAME
 )
 set(ECM_PKGCONFIG_INSTALL_DIR "${LIB_INSTALL_DIR}/pkgconfig" CACHE PATH "The directory where pkgconfig will be installed to.")
@@ -456,8 +469,9 @@ else ()
 endif ()
 
 ecm_generate_pri_file(
-    BASE_NAME webkit
-    LIB_NAME QtWebKit
+    BASE_NAME ${WEBKIT_BASE_NAME}
+    LIB_NAME ${WEBKIT_LIB_NAME}
+    INCLUDE_INSTALL_DIR "${KDE_INSTALL_INCLUDEDIR}/QtWebKit"
     DEPS "${WEBKIT_PRI_DEPS}"
     RUNTIME_DEPS "${WEBKIT_PRI_RUNTIME_DEPS}"
     DEFINES QT_WEBKIT_LIB
@@ -602,7 +616,9 @@ install(
 )
 
 ecm_generate_pkgconfig_file(
-    BASE_NAME Qt5WebKitWidgets
+    BASE_NAME ${WEBKITWIDGETS_BASE_NAME}
+    LIB_NAME ${WEBKITWIDGETS_LIB_NAME}
+    INCLUDE_INSTALL_DIR "${KDE_INSTALL_INCLUDEDIR}/QtWebKitWidgets"
     DEPS "${WEBKITWIDGETS_PKGCONFIG_DEPS}"
     FILENAME_VAR WebKitWidgets_PKGCONFIG_FILENAME
 )
@@ -623,8 +639,9 @@ else ()
 endif ()
 
 ecm_generate_pri_file(
-    BASE_NAME webkitwidgets
-    LIB_NAME QtWebKitWidgets
+    BASE_NAME ${WEBKITWIDGETS_BASE_NAME}
+    LIB_NAME ${WEBKITWIDGETS_LIB_NAME}
+    INCLUDE_INSTALL_DIR "${KDE_INSTALL_INCLUDEDIR}/QtWebKitWidgets"
     DEPS "${WEBKITWIDGETS_PRI_DEPS}"
     RUNTIME_DEPS "${WEBKITWIDGETS_PRI_RUNTIME_DEPS}"
     DEFINES QT_WEBKITWIDGETS_LIB
