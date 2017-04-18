@@ -332,6 +332,9 @@ public:
 #endif
     virtual void triggerAction(WebAction action, bool checked = false);
 
+    void setDevicePixelRatio(qreal ratio);
+    qreal devicePixelRatio() const;
+
     QSize viewportSize() const;
     void setViewportSize(const QSize &size) const;
     ViewportAttributes viewportAttributesForSize(const QSize& availableSize) const;
