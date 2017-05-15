@@ -23,9 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
+#define __STDC_FORMAT_MACROS
 #include "config.h"
 #include "ParsedContentRange.h"
 
+#include <inttypes.h>
 #include <wtf/text/WTFString.h>
 
 namespace WebCore {
