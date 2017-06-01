@@ -891,6 +891,9 @@ GraphicsContext* ShadowBlur::beginShadowLayer(GraphicsContext& context, const Fl
     auto& scratchBuffer = ScratchBuffer::singleton();
     scratchBuffer.setCachedShadowValues(FloatSize(), Color::black, IntRect(), FloatRoundedRect::Radii(), m_layerSize);
     m_layerImage = scratchBuffer.getScratchBuffer(layerRect.size());
+    
+    if (!m_layerImage)
+        return nullptr;
 
     GraphicsContext& shadowContext = m_layerImage->context();
     shadowContext.save();
