@@ -72,10 +72,6 @@
 #include <wtf/Vector.h>
 #include <wtf/unicode/CharacterNames.h>
 
-#if PLATFORM(QT)
-#include <QVariant>
-#endif
-
 namespace WebCore {
 
 using namespace HTMLNames;
