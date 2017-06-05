@@ -55,6 +55,7 @@ struct ViewportArguments;
 }
 
 class QtPluginWidgetAdapter;
+class QWebElement;
 class QWebFrameAdapter;
 class QWebFullScreenRequest;
 class QWebHistoryItem;
