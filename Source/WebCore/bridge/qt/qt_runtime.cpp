@@ -1237,6 +1237,7 @@ QtRuntimeMethod::QtRuntimeMethod(JSContextRef ctx, QObject* object, const QByteA
     , m_flags(flags)
     , m_instance(instance)
 {
+    UNUSED_PARAM(ctx);
 }
 
 QtRuntimeMethod::~QtRuntimeMethod()
