@@ -976,7 +976,7 @@ static int indexOfMetaEnum(const QMetaObject *meta, const QByteArray &str)
 static int findMethodIndex(JSContextRef context,
                            const QMetaObject* meta,
                            const QByteArray& signature,
-                           unsigned argumentCount,
+                            unsigned argumentCount,
                            const JSValueRef arguments[],
                            bool allowPrivate,
                            QVarLengthArray<QVariant, 10> &vars,
