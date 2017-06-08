@@ -226,6 +226,13 @@ if (ENABLE_SMOOTH_SCROLLING)
     )
 endif ()
 
+if (ENABLE_SMOOTH_SCROLLING)
+    list(APPEND WebCore_SOURCES
+        platform/ScrollAnimationSmooth.cpp
+        platform/ScrollAnimatorSmooth.cpp
+    )
+endif ()
+
 # Do it in the WebCore to support SHARED_CORE since WebKitWidgets won't load WebKit in that case.
 # This should match the opposite statement in WebKit/PlatformQt.cmake
 if (SHARED_CORE)
