@@ -252,7 +252,7 @@ void FontCascade::initFormatForTextLayout(QTextLayout* layout, const TextRun& ru
     // word-spacing along with other options would be applied to. This is safe since the other
     // formatting options does not affect spaces.
     unsigned length = run.length();
-    for (range.start = 0; range.start < length && treatAsSpace(run[range.start]); ++range.start) { }
+    for (range.start = 0; static_cast<unsigned>(range.start) < length && treatAsSpace(run[range.start]); ++range.start) { }
     range.length = length - range.start;
 
     if (m_wordSpacing && !run.spacingDisabled())
