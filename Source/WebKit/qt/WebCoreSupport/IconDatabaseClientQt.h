@@ -46,6 +46,8 @@ public:
 
 Q_SIGNALS:
     void iconLoadedForPageURL(const QString&);
+    void iconURLLoadedForPageURL(const QString&);
+    void iconURLChangedForPageURL(const QString&);
 
 private:
     IconDatabaseClientQt();

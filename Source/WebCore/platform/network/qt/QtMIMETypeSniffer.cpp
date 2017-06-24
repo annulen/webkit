@@ -48,7 +48,7 @@ bool QtMIMETypeSniffer::sniff()
     // See QNetworkReplyWrapper::setFinished().
     const bool isReplyFinished = m_reply->property("_q_isFinished").toBool();
 
-    if (!isReplyFinished && m_reply->bytesAvailable() < m_sniffer.dataSize())
+    if (!isReplyFinished && static_cast<unsigned>(m_reply->bytesAvailable()) < m_sniffer.dataSize())
         return false;
 
     QByteArray data = m_reply->peek(m_sniffer.dataSize());

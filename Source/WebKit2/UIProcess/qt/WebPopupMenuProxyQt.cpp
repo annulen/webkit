@@ -179,7 +179,7 @@ QHash<int, QByteArray> PopupMenuItemModel::roleNames() const
 
 QVariant PopupMenuItemModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= m_items.size())
+    if (!index.isValid() || index.row() < 0 || static_cast<unsigned>(index.row()) >= m_items.size())
         return QVariant();
 
     const Item& item = m_items[index.row()];
@@ -216,7 +216,7 @@ void PopupMenuItemModel::select(int index)
 void PopupMenuItemModel::toggleItem(int index)
 {
     int oldIndex = m_selectedModelIndex;
-    if (index < 0 || index >= m_items.size())
+    if (index < 0 || static_cast<unsigned>(index) >= m_items.size())
         return;
     Item& item = m_items[index];
     if (!item.enabled)
@@ -250,7 +250,7 @@ void PopupMenuItemModel::buildItems(const Vector<WebPopupItem>& webPopupItems)
 {
     QString currentGroup;
     m_items.reserveInitialCapacity(webPopupItems.size());
-    for (int i = 0; i < webPopupItems.size(); i++) {
+    for (unsigned i = 0; i < webPopupItems.size(); i++) {
         const WebPopupItem& webPopupItem = webPopupItems[i];
         if (webPopupItem.m_isLabel) {
             currentGroup = webPopupItem.m_text;

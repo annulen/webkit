@@ -263,7 +263,7 @@ QList<ItemType> convertToList(JSContextRef context, JSRealType type, JSObjectRef
             else
                 break;
         }
-        if (list.count() != length)
+        if (static_cast<unsigned>(list.count()) != length)
             list.clear();
         else if (distance)
             *distance = 5;
@@ -976,7 +976,7 @@ static int indexOfMetaEnum(const QMetaObject *meta, const QByteArray &str)
 static int findMethodIndex(JSContextRef context,
                            const QMetaObject* meta,
                            const QByteArray& signature,
-                           int argumentCount,
+                            unsigned argumentCount,
                            const JSValueRef arguments[],
                            bool allowPrivate,
                            QVarLengthArray<QVariant, 10> &vars,
@@ -1237,6 +1237,7 @@ QtRuntimeMethod::QtRuntimeMethod(JSContextRef ctx, QObject* object, const QByteA
     , m_flags(flags)
     , m_instance(instance)
 {
+    UNUSED_PARAM(ctx);
 }
 
 QtRuntimeMethod::~QtRuntimeMethod()

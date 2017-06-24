@@ -59,6 +59,7 @@ void IconDatabaseClientQt::didRemoveAllIcons()
 
 void IconDatabaseClientQt::didImportIconURLForPageURL(const String& url)
 {
+    emit iconURLLoadedForPageURL(url);
 }
 
 void IconDatabaseClientQt::didImportIconDataForPageURL(const String& url)
@@ -68,6 +69,7 @@ void IconDatabaseClientQt::didImportIconDataForPageURL(const String& url)
 
 void IconDatabaseClientQt::didChangeIconForPageURL(const String& url)
 {
+    emit iconURLChangedForPageURL(url);
 }
 
 void IconDatabaseClientQt::didFinishURLImport()

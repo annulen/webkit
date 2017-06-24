@@ -199,7 +199,7 @@ private:
 private:
     Vector<FormDataElement> m_formElements;
     QFile* m_currentFile;
-    qint64 m_currentDelta;
+    quint64 m_currentDelta;
     qint64 m_fileSize;
     qint64 m_dataSize;
     RefPtr<FormData> m_formData;

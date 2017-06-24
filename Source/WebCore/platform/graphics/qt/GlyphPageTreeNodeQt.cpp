@@ -38,7 +38,7 @@ bool GlyphPage::fill(UChar* buffer, unsigned bufferLength)
     bool haveGlyphs = false;
 
     for (unsigned i = 0; i < GlyphPage::size; ++i) {
-        Glyph glyph = (i < indexes.size()) ? indexes.at(i) : 0;
+        Glyph glyph = (i < static_cast<unsigned>(indexes.size())) ? indexes.at(i) : 0;
         if (!glyph)
             setGlyphForIndex(i, 0);
         else {

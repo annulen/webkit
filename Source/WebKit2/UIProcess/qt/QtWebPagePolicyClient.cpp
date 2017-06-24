@@ -60,8 +60,9 @@ void QtWebPagePolicyClient::decidePolicyForNavigationAction(const QUrl& url, Qt:
     case QQuickWebView::AcceptRequest:
         WKFramePolicyListenerUse(listener);
         return;
-    }
-    ASSERT_NOT_REACHED();
+    default:
+        ASSERT_NOT_REACHED();
+    }    
 }
 
 static inline QtWebPagePolicyClient* toQtWebPagePolicyClient(const void* clientInfo)
