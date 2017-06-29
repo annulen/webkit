@@ -60,9 +60,10 @@ if (${PORT} STREQUAL "Qt")
             DESTINATION "${LIB_INSTALL_DIR}"
             RUNTIME DESTINATION "${BIN_INSTALL_DIR}"
     )
-    if (MSVC)
-        install(FILES $<TARGET_PDB_FILE:WebKit> DESTINATION "${BIN_INSTALL_DIR}" OPTIONAL)
-    endif ()
+	# temporarily removed as only required if building with PDB output files
+    #if (MSVC)
+    #    install(FILES $<TARGET_PDB_FILE:WebKit> DESTINATION "${BIN_INSTALL_DIR}" OPTIONAL)
+    #endif ()
 
     if (NOT MSVC)
         ADD_PREFIX_HEADER(WebKit "${WEBKIT_DIR}/qt/WebKitPrefix.h")
