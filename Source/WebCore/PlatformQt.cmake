@@ -437,6 +437,10 @@ if (WIN32)
         add_definitions(-DSTATICALLY_LINKED_WITH_WTF -DSTATICALLY_LINKED_WITH_JavaScriptCore)
     endif ()
 
+    list(APPEND WebCore_LIBRARIES
+        ws2_32
+    )
+
     list(APPEND WebCore_SOURCES
         platform/win/SystemInfo.cpp
     )
