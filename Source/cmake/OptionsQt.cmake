@@ -283,9 +283,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif ()
 elseif (MSVC AND MSVC_VERSION LESS 1900)
     message(FATAL_ERROR "MSVC 2015 is required to build QtWebKit, use a newer MSVC version")
-elseif (MSVC)
-    # Required due to changes in MSVC 2015 CRT functions now being inline or moved to different headers
-    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} legacy_stdio_definitions.lib)
 endif ()
 
 if (APPLE AND CMAKE_SYSTEM_VERSION VERSION_LESS 14.0.0)
