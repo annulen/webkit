@@ -113,6 +113,7 @@ if (WIN32)
 
     set(CMAKE_SHARED_LIBRARY_PREFIX "")
     set(CMAKE_SHARED_MODULE_PREFIX "")
+    set(CMAKE_STATIC_LIBRARY_PREFIX "")
 endif ()
 
 WEBKIT_OPTION_BEGIN()
@@ -290,12 +291,17 @@ endif ()
 
 set(ENABLE_WEBKIT ON)
 set(WTF_USE_UDIS86 1)
+set(ICU_LIBRARY_PREFIX "")
 
 get_target_property(QT_CORE_TYPE Qt5::Core TYPE)
 if (QT_CORE_TYPE MATCHES STATIC)
     set(QT_STATIC_BUILD ON)
     set(SHARED_CORE OFF)
     set(MACOS_BUILD_FRAMEWORKS OFF)
+    if (MSVC)
+        # static icu libraries on windows are build with s prefix
+        set(ICU_LIBRARY_PREFIX "s")
+    endif ()
 endif ()
 
 if (SHARED_CORE)
@@ -800,7 +806,7 @@ if (MSVC)
     endif ()
 
     if (NOT QT_CONAN_DIR)
-        set(ICU_LIBRARIES icuuc${CMAKE_DEBUG_POSTFIX} icuin${CMAKE_DEBUG_POSTFIX} icudt${CMAKE_DEBUG_POSTFIX})
+        set(ICU_LIBRARIES ${ICU_LIBRARY_PREFIX}icuuc${CMAKE_DEBUG_POSTFIX} ${ICU_LIBRARY_PREFIX}icuin${CMAKE_DEBUG_POSTFIX} ${ICU_LIBRARY_PREFIX}icudt${CMAKE_DEBUG_POSTFIX})
     endif ()
 endif ()
 
