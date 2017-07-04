@@ -32,6 +32,10 @@ if (COMPILER_IS_GCC_OR_CLANG)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-strict-aliasing")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-strict-aliasing -fno-rtti")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    if (NOT (COMPILER_IS_CLANG AND "${CLANG_VERSION}" VERSION_LESS 4.0.0))
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-expansion-to-defined")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-expansion-to-defined")
+    endif ()
 endif ()
 
 if (COMPILER_IS_CLANG AND CMAKE_GENERATOR STREQUAL "Ninja")
@@ -196,9 +200,9 @@ endif ()
 
 # The Ninja generator does not yet know how to build archives in pieces, and so response
 # files must be used to deal with very long linker command lines.
-# See https://bugs.webkit.org/show_bug.cgi?id=129771
-# The Apple Toolchain doesn't support response files.
-if (NOT APPLE)
+# CMake does this automatically, but the condition was wrong on Linux until CMake 3.2.
+# See https://cmake.org/Bug/view.php?id=14892
+if ((CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux") AND (CMAKE_VERSION VERSION_LESS 3.2))
     set(CMAKE_NINJA_FORCE_RESPONSE_FILE 1)
 endif ()
 

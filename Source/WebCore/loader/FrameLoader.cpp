@@ -591,7 +591,7 @@ void FrameLoader::clear(Document* newDocument, bool clearWindowProperties, bool 
     if (clearWindowProperties) {
         InspectorInstrumentation::frameWindowDiscarded(&m_frame, m_frame.document()->domWindow());
         m_frame.document()->domWindow()->resetUnlessSuspendedForDocumentSuspension();
-        m_frame.script().clearWindowShell(newDocument->domWindow(), m_frame.document()->inPageCache());
+        m_frame.script().clearWindowShellsNotMatchingDOMWindow(newDocument->domWindow(), m_frame.document()->inPageCache());
     }
 
     m_frame.selection().prepareForDestruction();
@@ -608,6 +608,9 @@ void FrameLoader::clear(Document* newDocument, bool clearWindowProperties, bool 
     m_frame.setDocument(nullptr);
 
     subframeLoader().clear();
+
+    if (clearWindowProperties)
+        m_frame.script().setDOMWindowForWindowShell(newDocument->domWindow());
 
     if (clearScriptObjects)
         m_frame.script().clearScriptObjects();
@@ -1579,7 +1582,7 @@ void FrameLoader::reload(bool endToEndReload, bool contentBlockersEnabled)
 
 void FrameLoader::stopAllLoaders(ClearProvisionalItemPolicy clearProvisionalItemPolicy)
 {
-    ASSERT(!m_frame.document() || !m_frame.document()->inPageCache());
+    ASSERT(!m_frame.document() || m_frame.document()->pageCacheState() != Document::InPageCache);
     if (m_pageDismissalEventBeingDispatched != PageDismissalType::None)
         return;
 
@@ -2081,7 +2084,7 @@ void FrameLoader::open(CachedFrameBase& cachedFrame)
 
     clear(document, true, true, cachedFrame.isMainFrame());
 
-    document->setInPageCache(false);
+    document->setPageCacheState(Document::NotInPageCache);
 
     m_needsClear = true;
     m_isComplete = false;
@@ -3099,6 +3102,8 @@ void FrameLoader::continueLoadAfterNewWindowPolicy(const ResourceRequest& reques
     RefPtr<Frame> mainFrame = m_client.dispatchCreatePage(action);
     if (!mainFrame)
         return;
+
+    mainFrame->loader().forceSandboxFlags(frame->loader().effectiveSandboxFlags());
 
     if (frameName != "_blank")
         mainFrame->tree().setName(frameName);

@@ -1565,7 +1565,7 @@ void FrameView::adjustMediaTypeForPrinting(bool printing)
     if (printing) {
         if (m_mediaTypeWhenNotPrinting.isNull())
             m_mediaTypeWhenNotPrinting = mediaType();
-            setMediaType("print");
+        setMediaType("print");
     } else {
         if (!m_mediaTypeWhenNotPrinting.isNull())
             setMediaType(m_mediaTypeWhenNotPrinting);
@@ -2741,8 +2741,10 @@ void FrameView::setNeedsLayout()
         return;
     }
 
-    if (RenderView* renderView = this->renderView())
+    if (auto* renderView = this->renderView()) {
+        ASSERT(!renderView->inHitTesting());
         renderView->setNeedsLayout();
+    }
 }
 
 void FrameView::unscheduleRelayout()

@@ -626,12 +626,6 @@
 #define HAVE_PTHREAD_NP_H 1
 #endif
 
-#if !defined(HAVE_VASPRINTF)
-#if !COMPILER(MSVC) && !COMPILER(MINGW)
-#define HAVE_VASPRINTF 1
-#endif
-#endif
-
 #if !defined(HAVE_STRNSTR)
 #if OS(DARWIN) || (OS(FREEBSD) && !defined(__GLIBC__))
 #define HAVE_STRNSTR 1
@@ -900,7 +894,7 @@
 /* Pick which allocator to use; we only need an executable allocator if the assembler is compiled in.
    On non-Windows x86-64, iOS, and ARM64 we use a single fixed mmap, on other platforms we mmap on demand. */
 #if ENABLE(ASSEMBLER)
-#if CPU(X86_64) || PLATFORM(IOS) || CPU(ARM64)
+#if CPU(X86_64) || PLATFORM(IOS) || CPU(ARM64) || CPU(MIPS)
 #define ENABLE_EXECUTABLE_ALLOCATOR_FIXED 1
 #else
 #define ENABLE_EXECUTABLE_ALLOCATOR_DEMAND 1
@@ -1130,10 +1124,6 @@
 #if COMPILER(MSVC)
 #undef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
-#if _MSC_VER < 1900
-#undef _HAS_EXCEPTIONS
-#define _HAS_EXCEPTIONS 1
-#endif
 #endif
 
 #if PLATFORM(MAC)
