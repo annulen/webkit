@@ -23,7 +23,6 @@
 
 #include <QScopedPointer>
 #include <QtGlobal>
-#include <WKContext.h>
 #include <WKRetainPtr.h>
 
 namespace WebKit {
@@ -36,11 +35,13 @@ public:
     ~QtWebContext();
 
     enum StorageType {
+        ApplicationCacheStorage,
         DatabaseStorage,
         LocalStorage,
         CookieStorage,
         DiskCacheStorage,
-        IconDatabaseStorage
+        IconDatabaseStorage,
+        NetworkCacheStorage
     };
 
     static QtWebContext* create(WKContextRef);

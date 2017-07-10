@@ -51,6 +51,8 @@ defineReplace(appleSdkVersion) {
 }
 
 defineTest(isPlatformSupported) {
+    !qtHaveModule(widgets): skipBuild("QtWidgets module is required to build QtWebKit.")
+
     cross_compile: skipBuild("cross-compilation of QtWebKit with qmake is not supported yet")
 
     requiredPrograms = cmake gperf python perl bison ruby flex
@@ -64,11 +66,8 @@ defineTest(isPlatformSupported) {
     }
 
     win32 {
-        CONFIG(debug, debug|release):!contains(QMAKE_HOST.arch, x86_64) {
-            # debug_and_release is built as release, see Tools/qmake/projects/run_cmake.pro
-            !debug_and_release {
-                skipBuild("QtWebKit requires a 64-bit toolchain for debug build")
-            }
+        qtConfig(opengles2):!qtConfig(dynamicgl) {
+            skipBuild("QtWebKit supports only dynamic GL Qt builds on Windows at the moment.")
         }
         winrt {
             skipBuild("WinRT is not supported.")
@@ -76,6 +75,12 @@ defineTest(isPlatformSupported) {
         msvc {
             !isVersionAtLeast($$MSVC_VER, "14.0") {
                 skipBuild("QtWebKit on Windows requires MSVC 2015.")
+            }
+            CONFIG(debug, debug|release):!contains(QMAKE_HOST.arch, x86_64) {
+                # debug_and_release is built as release, see Tools/qmake/projects/run_cmake.pro
+                !debug_and_release {
+                    skipBuild("QtWebKit requires 64-bit MSVC toolchain for debug build")
+                }
             }
         } else {
             isGCCVersionSupported()
@@ -102,6 +107,8 @@ defineTest(isPlatformSupported) {
         skipBuild("C++11 support is required in order to build QtWebKit.")
     }
 
+    isRubyVersionSupported()
+
     isEmpty(skipBuildReason): return(true)
     return(false)
 }
@@ -110,6 +117,13 @@ defineTest(isGCCVersionSupported) {
     gcc_version = $${QT_GCC_MAJOR_VERSION}.$${QT_GCC_MINOR_VERSION}
     isVersionAtLeast($$gcc_version, "4.9"): return(true)
     skipBuild("Using gcc version $$gcc_version, but at least gcc version 4.9 is required to build QtWebKit.")
+    return(false)
+}
+
+defineTest(isRubyVersionSupported) {
+    ruby_version = $$system("ruby -e 'puts RUBY_VERSION'")
+    isVersionAtLeast($$ruby_version, "1.9"): return(true)
+    skipBuild("Using Ruby version $$ruby_version, but at least Ruby 1.9 is required to build QtWebKit.")
     return(false)
 }
 

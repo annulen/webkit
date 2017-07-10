@@ -166,8 +166,7 @@ void QWebInspector::showEvent(QShowEvent* event)
 /*! \reimp */
 void QWebInspector::hideEvent(QHideEvent* event)
 {
-    if (d->page)
-        d->page->d->didCloseInspector();
+    QWidget::hideEvent(event);
 }
 
 /*! \reimp */

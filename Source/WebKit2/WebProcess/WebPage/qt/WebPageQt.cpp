@@ -29,11 +29,9 @@
 
 #include "NotImplemented.h"
 #include "PopupMenuClient.h"
-#include "WebEditorClient.h"
 #include "WebEvent.h"
 #include "WebPageProxyMessages.h"
 #include "WebPopupMenu.h"
-#include "WebProcess.h"
 #include <QClipboard>
 #include <QGuiApplication>
 #include <WebCore/EventHandler.h>
@@ -94,6 +92,19 @@ using namespace WebCore;
 namespace WebKit {
     
 void WebPage::platformInitialize()
+{
+}
+
+void WebPage::platformDetach()
+{
+}
+
+String WebPage::platformUserAgent(const WebCore::URL&) const
+{
+    return String();
+}
+
+void WebPage::platformEditorState(Frame&, EditorState&, WebPage::IncludePostLayoutDataHint) const
 {
 }
 
@@ -221,16 +232,6 @@ const char* WebPage::interpretKeyEvent(const KeyboardEvent* evt)
     return mapKey ? keyPressCommandsMap->get(mapKey) : 0;
 }
 
-static inline void scroll(Page* page, ScrollDirection direction, ScrollGranularity granularity)
-{
-    page->focusController().focusedOrMainFrame().eventHandler().scrollRecursively(direction, granularity);
-}
-
-static inline void logicalScroll(Page* page, ScrollLogicalDirection direction, ScrollGranularity granularity)
-{
-    page->focusController().focusedOrMainFrame().eventHandler().logicalScrollRecursively(direction, granularity);
-}
-
 bool WebPage::performDefaultBehaviorForKeyEvent(const WebKeyboardEvent& keyboardEvent)
 {
     if (keyboardEvent.type() != WebEvent::KeyDown && keyboardEvent.type() != WebEvent::RawKeyDown)
@@ -296,31 +297,6 @@ PassRefPtr<SharedBuffer> WebPage::cachedResponseDataForURL(const URL&)
 {
     notImplemented();
     return 0;
-}
-
-void WebPage::registerApplicationScheme(const String& scheme)
-{
-    QtNetworkAccessManager* qnam = qobject_cast<QtNetworkAccessManager*>(WebProcess::singleton().networkAccessManager());
-    if (!qnam)
-        return;
-    qnam->registerApplicationScheme(this, QString(scheme));
-}
-
-void WebPage::receivedApplicationSchemeRequest(const QNetworkRequest& request, QtNetworkReply* reply)
-{
-    QtNetworkRequestData requestData(request, reply);
-    m_applicationSchemeReplies.add(requestData.m_replyUuid, reply);
-    send(Messages::WebPageProxy::ResolveApplicationSchemeRequest(requestData));
-}
-
-void WebPage::applicationSchemeReply(const QtNetworkReplyData& replyData)
-{
-    if (!m_applicationSchemeReplies.contains(replyData.m_replyUuid))
-        return;
-
-    QtNetworkReply* networkReply = m_applicationSchemeReplies.take(replyData.m_replyUuid);
-    networkReply->setReplyData(replyData);
-    networkReply->finalize();
 }
 
 void WebPage::selectedIndex(int32_t newIndex)

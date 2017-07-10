@@ -33,7 +33,6 @@
 #include "Widget.h"
 
 #include "Cursor.h"
-#include "Font.h"
 #include "GraphicsContext.h"
 #include "HostWindow.h"
 #include "IntRect.h"
@@ -42,7 +41,6 @@
 #include "FrameView.h"
 
 #include <QCoreApplication>
-#include <QDebug>
 #include <QPaintEngine>
 #include <QPainter>
 

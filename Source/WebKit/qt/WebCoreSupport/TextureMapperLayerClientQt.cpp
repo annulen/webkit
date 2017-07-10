@@ -31,7 +31,7 @@
 
 using namespace WebCore;
 
-TextureMapperLayerClientQt::TextureMapperLayerClientQt(QWebFrameAdapter* frame)
+TextureMapperLayerClientQt::TextureMapperLayerClientQt(QWebFrameAdapter& frame)
     : m_frame(frame)
     , m_syncTimer(*this, &TextureMapperLayerClientQt::syncLayers)
     , m_rootTextureMapperLayer(0)
@@ -70,9 +70,10 @@ void TextureMapperLayerClientQt::setRootGraphicsLayer(GraphicsLayer* layer)
         m_rootGraphicsLayer->setDrawsContent(false);
         m_rootGraphicsLayer->setMasksToBounds(false);
         m_rootGraphicsLayer->setSize(IntSize(1, 1));
-        if (!m_frame->pageAdapter->client->makeOpenGLContextCurrentIfAvailable())
-            ASSERT_WITH_MESSAGE(false, "TextureMapper::SoftwareMode is not implemented");
-        m_textureMapper = TextureMapper::create();
+        TextureMapper::AccelerationMode mode = TextureMapper::SoftwareMode;
+        if (pageClient() && pageClient()->makeOpenGLContextCurrentIfAvailable())
+            mode = TextureMapper::OpenGLMode;
+        m_textureMapper = TextureMapper::create(mode);
         m_rootTextureMapperLayer->setTextureMapper(m_textureMapper.get());
         syncRootLayer();
     } else {
@@ -86,17 +87,19 @@ void TextureMapperLayerClientQt::syncLayers()
     if (m_rootGraphicsLayer)
         syncRootLayer();
 
-    m_frame->frame->view()->flushCompositingStateIncludingSubframes();
+    bool didSync = m_frame.frame->view()->flushCompositingStateIncludingSubframes();
 
     if (!m_rootGraphicsLayer)
         return;
 
-    downcast<GraphicsLayerTextureMapper>(*m_rootGraphicsLayer).updateBackingStoreIncludingSubLayers();
+    if (didSync)
+        downcast<GraphicsLayerTextureMapper>(*m_rootGraphicsLayer).updateBackingStoreIncludingSubLayers();
 
     if (rootLayer()->descendantsOrSelfHaveRunningAnimations() && !m_syncTimer.isActive())
         m_syncTimer.startOneShot(1.0 / 60.0);
 
-    m_frame->pageAdapter->client->repaintViewport();
+    if (pageClient())
+        pageClient()->repaintViewport();
 }
 
 void TextureMapperLayerClientQt::renderCompositedLayers(GraphicsContext& context, const IntRect& clip)
@@ -116,8 +119,7 @@ void TextureMapperLayerClientQt::renderCompositedLayers(GraphicsContext& context
     m_textureMapper->setTextDrawingMode(context.textDrawingMode());
     QPainter* painter = context.platformContext();
     QTransform transform;
-    // QTFIXME: Restore SoftwareMode
-    if (true /*m_textureMapper->accelerationMode() == TextureMapper::OpenGLMode*/) {
+    if (m_textureMapper->accelerationMode() == TextureMapper::OpenGLMode) {
         // TextureMapperGL needs to duplicate the entire transform QPainter would do,
         // including the transforms QPainter would normally do behind the scenes.
         transform = painter->deviceTransform();
@@ -143,4 +145,9 @@ void TextureMapperLayerClientQt::renderCompositedLayers(GraphicsContext& context
     m_fpsCounter.updateFPSAndDisplay(*m_textureMapper.get(), IntPoint::zero(), matrix);
     m_textureMapper->endClip();
     m_textureMapper->endPainting();
+}
+
+QWebPageClient* TextureMapperLayerClientQt::pageClient() const
+{
+    return m_frame.pageAdapter->client.data();
 }

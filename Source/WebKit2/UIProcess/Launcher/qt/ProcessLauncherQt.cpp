@@ -36,16 +36,12 @@
 #include <QProcess>
 #include <QString>
 #include <QtCore/qglobal.h>
-#include <wtf/HashSet.h>
-#include <wtf/PassRefPtr.h>
 #include <wtf/RunLoop.h>
-#include <wtf/Threading.h>
 #include <wtf/text/WTFString.h>
 
 #if defined(Q_OS_UNIX)
 #include <errno.h>
 #include <fcntl.h>
-#include <runtime/InitializeThreading.h>
 #include <string>
 #include <sys/resource.h>
 #include <sys/socket.h>
@@ -117,14 +113,20 @@ void ProcessLauncher::launchProcess()
         commandLine = QLatin1String("%1 \"%2\" %3");
         QByteArray webProcessPrefix = qgetenv("QT_WEBKIT2_WP_CMD_PREFIX");
         commandLine = commandLine.arg(QLatin1String(webProcessPrefix.constData())).arg(QString(executablePathOfWebProcess()));
+    } else if (m_launchOptions.processType == ProcessType::Network) {
+        commandLine = QLatin1String("%1 \"%2\" %3");
+        QByteArray networkProcessPrefix = qgetenv("QT_WEBKIT2_NP_CMD_PREFIX");
+        commandLine = commandLine.arg(QLatin1String(networkProcessPrefix.constData())).arg(QString(executablePathOfNetworkProcess()));
 #if ENABLE(PLUGIN_PROCESS)
-    } else if (m_launchOptions.processType == PluginProcess) {
+    } else if (m_launchOptions.processType == ProcessType::Plugin32 || m_launchOptions.processType == ProcessType::Plugin64) {
         commandLine = QLatin1String("%1 \"%2\" %3 %4");
         QByteArray pluginProcessPrefix = qgetenv("QT_WEBKIT2_PP_CMD_PREFIX");
         commandLine = commandLine.arg(QLatin1String(pluginProcessPrefix.constData())).arg(QString(executablePathOfPluginProcess()));
 #endif
-    } else
+    } else {
+        qDebug() << "Unsupported process type" << (int)m_launchOptions.processType;
         ASSERT_NOT_REACHED();
+    }
 
 #if OS(DARWIN)
     // Create the listening port.
@@ -173,7 +175,7 @@ void ProcessLauncher::launchProcess()
 #endif
 
 #if ENABLE(PLUGIN_PROCESS)
-    if (m_launchOptions.processType == PluginProcess)
+    if (m_launchOptions.processType == ProcessType::Plugin32 || m_launchOptions.processType == ProcessType::Plugin64)
         commandLine = commandLine.arg(QString(m_launchOptions.extraInitializationData.get("plugin-path")));
 #endif
 

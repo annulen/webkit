@@ -144,6 +144,7 @@ protected Q_SLOTS:
     void toggleJavascriptCanOpenWindows(bool enable);
     void toggleAutoLoadImages(bool enable);
     void togglePrivateBrowsing(bool enable);
+    void toggleWebSecurity(bool enable);
     void setUseDiskCookies(bool enable);
     void clearCookies();
     void togglePlugins(bool enable);
@@ -176,6 +177,7 @@ protected Q_SLOTS:
 #endif
 
     void clearMemoryCaches();
+    void clearPageSelection();
 
 public Q_SLOTS:
     LauncherWindow* newWindow();
@@ -195,6 +197,8 @@ private:
     bool isGraphicsBased() const;
 
 private:
+    void closeEvent(QCloseEvent*) final;
+
     static QVector<int> m_zoomLevels;
     int m_currentZoom;
 

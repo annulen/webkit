@@ -26,7 +26,10 @@ list(APPEND WebCore_INCLUDE_DIRECTORIES
     "${THIRDPARTY_DIR}/ANGLE/include/KHR"
     "${WEBCORE_DIR}/Modules/gamepad"
     "${WEBCORE_DIR}/bridge/qt"
+    "${WEBCORE_DIR}/dom/qt"
+    "${WEBCORE_DIR}/editing/qt"
     "${WEBCORE_DIR}/history/qt"
+    "${WEBCORE_DIR}/page/qt"
     "${WEBCORE_DIR}/platform/qt"
     "${WEBCORE_DIR}/platform/audio/qt"
     "${WEBCORE_DIR}/platform/graphics/egl"
@@ -40,6 +43,7 @@ list(APPEND WebCore_INCLUDE_DIRECTORIES
     "${WEBCORE_DIR}/platform/network/qt"
     "${WEBCORE_DIR}/platform/text/qt"
     "${WEBCORE_DIR}/platform/win"
+    "${WEBCORE_DIR}/platform/graphics/x11"
     "${WTF_DIR}"
 )
 
@@ -53,17 +57,24 @@ list(APPEND WebCore_SOURCES
     bridge/qt/qt_pixmapruntime.cpp
     bridge/qt/qt_runtime.cpp
 
+    dom/qt/GestureEvent.cpp
+
     editing/qt/EditorQt.cpp
 
     page/qt/DragControllerQt.cpp
     page/qt/EventHandlerQt.cpp
+    page/qt/TouchAdjustment.cpp
 
     platform/KillRingNone.cpp
 
     platform/audio/qt/AudioBusQt.cpp
 
     platform/graphics/ImageSource.cpp
+    platform/graphics/PlatformDisplay.cpp
     platform/graphics/WOFFFileFormat.cpp
+
+    platform/graphics/texmap/BitmapTextureImageBuffer.cpp
+    platform/graphics/texmap/TextureMapperImageBuffer.cpp
 
     platform/graphics/qt/ColorQt.cpp
     platform/graphics/qt/FloatPointQt.cpp
@@ -85,7 +96,6 @@ list(APPEND WebCore_SOURCES
     platform/graphics/qt/IntPointQt.cpp
     platform/graphics/qt/IntRectQt.cpp
     platform/graphics/qt/IntSizeQt.cpp
-    platform/graphics/qt/QFramebufferPaintDevice.cpp
     platform/graphics/qt/PathQt.cpp
     platform/graphics/qt/PatternQt.cpp
     platform/graphics/qt/StillImageQt.cpp
@@ -93,6 +103,9 @@ list(APPEND WebCore_SOURCES
     platform/graphics/qt/TransformationMatrixQt.cpp
 
     platform/graphics/surfaces/qt/GraphicsSurfaceQt.cpp
+
+    platform/graphics/x11/PlatformDisplayX11.cpp
+    platform/graphics/x11/XUniqueResource.cpp
 
     platform/network/NetworkStorageSessionStub.cpp
     platform/network/MIMESniffing.cpp
@@ -149,11 +162,25 @@ list(APPEND WebCore_SOURCES
     platform/text/qt/TextBreakIteratorInternalICUQt.cpp
 )
 
+QTWEBKIT_GENERATE_MOC_FILES_CPP(
+    platform/network/qt/DNSQt.cpp
+    platform/qt/MainThreadSharedTimerQt.cpp
+)
+
+QTWEBKIT_GENERATE_MOC_FILES_H(
+    platform/network/qt/CookieJarQt.h
+    platform/network/qt/QNetworkReplyHandler.h
+    platform/network/qt/QtMIMETypeSniffer.h
+)
+
+QTWEBKIT_GENERATE_MOC_FILE_H(platform/network/qt/NetworkStateNotifierPrivate.h platform/network/qt/NetworkStateNotifierQt.cpp)
+QTWEBKIT_GENERATE_MOC_FILE_H(platform/network/qt/SocketStreamHandlePrivate.h platform/network/qt/SocketStreamHandleQt.cpp)
+
 if (COMPILER_IS_GCC_OR_CLANG)
     set_source_files_properties(
         platform/graphics/qt/ImageBufferDataQt.cpp
     PROPERTIES
-        COMPILE_FLAGS -frtti
+        COMPILE_FLAGS "-frtti -UQT_NO_DYNAMIC_CAST"
     )
 endif ()
 
@@ -170,6 +197,7 @@ if (ENABLE_GAMEPAD_DEPRECATED)
     list(APPEND WebCore_SOURCES
         platform/qt/GamepadsQt.cpp
     )
+    QTWEBKIT_GENERATE_MOC_FILES_CPP(platform/qt/GamepadsQt.cpp)
 endif ()
 
 if (ENABLE_GRAPHICS_CONTEXT_3D)
@@ -178,20 +206,38 @@ if (ENABLE_GRAPHICS_CONTEXT_3D)
     )
 endif ()
 
-if (ENABLE_NETSCAPE_PLUGIN_API AND WIN32)
-    set(WebCore_FORWARDING_HEADERS_FILES
-        platform/graphics/win/LocalWindowsContext.h
-        platform/win/BitmapInfo.h
-        platform/win/WebCoreInstanceHandle.h
-    )
+if (ENABLE_NETSCAPE_PLUGIN_API)
+    if (WIN32)
+        list(APPEND WebCore_FORWARDING_HEADERS_FILES
+            platform/graphics/win/LocalWindowsContext.h
+
+            platform/win/BitmapInfo.h
+            platform/win/WebCoreInstanceHandle.h
+        )
+        list(APPEND WebCore_SOURCES
+            platform/graphics/win/TransformationMatrixWin.cpp
+
+            platform/win/BitmapInfo.cpp
+            platform/win/WebCoreInstanceHandle.cpp
+        )
+        list(APPEND WebCore_LIBRARIES
+            Shlwapi
+            version
+        )
+    elseif (PLUGIN_BACKEND_XLIB)
+        list(APPEND WebCore_FORWARDING_HEADERS_FILES
+           plugins/qt/QtX11ImageConversion.h
+        )
+        list(APPEND WebCore_SOURCES
+            plugins/qt/QtX11ImageConversion.cpp
+        )
+    endif ()
+endif ()
+
+if (ENABLE_SMOOTH_SCROLLING)
     list(APPEND WebCore_SOURCES
-        platform/graphics/win/TransformationMatrixWin.cpp
-        platform/win/BitmapInfo.cpp
-        platform/win/WebCoreInstanceHandle.cpp
-    )
-    list(APPEND WebCore_LIBRARIES
-        Shlwapi
-        version
+        platform/ScrollAnimationSmooth.cpp
+        platform/ScrollAnimatorSmooth.cpp
     )
 endif ()
 
@@ -219,7 +265,6 @@ list(APPEND WebCore_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
     ${Qt5Network_INCLUDE_DIRS}
     ${Qt5Sensors_INCLUDE_DIRS}
-    ${Qt5Sql_INCLUDE_DIRS}
     ${SQLITE_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIRS}
 )
@@ -232,8 +277,8 @@ list(APPEND WebCore_LIBRARIES
     ${Qt5Gui_LIBRARIES}
     ${Qt5Network_LIBRARIES}
     ${Qt5Sensors_LIBRARIES}
-    ${Qt5Sql_LIBRARIES}
     ${SQLITE_LIBRARIES}
+    ${X11_X11_LIB}
     ${ZLIB_LIBRARIES}
 )
 
@@ -255,6 +300,16 @@ if (ENABLE_WEBKIT2)
     list(APPEND WebCore_SOURCES
         page/qt/GestureTapHighlighter.cpp
     )
+    if (USE_MACH_PORTS)
+        list(APPEND WebCore_FORWARDING_HEADERS_FILES
+            platform/cocoa/MachSendRight.h
+
+            platform/spi/cocoa/MachVMSPI.h
+        )
+        list(APPEND WebCore_SOURCES
+            platform/cocoa/MachSendRight.cpp
+        )
+    endif ()
 endif ()
 
 if (ENABLE_OPENGL)
@@ -262,6 +317,8 @@ if (ENABLE_OPENGL)
         platform/graphics/opengl/Extensions3DOpenGLCommon.cpp
         platform/graphics/opengl/GraphicsContext3DOpenGLCommon.cpp
         platform/graphics/opengl/TemporaryOpenGLSetting.cpp
+
+        platform/graphics/qt/QFramebufferPaintDevice.cpp
     )
 
     if (${Qt5Gui_OPENGL_IMPLEMENTATION} STREQUAL GLESv2)
@@ -317,6 +374,7 @@ if (USE_QT_MULTIMEDIA)
     list(APPEND WebCore_LIBRARIES
         ${Qt5Multimedia_LIBRARIES}
     )
+    QTWEBKIT_GENERATE_MOC_FILES_H(platform/graphics/qt/MediaPlayerPrivateQt.h)
 endif ()
 
 if (ENABLE_VIDEO)
@@ -381,36 +439,6 @@ if (WIN32)
 
     list(APPEND WebCore_SOURCES
         platform/win/SystemInfo.cpp
-    )
-endif ()
-
-if (MSVC)
-    list(APPEND WebCore_INCLUDE_DIRECTORIES
-        "${CMAKE_BINARY_DIR}/../include/private"
-        "${CMAKE_BINARY_DIR}/../include/private/JavaScriptCore"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/ANGLE"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/ANGLE/include/KHR"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/ForwardingHeaders"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/API"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/assembler"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/builtins"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/bytecode"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/bytecompiler"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/dfg"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/disassembler"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/heap"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/debugger"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/interpreter"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/jit"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/llint"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/parser"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/profiler"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/runtime"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/JavaScriptCore/yarr"
-        "${DERIVED_SOURCES_DIR}/ForwardingHeaders/WTF"
-        "${WEBCORE_DIR}/ForwardingHeaders"
-        "${WEBCORE_DIR}/platform/win"
     )
 endif ()
 

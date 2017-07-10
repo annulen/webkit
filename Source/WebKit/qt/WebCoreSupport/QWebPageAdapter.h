@@ -228,8 +228,9 @@ public:
     virtual void createUndoStep(QSharedPointer<UndoStepQt>) = 0;
 
     virtual void updateNavigationActions() = 0;
+    virtual void clearCustomActions() = 0;
 
-    virtual QWebFrameAdapter* mainFrameAdapter() = 0;
+    virtual QWebFrameAdapter& mainFrameAdapter() = 0;
 
     virtual QObject* inspectorHandle() = 0;
     virtual void setInspectorFrontend(QObject*) = 0;
@@ -273,7 +274,7 @@ public:
             Separator,
             SubMenu
         } type;
-        MenuAction action;
+        int action;
         enum Trait {
             None = 0,
             Enabled = 1,
@@ -314,6 +315,7 @@ public:
 
     void adjustPointForClicking(QMouseEvent*);
 
+    bool tryClosePage();
     void mouseMoveEvent(QMouseEvent*);
     void mousePressEvent(QMouseEvent*);
     void mouseDoubleClickEvent(QMouseEvent*);
@@ -344,20 +346,21 @@ public:
     QWebHitTestResultPrivate* updatePositionDependentMenuActions(const QPoint&, QBitArray*);
     void updateActionInternal(MenuAction, const char* commandName, bool* enabled, bool* checked);
     void triggerAction(MenuAction, QWebHitTestResultPrivate*, const char* commandName, bool endToEndReload);
+    void triggerCustomAction(int action, const QString &title);
     QString contextMenuItemTagForAction(MenuAction, bool* checkable) const;
 
     QStringList supportedContentTypes() const;
 #if ENABLE(GEOLOCATION) && HAVE(QTPOSITIONING)
     void setGeolocationEnabledForFrame(QWebFrameAdapter*, bool);
 #endif
-#if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
+#if ENABLE(NOTIFICATIONS)
     void setNotificationsAllowedForFrame(QWebFrameAdapter*, bool allowed);
     void addNotificationPresenterClient();
 #ifndef QT_NO_SYSTEMTRAYICON
     bool hasSystemTrayIcon() const;
     void setSystemTrayIcon(QObject*);
 #endif // QT_NO_SYSTEMTRAYICON
-#endif // ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
+#endif // ENABLE(NOTIFICATIONS)
 
     // Called from QWebPage as private slots.
     void _q_cleanupLeakMessages();
@@ -384,6 +387,7 @@ public:
 
     ViewportAttributes viewportAttributesForSize(const QSize& availableSize, const QSize& deviceSize) const;
     void setDevicePixelRatio(float devicePixelRatio);
+    float devicePixelRatio();
 
     bool isPlayingAudio() const;
 

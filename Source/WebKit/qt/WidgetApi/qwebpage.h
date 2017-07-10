@@ -193,6 +193,10 @@ public:
         ToggleMediaMute,
         ToggleVideoFullscreen,
 
+        RequestClose,
+
+        Unselect,
+
         WebActionCount
     };
 
@@ -328,8 +332,13 @@ public:
 
 #ifndef QT_NO_ACTION
     QAction *action(WebAction action) const;
+    QAction *customAction(int action) const;
 #endif
     virtual void triggerAction(WebAction action, bool checked = false);
+
+    void setDevicePixelRatio(qreal ratio);
+    qreal devicePixelRatio() const;
+    void resetDevicePixelRatio();
 
     QSize viewportSize() const;
     void setViewportSize(const QSize &size) const;
@@ -476,6 +485,7 @@ private:
     Q_PRIVATE_SLOT(d, void _q_onLoadProgressChanged(int))
 #ifndef QT_NO_ACTION
     Q_PRIVATE_SLOT(d, void _q_webActionTriggered(bool checked))
+    Q_PRIVATE_SLOT(d, void _q_customActionTriggered(bool checked))
 #endif
     Q_PRIVATE_SLOT(d, void _q_cleanupLeakMessages())
     Q_PRIVATE_SLOT(d, void _q_updateScreen(QScreen*))

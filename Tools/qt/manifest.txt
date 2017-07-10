@@ -69,16 +69,29 @@ exclude Source/WebKit2/Resources
 file Source/WebCore/English.lproj/mediaControlsLocalizedStrings.js
 
 # Windows-specific code
-file Source/WTF/wtf/win/GDIObject.h
+file Source/WTF/wtf/text/win
+file Source/WTF/wtf/threads/win/BinarySemaphoreWin.cpp
+file Source/WTF/wtf/win
 file Source/WebCore/platform/graphics/win/LocalWindowsContext.h
 file Source/WebCore/platform/graphics/win/MediaPlayerPrivateMediaFoundation.cpp
+file Source/WebCore/platform/graphics/win/MediaPlayerPrivateMediaFoundation.h
 file Source/WebCore/platform/graphics/win/TransformationMatrixWin.cpp
-file Source/WebCore/platform/win/BitmapInfo.cpp
-file Source/WebCore/platform/win/BitmapInfo.h
-file Source/WebCore/platform/win/SystemInfo.cpp
-file Source/WebCore/platform/win/SystemInfo.h
-file Source/WebCore/platform/win/WebCoreInstanceHandle.cpp
-file Source/WebCore/platform/win/WebCoreInstanceHandle.h
+file Source/WebCore/platform/win
+
+# macOS-specific code
+file Source/WTF/wtf/cf
+file Source/WTF/wtf/cocoa
+file Source/WTF/wtf/text/cf
+file Source/WebCore/platform/cf/SharedBufferCF.cpp
+file Source/WebCore/platform/cocoa/MachSendRight.cpp
+file Source/WebCore/platform/cocoa/MachSendRight.h
+file Source/WebCore/platform/spi/cocoa/MachVMSPI.h
+
+# WK2 on Windows and macOS
+file Source/WebKit2/Platform/IPC/mac
+file Source/WebKit2/Platform/IPC/win
+file Source/WebKit2/Platform/mac
+file Source/WebKit2/Platform/win
 
 # WK1 plugin code is in WebKit/win
 file Source/WebKit/win/Plugins
@@ -99,8 +112,12 @@ file Source/WebCore/Resources/plugIns.js
 
 # WebCore.qrc
 file Source/WebCore/Resources/missingImage.png
+file Source/WebCore/Resources/missingImage@2x.png
+file Source/WebCore/Resources/missingImage@3x.png
 file Source/WebCore/Resources/nullPlugin.png
+file Source/WebCore/Resources/nullPlugin@2x.png
 file Source/WebCore/Resources/textAreaResizeCorner.png
+file Source/WebCore/Resources/textAreaResizeCorner@2x.png
 file Source/WebCore/Resources/urlIcon.png
 file Source/WebCore/Resources/zoomInCursor.png
 file Source/WebCore/Resources/zoomOutCursor.png

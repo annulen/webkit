@@ -33,8 +33,12 @@ macro(ADD_PRECOMPILED_HEADER _header _cpp _source)
             PROPERTIES COMPILE_FLAGS "/Yc\"${_header}\" /Fp\"${PrecompiledBinary}\""
             OBJECT_OUTPUTS "${PrecompiledBinary}")
         set_source_files_properties(${_sources}
-            PROPERTIES COMPILE_FLAGS "/Yu\"${_header}\" /FI\"${_header}\" /Fp\"${PrecompiledBinary}\""
-            OBJECT_DEPENDS "${PrecompiledBinary}")
+            PROPERTIES COMPILE_FLAGS "/Yu\"${_header}\" /FI\"${_header}\" /Fp\"${PrecompiledBinary}\"")
+
+        foreach (_src ${_sources})
+            ADD_SOURCE_DEPENDENCIES(${_src} ${PrecompiledBinary})
+        endforeach ()
+
         list(APPEND ${_source} ${_cpp})
     endif ()
     #FIXME: Add support for Xcode.
@@ -374,7 +378,9 @@ macro(GENERATE_WEBKIT2_MESSAGE_SOURCES _output_source _input_files)
 endmacro()
 
 macro(MAKE_JS_FILE_ARRAYS _output_cpp _output_h _scripts _scripts_dependencies)
-    if (WIN32)
+    if (NOT CMAKE_VERSION VERSION_LESS 3.1)
+        set(_python_path ${CMAKE_COMMAND} -E env "PYTHONPATH=${JavaScriptCore_SCRIPTS_DIR}")
+    elseif (WIN32)
         set(_python_path set "PYTHONPATH=${JavaScriptCore_SCRIPTS_DIR}" &&)
     else ()
         set(_python_path "PYTHONPATH=${JavaScriptCore_SCRIPTS_DIR}")

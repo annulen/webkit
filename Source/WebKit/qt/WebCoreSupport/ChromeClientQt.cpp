@@ -416,7 +416,7 @@ void ChromeClientQt::invalidateRootView(const IntRect& windowRect)
 {
 #if USE(TILED_BACKING_STORE)
     if (platformPageClient()) {
-        WebCore::TiledBackingStore* backingStore = m_webPage->mainFrameAdapter()->frame->tiledBackingStore();
+        WebCore::TiledBackingStore* backingStore = m_webPage->mainFrameAdapter().frame->tiledBackingStore();
         if (!backingStore)
             return;
         backingStore->invalidate(windowRect);
@@ -453,11 +453,11 @@ void ChromeClientQt::scroll(const IntSize& delta, const IntRect& scrollViewRect,
     QMetaObject::invokeMethod(m_webPage->handle(), "scrollRequested", Q_ARG(int, delta.width()), Q_ARG(int, delta.height()), Q_ARG(QRect, scrollViewRect));
 }
 
-#if USE(TILED_BACKING_STORE)
+#if USE(COORDINATED_GRAPHICS)
 void ChromeClientQt::delegatedScrollRequested(const IntPoint& point)
 {
 
-    const QPoint ofs = m_webPage->mainFrameAdapter()->scrollPosition();
+    const QPoint ofs = m_webPage->mainFrameAdapter().scrollPosition();
     IntSize currentPosition(ofs.x(), ofs.y());
     int x = point.x() - currentPosition.width();
     int y = point.y() - currentPosition.height();
@@ -620,7 +620,7 @@ void ChromeClientQt::scheduleAnimation()
 
 void ChromeClientQt::serviceScriptedAnimations()
 {
-    m_webPage->mainFrameAdapter()->frame->view()->serviceScriptedAnimations(currentTime());
+    m_webPage->mainFrameAdapter().frame->view()->serviceScriptedAnimations(currentTime());
 }
 #endif
 
@@ -660,9 +660,9 @@ IntRect ChromeClientQt::visibleRectForTiledBackingStore() const
         return IntRect();
 
     if (!platformPageClient()->viewResizesToContentsEnabled()) {
-        const QPoint ofs = m_webPage->mainFrameAdapter()->scrollPosition();
+        const QPoint ofs = m_webPage->mainFrameAdapter().scrollPosition();
         IntSize offset(ofs.x(), ofs.y());
-        return QRect(QPoint(offset.width(), offset.height()), m_webPage->mainFrameAdapter()->frameRect().size());
+        return QRect(QPoint(offset.width(), offset.height()), m_webPage->mainFrameAdapter().frameRect().size());
     }
 
     return enclosingIntRect(FloatRect(platformPageClient()->graphicsItemVisibleRect()));

@@ -1,3 +1,106 @@
+2016-07-16  Filip Pizlo  <fpizlo@apple.com>
+
+        DFG CSE is broken for MultiGetByOffset
+        https://bugs.webkit.org/show_bug.cgi?id=159858
+
+        Reviewed by Saam Barati.
+        
+        This disabled CSE for MultiGetByOffset. I opened bug 159859 for the long-term fix, which
+        would teach CSE (and other passes also) how to decay a removed MultiGetByOffset to a
+        CheckStructure. Since we currently just decay MultiGetByOffset to Check, we forget the
+        structure checks. So, if we CSE a MultiGetByOffset that checks for one set of structures with
+        a heap access on the same property and base that checks for different structures, then we
+        will forget some structure checks that we had previously. It's unsound to forget checks in
+        DFG IR.
+        
+        This bug mostly manifested as a high-volume crash at Unreachable in FTL, because we'd prove
+        that the code after the MultiGetByOffset was unreachable due to the structure checks and then
+        CSE would remove everything but the Unreachable.
+
+        * dfg/DFGClobberize.h:
+        (JSC::DFG::clobberize): Remove the def() for MultiGetByOffset to disable CSE for this node for now.
+        * tests/stress/cse-multi-get-by-offset-remove-checks.js: Added. This used to fail with FTL enabled.
+        (Cons1):
+        (Cons2):
+        (Cons3):
+        (foo):
+        (bar):
+
+2016-09-15  Keith Miller  <keith_miller@apple.com>
+
+
+        Pragma out undefined-var-template warnings in JSC for JSObjects that are templatized
+        https://bugs.webkit.org/show_bug.cgi?id=161985
+
+        Reviewed by Alex Christensen.
+
+        I started a true fix for this in
+        https://bugs.webkit.org/show_bug.cgi?id=161979, however the fix
+        for this issue is not sustainable. Since the scope of this issue
+        is just limited to the static const ClassInfo member it is
+        simpler to just pragma out this warning. This works because
+        COMDAT will, AFAIK, pick the actual specialization.  If, in the
+        future, we want to expose these classes to WebCore we will need to
+        do what we do for JSGenericTypedArrayViews and create a custom
+        info() function with a switch.
+
+        This patch also fixes a bunch of weak external symbols due to one of:
+        1) out of line template member definitions functions not being marked inline.
+        2) inline member functions definitions being marked as exported.
+        3) missing header file includes for forward function declarations.
+
+        * API/JSCallbackObject.h:
+        * b3/B3ValueInlines.h:
+        (JSC::B3::Value::as):
+        * runtime/HashMapImpl.cpp:
+        (JSC::getHashMapBucketKeyClassInfo):
+        (JSC::getHashMapBucketKeyValueClassInfo):
+        (JSC::getHashMapImplKeyClassInfo):
+        (JSC::getHashMapImplKeyValueClassInfo):
+        * runtime/HashMapImpl.h:
+        (JSC::HashMapBucket::info):
+        (JSC::HashMapImpl::info):
+        * runtime/JSCJSValue.h:
+        (JSC::toUInt32): Deleted.
+        * runtime/JSGenericTypedArrayView.h:
+        (JSC::JSGenericTypedArrayView::setIndexQuicklyToDouble):
+        * runtime/JSGenericTypedArrayViewConstructor.h:
+        * runtime/JSGenericTypedArrayViewPrototype.h:
+        * runtime/MathCommon.h:
+        (JSC::toUInt32):
+        * runtime/TypedArrayAdaptors.h:
+        * runtime/VM.h:
+        (JSC::VM::watchdog):
+        (JSC::VM::heapProfiler):
+        (JSC::VM::samplingProfiler):
+
+2016-04-20  Michael Saboff  <msaboff@apple.com>
+
+        REGRESSION(r190289): Spin trying to view/sign in to hbogo.com
+        https://bugs.webkit.org/show_bug.cgi?id=156765
+
+        Reviewed by Saam Barati.
+
+        In the op_get_by_val case, we were holding the lock on a profiled CodeBlock
+        when we call into handleGetById(). Changed to drop the lock before calling
+        handleGetById().
+
+        The bug here was that the call to handleGetById() may end up calling in to
+        getPredictionWithoutOSRExit() for a tail call opcode. As part of that
+        processing, we walk back up the stack to find the effective caller and when
+        found, we lock the corresponding CodeBlock to get the predicition.
+        That CodeBLock may be the same one locked above. There is no need anyway
+        to hold the CodeBlock lock when calling handleGetById().
+
+        Added a new stress test.
+
+        * dfg/DFGByteCodeParser.cpp:
+        (JSC::DFG::ByteCodeParser::parseBlock):
+        * tests/stress/regress-156765.js: Added.
+        (realValue):
+        (object.get hello):
+        (ok):
+
 2016-12-20  Konstantin Tokarev  <annulen@yandex.ru>
 
         __cpuid() requires <intrin.h> to be included

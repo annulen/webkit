@@ -19,6 +19,10 @@
 
 #include "config.h"
 
+#if OS(WINDOWS)
+#include <windows.h>
+#endif
+
 #include "private/qquicknetworkreply_p.h"
 #include "private/qquicknetworkrequest_p.h"
 #include "private/qquickwebpage_p.h"
@@ -35,7 +39,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QQuickWebViewExperimentalExtension : public QObject {
+class QQuickWebViewExperimentalExtension final : public QObject {
     Q_OBJECT
     Q_PROPERTY(QQuickWebViewExperimental* experimental READ experimental CONSTANT FINAL)
 public:
@@ -43,11 +47,11 @@ public:
     QQuickWebViewExperimental* experimental() { return static_cast<QQuickWebView*>(parent())->experimental(); }
 };
 
-class WebKitQmlExperimentalExtensionPlugin: public QQmlExtensionPlugin {
+class WebKitQmlExperimentalExtensionPlugin final : public QQmlExtensionPlugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface" FILE "plugin.json")
+    Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid FILE "plugin.json")
 public:
-    void registerTypes(const char* uri) override
+    void registerTypes(const char* uri) final
     {
         qWarning("\nWARNING: This project is using the experimental QML API extensions for QtWebKit and is therefore tied to a specific QtWebKit release.\n"
                  "WARNING: The experimental API will change from version to version, or even be removed. You have been warned!\n");

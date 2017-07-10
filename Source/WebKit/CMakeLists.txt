@@ -50,22 +50,37 @@ if (MSVC)
     endif ()
 endif ()
 
-set(WebKit_PRIVATE_HEADERS_LOCATION Headers/${PROJECT_VERSION}/QtWebKit/Private)
+set(WebKit_PRIVATE_HEADERS_LOCATION Headers/${PROJECT_VERSION}/QtWebKit/private)
 
 WEBKIT_FRAMEWORK(WebKit)
 
-set_target_properties(WebKit PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
-install(TARGETS WebKit EXPORT WebKitTargets
-        DESTINATION "${LIB_INSTALL_DIR}"
-        INCLUDES DESTINATION "${KDE_INSTALL_INCLUDEDIR}/QtWebKitWidgets"
-        RUNTIME DESTINATION "${BIN_INSTALL_DIR}"
-)
+if (${PORT} STREQUAL "Qt")
+    set_target_properties(WebKit PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+    install(TARGETS WebKit EXPORT WebKitTargets
+            DESTINATION "${LIB_INSTALL_DIR}"
+            RUNTIME DESTINATION "${BIN_INSTALL_DIR}"
+    )
+    if (MSVC AND NOT QT_STATIC_BUILD)
+        install(FILES $<TARGET_PDB_FILE:WebKit> DESTINATION "${BIN_INSTALL_DIR}" OPTIONAL)
+    endif ()
+
+    if (NOT MSVC)
+        ADD_PREFIX_HEADER(WebKit "${WEBKIT_DIR}/qt/WebKitPrefix.h")
+    endif ()
+
+    if (MACOS_BUILD_FRAMEWORKS)
+        set_target_properties(WebKit PROPERTIES
+            FRAMEWORK_VERSION 5
+            MACOSX_FRAMEWORK_IDENTIFIER org.qt-project.QtWebKit
+        )
+    endif ()
+
+    if (ENABLE_WEBKIT2)
+        add_dependencies(WebKit WebKit2)
+    endif ()
+endif ()
 
 add_dependencies(WebKit WebCore)
 if (TARGET WebKitGUID)
     add_dependencies(WebKit WebKitGUID)
-endif ()
-
-if (NOT MSVC AND ${PORT} STREQUAL "Qt")
-    ADD_PREFIX_HEADER(WebKit "${WEBKIT_DIR}/qt/WebKitPrefix.h")
 endif ()

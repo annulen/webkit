@@ -285,9 +285,9 @@ void QWebPageAdapter::initializeWebCorePage()
 
     page->addLayoutMilestones(DidFirstVisuallyNonEmptyLayout);
 
-    settings = new QWebSettings(&page->settings());
+    settings = new QWebSettings(page);
 
-#if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
+#if ENABLE(NOTIFICATIONS)
     WebCore::provideNotification(page, NotificationPresenterClientQt::notificationPresenter());
 #endif
 
@@ -299,7 +299,7 @@ QWebPageAdapter::~QWebPageAdapter()
     delete page;
     delete settings;
 
-#if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
+#if ENABLE(NOTIFICATIONS)
     NotificationPresenterClientQt::notificationPresenter()->removeClient();
 #endif
 #if ENABLE(DEVICE_ORIENTATION)
@@ -311,7 +311,7 @@ QWebPageAdapter::~QWebPageAdapter()
 void QWebPageAdapter::deletePage()
 {
     // Before we delete the page, detach the mainframe's loader
-    FrameLoader& loader = mainFrameAdapter()->frame->loader();
+    FrameLoader& loader = mainFrameAdapter().frame->loader();
     loader.detachFromParent();
     delete page;
     page = 0;
@@ -365,8 +365,12 @@ void QWebPageAdapter::setNetworkAccessManager(QNetworkAccessManager *manager)
 
 QNetworkAccessManager* QWebPageAdapter::networkAccessManager()
 {
-    if (!networkManager)
+    if (!networkManager) {
         networkManager = new QNetworkAccessManager(handle());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+        networkManager->setStrictTransportSecurityEnabled(true);
+#endif
+    }
     return networkManager;
 }
 
@@ -399,7 +403,7 @@ void QWebPageAdapter::setContentEditable(bool editable)
     page->setEditable(editable);
     page->setTabKeyCyclesThroughElements(!editable);
 
-    Frame* frame = mainFrameAdapter()->frame;
+    Frame* frame = mainFrameAdapter().frame;
     if (editable) {
         frame->editor().applyEditingStyleToBodyElement();
         // FIXME: mac port calls this if there is no selectedDOMRange
@@ -454,7 +458,7 @@ void QWebPageAdapter::adjustPointForClicking(QMouseEvent* ev)
 {
 #if ENABLE(TOUCH_ADJUSTMENT)
     QtPlatformPlugin platformPlugin;
-    OwnPtr<QWebTouchModifier> touchModifier = platformPlugin.createTouchModifier();
+    std::unique_ptr<QWebTouchModifier> touchModifier = platformPlugin.createTouchModifier();
     if (!touchModifier)
         return;
 
@@ -468,7 +472,7 @@ void QWebPageAdapter::adjustPointForClicking(QMouseEvent* ev)
     if (!topPadding && !rightPadding && !bottomPadding && !leftPadding)
         return;
 
-    FrameView* view = page->mainFrame()->view();
+    FrameView* view = page->mainFrame().view();
     ASSERT(view);
     if (view->scrollbarAtPoint(ev->pos()))
         return;
@@ -486,9 +490,14 @@ void QWebPageAdapter::adjustPointForClicking(QMouseEvent* ev)
 #endif
 }
 
+bool QWebPageAdapter::tryClosePage()
+{
+    return mainFrameAdapter().frame->loader().shouldClose();
+}
+
 void QWebPageAdapter::mouseMoveEvent(QMouseEvent* ev)
 {
-    WebCore::Frame* frame = mainFrameAdapter()->frame;
+    WebCore::Frame* frame = mainFrameAdapter().frame;
     if (!frame->view())
         return;
     if (ev->buttons() == Qt::NoButton)
@@ -500,7 +509,7 @@ void QWebPageAdapter::mouseMoveEvent(QMouseEvent* ev)
 
 void QWebPageAdapter::mousePressEvent(QMouseEvent* ev)
 {
-    WebCore::Frame* frame = mainFrameAdapter()->frame;
+    WebCore::Frame* frame = mainFrameAdapter().frame;
     if (!frame->view())
         return;
 
@@ -533,7 +542,7 @@ void QWebPageAdapter::mousePressEvent(QMouseEvent* ev)
 
 void QWebPageAdapter::mouseDoubleClickEvent(QMouseEvent *ev)
 {
-    WebCore::Frame* frame = mainFrameAdapter()->frame;
+    WebCore::Frame* frame = mainFrameAdapter().frame;
     if (!frame->view())
         return;
 
@@ -550,7 +559,7 @@ void QWebPageAdapter::mouseDoubleClickEvent(QMouseEvent *ev)
 
 void QWebPageAdapter::mouseTripleClickEvent(QMouseEvent *ev)
 {
-    WebCore::Frame* frame = mainFrameAdapter()->frame;
+    WebCore::Frame* frame = mainFrameAdapter().frame;
     if (!frame->view())
         return;
 
@@ -564,7 +573,7 @@ void QWebPageAdapter::mouseTripleClickEvent(QMouseEvent *ev)
 
 void QWebPageAdapter::mouseReleaseEvent(QMouseEvent *ev)
 {
-    WebCore::Frame* frame = mainFrameAdapter()->frame;
+    WebCore::Frame* frame = mainFrameAdapter().frame;
     if (!frame->view())
         return;
 
@@ -605,7 +614,7 @@ void QWebPageAdapter::handleSoftwareInputPanel(Qt::MouseButton button, const QPo
 #ifndef QT_NO_WHEELEVENT
 void QWebPageAdapter::wheelEvent(QWheelEvent *ev, int wheelScrollLines)
 {
-    WebCore::Frame* frame = mainFrameAdapter()->frame;
+    WebCore::Frame* frame = mainFrameAdapter().frame;
     if (!frame->view())
         return;
 
@@ -876,8 +885,11 @@ void QWebPageAdapter::dynamicPropertyChangeEvent(QObject* obj, QDynamicPropertyC
 #define MAP_ACTION_FROM_VALUE(Name, Value) \
     case Value: return QWebPageAdapter::Name
 
-static QWebPageAdapter::MenuAction adapterActionForContextMenuAction(WebCore::ContextMenuAction action)
+static int adapterActionForContextMenuAction(WebCore::ContextMenuAction action)
 {
+    if (action >= ContextMenuItemBaseCustomTag && action <= ContextMenuItemLastCustomTag)
+        return action;
+
     switch (action) {
         FOR_EACH_MAPPED_MENU_ACTION(MAP_ACTION_FROM_VALUE, SEMICOLON_SEPARATOR);
     case WebCore::ContextMenuItemTagInspectElement:
@@ -893,13 +905,12 @@ QList<MenuItem> descriptionForPlatformMenu(const Vector<ContextMenuItem>& items,
     QList<MenuItem> itemDescriptions;
     if (!items.size())
         return itemDescriptions;
-    for (int i = 0; i < items.size(); ++i) {
-        const ContextMenuItem &item = items.at(i);
+    for (const auto& item : items) {
         MenuItem description;
         switch (item.type()) {
         case WebCore::CheckableActionType: /* fall through */
         case WebCore::ActionType: {
-            QWebPageAdapter::MenuAction action = adapterActionForContextMenuAction(item.action());
+            int action = adapterActionForContextMenuAction(item.action());
             if (action > QWebPageAdapter::NoAction) {
                 description.type = MenuItem::Action;
                 description.action = action;
@@ -1024,7 +1035,7 @@ void QWebPageAdapter::didCloseInspector()
 
 void QWebPageAdapter::updateActionInternal(QWebPageAdapter::MenuAction action, const char* commandName, bool* enabled, bool* checked)
 {
-    WebCore::FrameLoader& loader = mainFrameAdapter()->frame->loader();
+    WebCore::FrameLoader& loader = mainFrameAdapter().frame->loader();
     WebCore::Editor& editor = page->focusController().focusedOrMainFrame().editor();
 
     switch (action) {
@@ -1132,11 +1143,11 @@ void QWebPageAdapter::triggerAction(QWebPageAdapter::MenuAction action, QWebHitT
         page->backForward().goForward();
         break;
     case Stop:
-        mainFrameAdapter()->frame->loader().stopForUserCancel();
+        mainFrameAdapter().frame->loader().stopForUserCancel();
         updateNavigationActions();
         break;
     case Reload:
-        mainFrameAdapter()->frame->loader().reload(endToEndReload);
+        mainFrameAdapter().frame->loader().reload(endToEndReload);
         break;
 
     case SetTextDirectionDefault:
@@ -1184,6 +1195,14 @@ void QWebPageAdapter::triggerAction(QWebPageAdapter::MenuAction action, QWebHitT
             editor.command(commandName).execute();
         break;
     }
+}
+
+void QWebPageAdapter::triggerCustomAction(int action, const QString &title)
+{
+    if (action >= ContextMenuItemBaseCustomTag && action <= ContextMenuItemLastCustomTag)
+        page->contextMenuController().contextMenuItemSelected(static_cast<ContextMenuAction>(action), title);
+    else
+        ASSERT_NOT_REACHED();
 }
 
 
@@ -1276,7 +1295,7 @@ QString QWebPageAdapter::contextMenuItemTagForAction(QWebPageAdapter::MenuAction
     }
 }
 
-#if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
+#if ENABLE(NOTIFICATIONS)
 void QWebPageAdapter::setNotificationsAllowedForFrame(QWebFrameAdapter* frame, bool allowed)
 {
     NotificationPresenterClientQt::notificationPresenter()->setNotificationsAllowedForFrame(frame->frame, allowed);
@@ -1298,7 +1317,7 @@ void QWebPageAdapter::setSystemTrayIcon(QObject *icon)
     NotificationPresenterClientQt::notificationPresenter()->setSystemTrayIcon(icon);
 }
 #endif // QT_NO_SYSTEMTRAYICON
-#endif // ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
+#endif // ENABLE(NOTIFICATIONS)
 
 #if ENABLE(GEOLOCATION) && HAVE(QTPOSITIONING)
 void QWebPageAdapter::setGeolocationEnabledForFrame(QWebFrameAdapter* frame, bool on)
@@ -1361,6 +1380,11 @@ QWebPageAdapter::ViewportAttributes QWebPageAdapter::viewportAttributesForSize(c
 void QWebPageAdapter::setDevicePixelRatio(float devicePixelRatio)
 {
     page->setDeviceScaleFactor(devicePixelRatio);
+}
+
+float QWebPageAdapter::devicePixelRatio()
+{
+    return page->deviceScaleFactor();
 }
 
 bool QWebPageAdapter::isPlayingAudio() const
@@ -1443,7 +1467,7 @@ void QWebPageAdapter::focusInEvent(QFocusEvent *)
     focusController.setActive(true);
     focusController.setFocused(true);
     if (!focusController.focusedFrame())
-        focusController.setFocusedFrame(mainFrameAdapter()->frame);
+        focusController.setFocusedFrame(mainFrameAdapter().frame);
 }
 
 void QWebPageAdapter::focusOutEvent(QFocusEvent *)
@@ -1493,7 +1517,7 @@ bool QWebPageAdapter::handleShortcutOverrideEvent(QKeyEvent* event)
 bool QWebPageAdapter::touchEvent(QTouchEvent* event)
 {
 #if ENABLE(TOUCH_EVENTS)
-    Frame* frame = mainFrameAdapter()->frame;
+    Frame* frame = mainFrameAdapter().frame;
     if (!frame->view() || !frame->document())
         return false;
 

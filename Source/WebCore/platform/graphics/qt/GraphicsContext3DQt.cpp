@@ -24,16 +24,13 @@
 #include "GraphicsSurface.h"
 #include "HostWindow.h"
 #include "ImageBuffer.h"
-#include "ImageData.h"
 #include "NativeImageQt.h"
-#include "NotImplemented.h"
 #include "QWebPageClient.h"
 #include "SharedBuffer.h"
 #include "TextureMapperPlatformLayer.h"
 #include <QOffscreenSurface>
 #include <private/qopenglextensions_p.h>
 #include <qpa/qplatformpixmap.h>
-#include <wtf/text/CString.h>
 
 #if USE(TEXTURE_MAPPER_GL)
 #include <texmap/TextureMapperGL.h>
@@ -274,8 +271,7 @@ void GraphicsContext3DPrivate::paintToTextureMapper(TextureMapper& textureMapper
     m_context->markLayerComposited();
     blitMultisampleFramebufferAndRestoreContext();
 
-    // QTFIXME: Restore SoftwareMode
-    if (true /*textureMapper.accelerationMode() == TextureMapper::OpenGLMode*/) {
+    if (textureMapper.accelerationMode() == TextureMapper::OpenGLMode) {
         TextureMapperGL& texmapGL = static_cast<TextureMapperGL&>(textureMapper);
         TextureMapperGL::Flags flags = TextureMapperGL::ShouldFlipTexture | (m_context->m_attrs.alpha ? TextureMapperGL::ShouldBlend : 0);
         IntSize textureSize(m_context->m_currentWidth, m_context->m_currentHeight);

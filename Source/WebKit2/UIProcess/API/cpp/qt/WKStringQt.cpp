@@ -24,7 +24,6 @@
 #include "WKAPICast.h"
 #include "WKRetainPtr.h"
 #include <QString>
-#include <wtf/RefPtr.h>
 #include <wtf/text/WTFString.h>
 
 using namespace WebKit;
@@ -39,8 +38,13 @@ QString WKStringCopyQString(WKStringRef stringRef)
 {
     if (!stringRef)
         return QString();
-    const WTF::String& string = toImpl(stringRef)->string();
-    return QString(reinterpret_cast<const QChar*>(string.characters()), string.length());
+
+    auto stringView = toImpl(stringRef)->stringView();
+
+    if (stringView.is8Bit())
+        return QString::fromLatin1(reinterpret_cast<const char*>(stringView.characters8()), stringView.length());
+
+    return QString(reinterpret_cast<const QChar*>(stringView.characters16()), stringView.length());
 }
 
 namespace WebKit {

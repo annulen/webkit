@@ -72,7 +72,7 @@ CoordinatedGraphicsScene::~CoordinatedGraphicsScene()
 void CoordinatedGraphicsScene::paintToCurrentGLContext(const TransformationMatrix& matrix, float opacity, const FloatRect& clipRect, const Color& backgroundColor, bool drawsBackground, const FloatPoint& contentPosition, TextureMapper::PaintFlags PaintFlags)
 {
     if (!m_textureMapper) {
-        m_textureMapper = TextureMapper::create();
+        m_textureMapper = TextureMapper::create(TextureMapper::OpenGLMode);
         static_cast<TextureMapperGL*>(m_textureMapper.get())->setEnableEdgeDistanceAntialiasing(true);
     }
 
@@ -148,6 +148,13 @@ void CoordinatedGraphicsScene::paintToGraphicsContext(PlatformGraphicsContext* p
     m_textureMapper->setGraphicsContext(0);
 }
 
+#if PLATFORM(QT)
+void CoordinatedGraphicsScene::setScrollPosition(const FloatPoint& scrollPosition)
+{
+    m_scrollPosition = scrollPosition;
+}
+#endif
+
 void CoordinatedGraphicsScene::updateViewport()
 {
     ASSERT(&m_clientRunLoop == &RunLoop::current());
@@ -163,7 +170,11 @@ void CoordinatedGraphicsScene::adjustPositionForFixedLayers(const FloatPoint& co
     // Fixed layer positions are updated by the web process when we update the visible contents rect / scroll position.
     // If we want those layers to follow accurately the viewport when we move between the web process updates, we have to offset
     // them by the delta between the current position and the position of the viewport used for the last layout.
+#if PLATFORM(QT)
+    FloatSize delta = m_scrollPosition - m_renderedContentsScrollPosition;
+#else
     FloatSize delta = contentPosition - m_renderedContentsScrollPosition;
+#endif
 
     for (auto& fixedLayer : m_fixedLayers.values())
         fixedLayer->setScrollPositionDeltaIfNeeded(delta);

@@ -209,6 +209,7 @@ class WebFullScreenManagerProxy;
 class WebNavigationState;
 class WebVideoFullscreenManagerProxy;
 class WebKeyboardEvent;
+class WebURLSchemeHandler;
 class WebMouseEvent;
 class WebOpenPanelResultListenerProxy;
 class WebPageGroup;
@@ -223,6 +224,10 @@ struct EditorState;
 struct PlatformPopupMenuData;
 struct PrintInfo;
 struct WebPopupItem;
+
+#if ENABLE(QT_GESTURE_EVENTS)
+class WebGestureEvent;
+#endif
 
 #if ENABLE(VIBRATION)
 class WebVibrationProxy;
@@ -542,9 +547,6 @@ public:
     void commitPageTransitionViewport();
 #endif
 #if PLATFORM(QT)
-    void registerApplicationScheme(const String& scheme);
-    void resolveApplicationSchemeRequest(QtNetworkRequestData);
-    void sendApplicationSchemeReply(const QQuickNetworkReply*);
     void authenticationRequiredRequest(const String& hostname, const String& realm, const String& prefilledUsername, String& username, String& password);
     void certificateVerificationRequest(const String& hostname, bool& ignoreErrors);
     void proxyAuthenticationRequiredRequest(const String& hostname, uint16_t port, const String& prefilledUsername, String& username, String& password);
@@ -628,6 +630,10 @@ public:
 
 #if ENABLE(MAC_GESTURE_EVENTS)
     void handleGestureEvent(const NativeWebGestureEvent&);
+#endif
+
+#if ENABLE(QT_GESTURE_EVENTS)
+    void handleGestureEvent(const WebGestureEvent&);
 #endif
 
 #if ENABLE(IOS_TOUCH_EVENTS)
@@ -1113,6 +1119,9 @@ public:
 
     void didRestoreScrollPosition();
 
+    void setURLSchemeHandlerForScheme(Ref<WebURLSchemeHandler>&&, const String& scheme);
+    WebURLSchemeHandler* urlSchemeHandlerForScheme(const String& scheme);
+
 private:
     WebPageProxy(PageClient&, WebProcessProxy&, uint64_t pageID, Ref<API::PageConfiguration>&&);
     void platformInitialize();
@@ -1508,6 +1517,9 @@ private:
 #endif
 #endif
 
+    void startURLSchemeHandlerTask(uint64_t handlerIdentifier, uint64_t resourceIdentifier, const WebCore::ResourceRequest&);
+    void stopURLSchemeHandlerTask(uint64_t handlerIdentifier, uint64_t resourceIdentifier);
+
     void handleAutoFillButtonClick(const UserData&);
 
     void finishInitializingWebPageAfterProcessLaunch();
@@ -1689,6 +1701,9 @@ private:
     DownloadID m_syncNavigationActionPolicyDownloadID;
     bool m_shouldSuppressAppLinksInNextNavigationPolicyDecision { false };
 
+#if ENABLE(QT_GESTURE_EVENTS)
+    Deque<WebGestureEvent> m_gestureEventQueue;
+#endif
     Deque<NativeWebKeyboardEvent> m_keyEventQueue;
     Deque<NativeWebWheelEvent> m_wheelEventQueue;
     Deque<std::unique_ptr<Vector<NativeWebWheelEvent>>> m_currentlyProcessedWheelEvents;
@@ -1835,6 +1850,9 @@ private:
     bool m_hasDeferredStartAssistingNode { false };
     std::unique_ptr<NodeAssistanceArguments> m_deferredNodeAssistanceArguments;
 #endif
+
+    HashMap<String, RefPtr<WebURLSchemeHandler>> m_urlSchemeHandlersByScheme;
+    HashMap<uint64_t, RefPtr<WebURLSchemeHandler>> m_urlSchemeHandlersByIdentifier;
 };
 
 } // namespace WebKit

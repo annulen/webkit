@@ -82,7 +82,6 @@
 #include "qwebpluginfactory.h"
 #include "qwebsettings.h"
 #include <QCoreApplication>
-#include <QDebug>
 #include <QFileInfo>
 #include <QMouseEvent>
 #include <QNetworkReply>
@@ -103,7 +102,7 @@ static QString drtDescriptionSuitableForTestResult(WebCore::Frame* webCoreFrame)
     QWebFrameAdapter* frame = QWebFrameAdapter::kit(webCoreFrame);
     QString name = webCoreFrame->tree().uniqueName();
 
-    bool isMainFrame = frame == frame->pageAdapter->mainFrameAdapter();
+    bool isMainFrame = frame == &frame->pageAdapter->mainFrameAdapter();
     if (isMainFrame) {
         if (!name.isEmpty())
             return QString::fromLatin1("main frame \"%1\"").arg(name);
@@ -566,9 +565,8 @@ void FrameLoaderClientQt::finishedLoading(DocumentLoader*)
 {
     if (!m_pluginView)
         return;
-    if (m_pluginView->isPluginView())
-        m_pluginView->didFinishLoading();
-    m_pluginView = 0;
+    m_pluginView->didFinishLoading();
+    m_pluginView = nullptr;
     m_hasSentResponseToPlugin = false;
 }
 
@@ -688,8 +686,10 @@ void FrameLoaderClientQt::dispatchDidClearWindowObjectInWorld(DOMWrapperWorld &w
     if (&world != &mainThreadNormalWorld())
         return;
 
-    if (m_webFrame)
+    if (m_webFrame) {
         m_webFrame->didClearWindowObject();
+        m_webFrame->pageAdapter->clearCustomActions();
+    }
 }
 
 void FrameLoaderClientQt::registerForIconNotification(bool shouldRegister)
@@ -802,8 +802,7 @@ void FrameLoaderClientQt::setMainDocumentError(WebCore::DocumentLoader* loader, 
 {
     if (!m_pluginView)
         return;
-    if (m_pluginView->isPluginView())
-        m_pluginView->didFail(error);
+    m_pluginView->didFail(error);
     m_pluginView = 0;
     m_hasSentResponseToPlugin = false;
 }
@@ -819,7 +818,7 @@ void FrameLoaderClientQt::committedLoad(WebCore::DocumentLoader* loader, const c
         loader->cancelMainResourceLoad(pluginWillHandleLoadError(loader->response()));
 
     // We re-check here as the plugin can have been created.
-    if (m_pluginView && m_pluginView->isPluginView()) {
+    if (m_pluginView) {
         if (!m_hasSentResponseToPlugin) {
             m_pluginView->didReceiveResponse(loader->response());
             // The function didReceiveResponse sets up a new stream to the plug-in.
@@ -985,7 +984,7 @@ void FrameLoaderClientQt::dispatchWillSendRequest(WebCore::DocumentLoader*, unsi
         && !host.isEmpty()
         && (urlScheme == QLatin1String("http") || urlScheme == QLatin1String("https"))) {
 
-        QUrl testURL = m_webFrame->pageAdapter->mainFrameAdapter()->frameLoaderClient->lastRequestedUrl();
+        QUrl testURL = m_webFrame->pageAdapter->mainFrameAdapter().frameLoaderClient->lastRequestedUrl();
         QString testHost = testURL.host();
         QString testURLScheme = testURL.scheme().toLower();
 
@@ -1135,7 +1134,7 @@ WebCore::Frame* FrameLoaderClientQt::dispatchCreatePage(const WebCore::Navigatio
     QWebPageAdapter* newPage = m_webFrame->pageAdapter->createWindow(/* modalDialog = */ false);
     if (!newPage)
         return 0;
-    return newPage->mainFrameAdapter()->frame;
+    return newPage->mainFrameAdapter().frame;
 }
 
 void FrameLoaderClientQt::dispatchDecidePolicyForResponse(const WebCore::ResourceResponse& response, const WebCore::ResourceRequest&, FramePolicyFunction function)
@@ -1495,9 +1494,12 @@ RefPtr<Widget> FrameLoaderClientQt::createPlugin(const IntSize& pluginSize, HTML
 
 void FrameLoaderClientQt::redirectDataToPlugin(Widget* pluginWidget)
 {
+    if (!pluginWidget || !pluginWidget->isPluginView()) {
+        m_pluginView = nullptr;
+        return;
+    }
     m_pluginView = toPluginView(pluginWidget);
-    if (pluginWidget)
-        m_hasSentResponseToPlugin = false;
+    m_hasSentResponseToPlugin = false;
 }
 
 PassRefPtr<Widget> FrameLoaderClientQt::createJavaAppletWidget(const IntSize& pluginSize, HTMLAppletElement* element, const URL& url, const Vector<String>& paramNames, const Vector<String>& paramValues)

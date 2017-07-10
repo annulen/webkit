@@ -262,6 +262,7 @@ void LauncherWindow::createChrome()
     editMenu->addAction(page()->action(QWebPage::Paste));
     editMenu->addSeparator();
     editMenu->addAction(page()->action(QWebPage::SelectAll));
+    editMenu->addAction("Unselect", this, SLOT(clearPageSelection()), QKeySequence::Deselect);
     editMenu->addSeparator();
 #ifndef QT_NO_LINEEDIT
     editMenu->addAction("&Find", this, SLOT(showFindBar()), QKeySequence(Qt::CTRL | Qt::Key_F));
@@ -351,6 +352,10 @@ void LauncherWindow::createChrome()
     QAction* touchMockAction = toolsMenu->addAction("Toggle touch mocking", this, SLOT(setTouchMocking(bool)));
     touchMockAction->setCheckable(true);
     touchMockAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_T));
+
+    QAction* toggleWebSecurity = toolsMenu->addAction("Disable Web Security", this, SLOT(toggleWebSecurity(bool)));
+    toggleWebSecurity->setCheckable(true);
+    toggleWebSecurity->setChecked(false);
 
     toolsMenu->addSeparator();
 
@@ -590,6 +595,16 @@ void LauncherWindow::createChrome()
 bool LauncherWindow::isGraphicsBased() const
 {
     return bool(qobject_cast<QGraphicsView*>(m_view));
+}
+
+void LauncherWindow::closeEvent(QCloseEvent* e)
+{
+    e->ignore();
+    auto c = connect(page(), &QWebPage::windowCloseRequested, this, [e]() {
+        e->accept();
+    });
+    page()->triggerAction(QWebPage::RequestClose);
+    disconnect(c);
 }
 
 void LauncherWindow::sendTouchEvent()
@@ -990,6 +1005,11 @@ void LauncherWindow::togglePrivateBrowsing(bool enable)
     page()->settings()->setAttribute(QWebSettings::PrivateBrowsingEnabled, enable);
 }
 
+void LauncherWindow::toggleWebSecurity(bool enable)
+{
+    page()->settings()->setAttribute(QWebSettings::WebSecurityEnabled, !enable);
+}
+
 void LauncherWindow::setUseDiskCookies(bool enable)
 {
     testBrowserCookieJarInstance()->setDiskStorageEnabled(enable);
@@ -1151,7 +1171,7 @@ void LauncherWindow::fileDownloadFinished()
     if (fileName.isEmpty())
         return;
     if (m_reply->error() != QNetworkReply::NoError)
-        QMessageBox::critical(this, QString("Download"), QString("Download failed."));
+        QMessageBox::critical(this, QStringLiteral("Download"), QStringLiteral("Download failed: ") + m_reply->errorString());
     else {
         QFile file(fileName);
         file.open(QIODevice::WriteOnly);
@@ -1166,6 +1186,11 @@ void LauncherWindow::clearMemoryCaches()
 {
     QWebSettings::clearMemoryCaches();
     qDebug() << "Memory caches were cleared";
+}
+
+void LauncherWindow::clearPageSelection()
+{
+    page()->triggerAction(QWebPage::Unselect);
 }
 
 void LauncherWindow::updateFPS(int fps)

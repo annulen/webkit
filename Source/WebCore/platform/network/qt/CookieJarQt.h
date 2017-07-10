@@ -21,9 +21,10 @@
 #ifndef CookieJarQt_h
 #define CookieJarQt_h
 
+#include "SQLiteDatabase.h"
+
 #include <QtCore/QObject>
 #include <QtNetwork/QNetworkCookieJar>
-#include <QtSql/QSqlDatabase>
 
 #include <wtf/HashSet.h>
 #include <wtf/text/WTFString.h>
@@ -39,17 +40,19 @@ public:
 
     void getHostnamesWithCookies(HashSet<String>&);
     bool deleteCookie(const QNetworkCookie&) final;
-    void deleteCookiesForHostname(const String&);
+    void deleteCookiesForHostnames(const Vector<String>&);
     void deleteAllCookies();
+    void deleteAllCookiesModifiedSince(std::chrono::system_clock::time_point);
     bool setCookiesFromUrl(const QList<QNetworkCookie>&, const QUrl&) final;
     void loadCookies();
 
 private:
     SharedCookieJarQt(const String&);
     ~SharedCookieJarQt();
-    void ensureDatabaseTable();
+    bool ensureDatabaseTable();
+    void deleteCookiesForHostname(const String&);
 
-    QSqlDatabase m_database;
+    SQLiteDatabase m_database;
 };
 
 }

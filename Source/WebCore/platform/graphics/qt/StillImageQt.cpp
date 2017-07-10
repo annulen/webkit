@@ -29,7 +29,6 @@
 #include "StillImageQt.h"
 
 #include "GraphicsContext.h"
-#include "IntSize.h"
 #include "ShadowBlur.h"
 
 #include <QPainter>
@@ -82,6 +81,9 @@ void StillImage::draw(GraphicsContext& ctxt, const FloatRect& dst,
 
     FloatRect normalizedSrc = src.normalized();
     FloatRect normalizedDst = dst.normalized();
+
+    // source rect needs scaling from the device coords to image coords
+    normalizedSrc.scale(m_pixmap->devicePixelRatio());
 
     CompositeOperator previousOperator = ctxt.compositeOperation();
     BlendMode previousBlendMode = ctxt.blendModeOperation();

@@ -28,7 +28,7 @@
 #include <QtCore/qshareddata.h>
 
 namespace WebCore {
-    class Settings;
+class Page;
 }
 
 class QWebPage;
@@ -90,7 +90,9 @@ public:
         MediaSourceEnabled,
         MediaEnabled,
         WebSecurityEnabled,
-        FullScreenSupportEnabled
+        FullScreenSupportEnabled,
+        ImagesEnabled,
+        AllowRunningInsecureContent
     };
     enum WebGraphic {
         MissingImageGraphic,
@@ -184,7 +186,7 @@ private:
     Q_DISABLE_COPY(QWebSettings)
 
     QWebSettings();
-    QWebSettings(WebCore::Settings *settings);
+    QWebSettings(WebCore::Page* page);
     ~QWebSettings();
 
     QWebSettingsPrivate *d;

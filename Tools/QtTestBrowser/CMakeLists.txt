@@ -2,9 +2,9 @@ set(QtTestBrowser_INCLUDE_DIRECTORIES
     "${CMAKE_BINARY_DIR}"
     "${CMAKE_SOURCE_DIR}/Source"
     "${DERIVED_SOURCES_WEBKIT_DIR}"
-    "${DERIVED_SOURCES_DIR}/ForwardingHeaders"
-    "${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKit"
-    "${DERIVED_SOURCES_DIR}/ForwardingHeaders/QtWebKitWidgets"
+    "${FORWARDING_HEADERS_DIR}"
+    "${FORWARDING_HEADERS_DIR}/QtWebKit"
+    "${FORWARDING_HEADERS_DIR}/QtWebKitWidgets"
     "${JAVASCRIPTCORE_DIR}"
     "${JAVASCRIPTCORE_DIR}/runtime"
     "${WEBCORE_DIR}"
@@ -66,4 +66,8 @@ include_directories(${QtTestBrowser_INCLUDE_DIRECTORIES})
 include_directories(SYSTEM ${QtTestBrowser_SYSTEM_INCLUDE_DIRECTORIES})
 add_executable(QtTestBrowser ${QtTestBrowser_SOURCES})
 target_link_libraries(QtTestBrowser ${QtTestBrowser_LIBRARIES})
-set_target_properties(QtTestBrowser PROPERTIES FOLDER "Tools")
+set_target_properties(QtTestBrowser PROPERTIES FOLDER "Tools" AUTOMOC ON)
+
+if (${CMAKE_BUILD_TYPE} MATCHES "Release")
+    set_target_properties(QtTestBrowser PROPERTIES WIN32_EXECUTABLE ON)
+endif ()

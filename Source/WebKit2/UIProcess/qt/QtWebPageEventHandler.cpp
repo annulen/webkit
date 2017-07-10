@@ -184,43 +184,56 @@ void QtWebPageEventHandler::handleHoverMoveEvent(QHoverEvent* ev)
 
 void QtWebPageEventHandler::handleDragEnterEvent(QDragEnterEvent* ev)
 {
-    m_webPageProxy->resetDragOperation();
+#if ENABLE(DRAG_SUPPORT)
+    m_webPageProxy->resetCurrentDragInformation();
     QTransform fromItemTransform = m_webPage->transformFromItem();
     // FIXME: Should not use QCursor::pos()
     DragData dragData(ev->mimeData(), fromItemTransform.map(ev->pos()), QCursor::pos(), dropActionToDragOperation(ev->possibleActions()));
     m_webPageProxy->dragEntered(dragData);
     ev->acceptProposedAction();
+#else
+    Q_UNUSED(ev);
+#endif
 }
 
 void QtWebPageEventHandler::handleDragLeaveEvent(QDragLeaveEvent* ev)
 {
+#if ENABLE(DRAG_SUPPORT)
     bool accepted = ev->isAccepted();
 
     // FIXME: Should not use QCursor::pos()
     DragData dragData(0, IntPoint(), QCursor::pos(), DragOperationNone);
     m_webPageProxy->dragExited(dragData);
-    m_webPageProxy->resetDragOperation();
+    m_webPageProxy->resetCurrentDragInformation();
 
     ev->setAccepted(accepted);
+#else
+    Q_UNUSED(ev);
+#endif
 }
 
 void QtWebPageEventHandler::handleDragMoveEvent(QDragMoveEvent* ev)
 {
+#if ENABLE(DRAG_SUPPORT)
     bool accepted = ev->isAccepted();
 
     QTransform fromItemTransform = m_webPage->transformFromItem();
     // FIXME: Should not use QCursor::pos()
     DragData dragData(ev->mimeData(), fromItemTransform.map(ev->pos()), QCursor::pos(), dropActionToDragOperation(ev->possibleActions()));
     m_webPageProxy->dragUpdated(dragData);
-    ev->setDropAction(dragOperationToDropAction(m_webPageProxy->dragSession().operation));
-    if (m_webPageProxy->dragSession().operation != DragOperationNone)
+    ev->setDropAction(dragOperationToDropAction(m_webPageProxy->currentDragOperation()));
+    if (m_webPageProxy->currentDragOperation() != DragOperationNone)
         ev->accept();
 
     ev->setAccepted(accepted);
+#else
+    Q_UNUSED(ev);
+#endif
 }
 
 void QtWebPageEventHandler::handleDropEvent(QDropEvent* ev)
 {
+#if ENABLE(DRAG_SUPPORT)
     bool accepted = ev->isAccepted();
     QTransform fromItemTransform = m_webPage->transformFromItem();
     // FIXME: Should not use QCursor::pos()
@@ -228,10 +241,13 @@ void QtWebPageEventHandler::handleDropEvent(QDropEvent* ev)
     SandboxExtension::Handle handle;
     SandboxExtension::HandleArray sandboxExtensionForUpload;
     m_webPageProxy->performDragOperation(dragData, String(), handle, sandboxExtensionForUpload);
-    ev->setDropAction(dragOperationToDropAction(m_webPageProxy->dragSession().operation));
+    ev->setDropAction(dragOperationToDropAction(m_webPageProxy->currentDragOperation()));
     ev->accept();
 
     ev->setAccepted(accepted);
+#else
+    Q_UNUSED(ev);
+#endif
 }
 
 void QtWebPageEventHandler::activateTapHighlight(const QTouchEvent::TouchPoint& point)
@@ -261,12 +277,12 @@ void QtWebPageEventHandler::deactivateTapHighlight()
 
 void QtWebPageEventHandler::handleSingleTapEvent(const QTouchEvent::TouchPoint& point)
 {
-#if ENABLE(GESTURE_EVENTS)
+#if ENABLE(QT_GESTURE_EVENTS)
     deactivateTapHighlight();
     m_postponeTextInputStateChanged = true;
 
     QTransform fromItemTransform = m_webPage->transformFromItem();
-    WebGestureEvent gesture(WebEvent::GestureSingleTap, fromItemTransform.map(point.pos()).toPoint(), point.screenPos().toPoint(), WebEvent::Modifiers(0), 0, IntSize(point.rect().size().toSize()), FloatPoint(0, 0));
+    WebGestureEvent gesture(WebEvent::GestureSingleTap, fromItemTransform.map(point.pos()).toPoint(), point.screenPos().toPoint(), WebEvent::Modifiers(0), 0, IntSize(point.rect().size().toSize()));
     m_webPageProxy->handleGestureEvent(gesture);
 #endif
 }
@@ -448,7 +464,7 @@ void QtWebPageEventHandler::handleWillSetInputMethodState()
 
 void QtWebPageEventHandler::doneWithGestureEvent(const WebGestureEvent& event, bool wasEventHandled)
 {
-#if ENABLE(GESTURE_EVENTS)
+#if ENABLE(QT_GESTURE_EVENTS)
     if (event.type() != WebEvent::GestureSingleTap)
         return;
 
@@ -566,7 +582,9 @@ void QtWebPageEventHandler::handleInputEvent(const QInputEvent* event)
 
         // Early return since this was a touch-end event.
         return;
-    } else if (activeTouchPointCount == 1) {
+    }
+
+    if (activeTouchPointCount == 1) {
         // If the pinch gesture recognizer was previously in active state the content might
         // be out of valid zoom boundaries, thus we need to finish the pinch gesture here.
         // This will resume the content to valid zoom levels before the pan gesture is started.
@@ -613,6 +631,7 @@ void QtWebPageEventHandler::didFindZoomableArea(const IntPoint& target, const In
 
 void QtWebPageEventHandler::startDrag(const WebCore::DragData& dragData, PassRefPtr<ShareableBitmap> dragImage)
 {
+#if ENABLE(DRAG_SUPPORT)
     QImage dragQImage;
     if (dragImage)
         dragQImage = dragImage->createQImage();
@@ -637,9 +656,12 @@ void QtWebPageEventHandler::startDrag(const WebCore::DragData& dragData, PassRef
     }
 
     m_webPageProxy->dragEnded(clientPosition, globalPosition, dropActionToDragOperation(actualDropAction));
+#else
+    Q_UNUSED(dragData);
+    Q_UNUSED(dragImage);
+#endif
 }
 
 } // namespace WebKit
 
 #include "moc_QtWebPageEventHandler.cpp"
-

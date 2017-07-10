@@ -64,7 +64,7 @@
 #include <QFileInfo>
 #include <QNetworkRequest>
 
-#if ENABLE(GESTURE_EVENTS)
+#if ENABLE(QT_GESTURE_EVENTS)
 #include "PlatformGestureEvent.h"
 #include "WebEventConversion.h"
 #endif
@@ -165,7 +165,7 @@ bool QWebFrameAdapter::hasView() const
     return frame && frame->view();
 }
 
-#if ENABLE(GESTURE_EVENTS)
+#if ENABLE(QT_GESTURE_EVENTS)
 void QWebFrameAdapter::handleGestureEvent(QGestureEventFacade* gestureEvent)
 {
     ASSERT(frame && frame->view());
@@ -465,7 +465,7 @@ QString QWebFrameAdapter::uniqueName() const
 // This code is copied from ChromeClientGtk.cpp.
 static void coalesceRectsIfPossible(const QRect& clipRect, QVector<QRect>& rects)
 {
-    const unsigned rectThreshold = 10;
+    const int rectThreshold = 10;
     const float wastedSpaceThreshold = 0.75f;
     bool useUnionedRect = (rects.size() <= 1) || (rects.size() > rectThreshold);
     if (!useUnionedRect) {
@@ -474,8 +474,8 @@ static void coalesceRectsIfPossible(const QRect& clipRect, QVector<QRect>& rects
         // is too large, then we will do individual rect painting instead.
         float unionPixels = (clipRect.width() * clipRect.height());
         float singlePixels = 0;
-        for (size_t i = 0; i < rects.size(); ++i)
-            singlePixels += rects[i].width() * rects[i].height();
+        for (auto& rect : rects)
+            singlePixels += rect.width() * rect.height();
         float wastedSpace = 1 - (singlePixels / unionPixels);
         if (wastedSpace <= wastedSpaceThreshold)
             useUnionedRect = true;
@@ -924,7 +924,7 @@ QWebElement QWebHitTestResultPrivate::elementForInnerNode() const
 
 QSize QWebFrameAdapter::customLayoutSize() const
 {
-    ASSERT(pageAdapter->mainFrameAdapter() == this);
+    ASSERT(&pageAdapter->mainFrameAdapter() == this);
     FrameView* view = frame->view();
     ASSERT(view);
     if (view->useFixedLayout())
@@ -934,7 +934,7 @@ QSize QWebFrameAdapter::customLayoutSize() const
 
 void QWebFrameAdapter::setCustomLayoutSize(const QSize& size)
 {
-    ASSERT(pageAdapter->mainFrameAdapter() == this);
+    ASSERT(&pageAdapter->mainFrameAdapter() == this);
     FrameView* view = frame->view();
     ASSERT(view);
 
@@ -949,7 +949,7 @@ void QWebFrameAdapter::setCustomLayoutSize(const QSize& size)
 
 void QWebFrameAdapter::setFixedVisibleContentRect(const QRect& rect)
 {
-    ASSERT(pageAdapter->mainFrameAdapter() == this);
+    ASSERT(&pageAdapter->mainFrameAdapter() == this);
     FrameView* view = frame->view();
     ASSERT(view);
     view->setFixedVisibleContentRect(rect);
@@ -957,7 +957,7 @@ void QWebFrameAdapter::setFixedVisibleContentRect(const QRect& rect)
 
 void QWebFrameAdapter::setViewportSize(const QSize& size)
 {
-    ASSERT(pageAdapter->mainFrameAdapter() == this);
+    ASSERT(&pageAdapter->mainFrameAdapter() == this);
     FrameView* view = frame->view();
     ASSERT(view);
     view->resize(size);
@@ -967,14 +967,14 @@ void QWebFrameAdapter::setViewportSize(const QSize& size)
 
 void QWebFrameAdapter::setPaintsEntireContents(bool resizesToContents)
 {
-    ASSERT(pageAdapter->mainFrameAdapter() == this);
+    ASSERT(&pageAdapter->mainFrameAdapter() == this);
     ASSERT(frame->view());
     frame->view()->setPaintsEntireContents(resizesToContents);
 }
 
 void QWebFrameAdapter::setDelegatesScrolling(bool resizesToContents)
 {
-    ASSERT(pageAdapter->mainFrameAdapter() == this);
+    ASSERT(&pageAdapter->mainFrameAdapter() == this);
     ASSERT(frame->view());
     frame->view()->setDelegatesScrolling(resizesToContents);
 }

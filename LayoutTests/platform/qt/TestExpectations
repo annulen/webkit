@@ -39,6 +39,7 @@
 # - Missing features in our DumpRenderTree implementation
 # - Failing SVG tests
 # - Failing CSS Tests
+# - Failing hidpi Tests
 # - failing fast tests
 # - failing fonts tests
 # - failing fullscreen tests
@@ -98,7 +99,6 @@ webkit.org/b/159370 [ Debug ] fast/history/page-cache-destroy-document.html [ Cr
 # =========================================================================== #
 
 [ Debug ] fast/history/back-from-page-with-focused-iframe.html [ Crash ]
-[ Debug ]  http/tests/local/fileapi/upload-zip-bundle-as-blob.html [ Crash ]
 [ Debug ]  http/tests/security/contentSecurityPolicy/worker-set-timeout-blocked.html [ Crash Pass ]
 [ Release ]  http/tests/security/contentSecurityPolicy/worker-set-timeout-blocked.html [ Failure Pass ]
 [ Debug ]  http/tests/websocket/tests/hybi/bad-handshake-crash.html [ Crash ]
@@ -141,7 +141,6 @@ webkit.org/b/159370 [ Debug ] fast/history/page-cache-destroy-document.html [ Cr
 [ Debug ]  http/tests/websocket/tests/hybi/workers/close-code-and-reason.html [ Crash ]
 [ Debug ]  http/tests/websocket/tests/hybi/workers/close.html [ Crash Pass ]
 [ Release ]  http/tests/websocket/tests/hybi/workers/close.html [ Failure Pass ]
-[ Debug ]  http/tests/xmlhttprequest/post-blob-content-type-async.html [ Crash ]
 
 #281 FTL crashes
   js/dom/cross-frame-bad-time.html [ Pass Crash ]
@@ -158,7 +157,7 @@ webkit.org/b/159370 [ Debug ] fast/history/page-cache-destroy-document.html [ Cr
   css3/shapes/shape-outside/values/shape-outside-ellipse-004.html [ Crash Failure ]
   css3/shapes/shape-outside/values/shape-outside-circle-004.html [ Crash Failure ]
 webgl/1.0.2/conformance/uniforms/out-of-bounds-uniform-array-access.html [ Crash ]
-webgl/1.0.2/conformance/canvas/to-data-url-test.html [ Crash ]
+[ Release ] webgl/1.0.2/conformance/canvas/to-data-url-test.html [ Crash ]
 webgl/1.0.2/conformance/glsl/misc/shader-uniform-packing-restrictions.html [ Crash ]
 webgl/1.0.3/conformance/glsl/bugs/complex-glsl-does-not-crash.html [ Crash ]
 
@@ -558,6 +557,7 @@ fast/css/draggable-region-parser.html [ Failure ]
 
 fast/lists/drag-into-marker.html [ Missing ]
 
+http/tests/local/fileapi/upload-zip-bundle-as-blob.html [ Timeout ]
 # ============================================================================= #
 #            Missing features in our DumpRenderTree implementation              #
 # ============================================================================= #
@@ -594,69 +594,6 @@ fast/forms/input-readonly-autoscroll.html [ Missing ]
 fast/forms/input-text-drag-down.html [ Missing ]
 
 
-#201 - Support testRunner.setBackingScaleFactor() in DRT
-fast/hidpi
-fast/backgrounds/gradient-background-leakage-hidpi.html
-fast/canvas/2d.backingStorePixelRatio.html
-fast/canvas/2d.imageDataHD.html
-fast/canvas/canvas-as-image-hidpi.html
-fast/canvas/canvas-resize-reset-pixelRatio.html
-imported/blink/fast/hidpi/border-background-align.html
-imported/blink/svg/zoom/text/lowdpi-zoom-text.html
-svg/as-image/animated-svg-repaints-completely-in-hidpi.html
-svg/as-image/image-respects-deviceScaleFactor.html
-svg/as-image/svg-as-image-canvas.html
-# All hidpi-* tests should activate HiDPI, but our DRT doesn't support it
-fast/backgrounds/hidpi-bitmap-background-on-subpixel-position.html
-fast/backgrounds/hidpi-bitmap-background-origin-on-subpixel-position.html
-fast/backgrounds/hidpi-generated-gradient-background-on-subpixel-position.html
-fast/borders/hidpi-border-image-gradient-on-subpixels.html
-fast/borders/hidpi-border-radius-outer-border-goes-rectangle.html
-fast/borders/hidpi-border-width-flooring.html
-fast/borders/hidpi-outline-on-subpixel-position.html
-fast/borders/hidpi-rounded-border-on-subpixel-position.html
-fast/box-shadow/hidpi-webkit-box-shadow-subpixel-position.html
-fast/canvas/hidpi-repaint-on-retina-leaves-bits-behind.html
-fast/flexbox/hidpi-simple-line-layout-with-flexbox-and-transition.html
-fast/forms/hidpi-fieldset-on-subpixel-position-when-legend-is-present.html
-fast/forms/hidpi-textarea-on-subpixel-position.html
-fast/frames/hidpi-position-iframe-on-device-pixel.html
-fast/images/hidpi-directly-composited-image-on-subpixel-position.html
-fast/images/hidpi-image-position-on-device-pixels.html
-fast/inline/hidpi-rtl-text-does-not-fit-line-and-gets-cut-off.html
-fast/inline/hidpi-selection-gap-and-inline-selection-have-gap-rtl.html
-fast/inline/hidpi-selection-gap-on-subpixel-position.html
-fast/inline/hidpi-selection-gap-overlaps-inline-selection.html
-fast/inline/hidpi-slow-path-text-on-subpixel-position.html
-fast/layers/hidpi-floor-negative-coordinate-values-to-maintain-rounding-direction.html
-fast/layers/hidpi-nested-layers-with-subpixel-accumulation.html
-fast/layers/hidpi-transform-on-child-content-is-mispositioned.html
-fast/repaint/hidpi-absolute-positioned-element-wrong-cliprect-after-move.html
-fast/repaint/hidpi-block-width-change-leaves-cruft.html
-fast/repaint/hidpi-box-with-subpixel-height-inflates.html
-fast/repaint/hidpi-content-inside-iframe-leaves-trails.html
-fast/repaint/hidpi-device-pixel-based-repaint-rect-tracking.html
-fast/repaint/hidpi-transform-on-subpixel-repaintrect.html
-fast/repaint/hidpi-wrong-repaint-rect-when-parent-has-noncompositing-transform.html
-fast/backgrounds/hidpi-background-image-contain-cover-scale-needs-more-precision.html [ ImageOnlyFailure ]
-fast/backgrounds/hidpi-bitmap-background-repeat-on-subpixel-position.html [ ImageOnlyFailure ]
-fast/borders/hidpi-border-clipping-right-after-move.html [ ImageOnlyFailure ]
-fast/borders/hidpi-border-painting-groove.html [ ImageOnlyFailure ]
-fast/borders/hidpi-border-painting-ridge.html [ ImageOnlyFailure ]
-fast/borders/hidpi-border-radius-with-subpixel-margin-not-renderable.html [ ImageOnlyFailure ]
-fast/borders/hidpi-double-border-with-border-radius-always-produce-solid-line.html [ ImageOnlyFailure ]
-fast/borders/hidpi-outline-hairline-painting.html [ ImageOnlyFailure ]
-fast/borders/hidpi-simple-hairline-border-painting.html [ ImageOnlyFailure ]
-fast/forms/hidpi-textfield-background-bleeding.html [ ImageOnlyFailure ]
-fast/inline-block/hidpi-margin-top-with-subpixel-value-and-overflow-hidden.html [ ImageOnlyFailure ]
-fast/inline/hidpi-inline-selection-leaves-gap.html [ ImageOnlyFailure ]
-fast/inline/hidpi-inline-text-decoration-with-subpixel-value.html [ ImageOnlyFailure ]
-fast/inline/hidpi-pixel-gap-between-adjacent-selection-inlines.html [ ImageOnlyFailure ]
-fast/inline/hidpi-select-inline-on-subpixel-position.html [ ImageOnlyFailure ]
-fast/layers/hidpi-box-positioned-off-by-one-when-transform-is-present.html [ ImageOnlyFailure ]
-fast/regions/hidpi-region-with-auto-margin-on-subpixel-position.html [ ImageOnlyFailure ]
-fast/text/hidpi-text-selection-gap-between-words.html [ ImageOnlyFailure ]
-
 # ============================================================================= #
 # Fluctuating/flakey tests
 # ============================================================================= #
@@ -666,8 +603,10 @@ http/tests/media/track/track-webvtt-slow-loading-2.html [ Timeout Pass ]
 http/tests/navigation/navigation-interrupted-by-fragment.html [ Timeout Pass ]
 svg/animations/svglengthlist-animation-3.html [ Pass Failure ]
 
+fast/events/touch/inserted-fragment-touch-target.html [ Timeout Pass ]
 fast/events/touch/moved-touch-target.html [ Timeout Pass ]
 fast/events/touch/touch-inside-iframe.html [ Timeout Pass ]
+fast/events/touch/touch-inside-iframe-scrolled.html [ Timeout Pass ]
 fast/events/onunload-back-to-page-cache.html [ Missing Pass ]
 
   perf/clone-with-focus.html [ Failure Pass ]
@@ -761,6 +700,41 @@ svg/animations/animate-elem-08-t-drt.html [ Failure ]
 
 # Changed pixel result suddenly, but behaivior seems to be correct
 [ Debug ] svg/custom/mask-invalidation.svg [ ImageOnlyFailure ]
+
+
+# ============================================================================= #
+# Failing hidpi Tests
+# ============================================================================= #
+
+fast/inline-block/hidpi-margin-top-with-subpixel-value-and-overflow-hidden.html [ ImageOnlyFailure ]
+fast/inline/hidpi-inline-text-decoration-with-subpixel-value.html [ ImageOnlyFailure ]
+
+fast/repaint/hidpi-absolute-positioned-element-wrong-cliprect-after-move.html [ Failure ]
+fast/repaint/hidpi-box-with-subpixel-height-inflates.html [ Failure ]
+fast/repaint/hidpi-content-inside-iframe-leaves-trails.html [ Failure ]
+fast/repaint/hidpi-device-pixel-based-repaint-rect-tracking.html [ Failure ]
+fast/repaint/hidpi-transform-on-subpixel-repaintrect.html [ Failure ]
+fast/repaint/hidpi-wrong-repaint-rect-when-parent-has-noncompositing-transform.html [ Failure ]
+
+fast/backgrounds/hidpi-background-image-contain-cover-scale-needs-more-precision.html [ ImageOnlyFailure ]
+fast/backgrounds/hidpi-bitmap-background-repeat-on-subpixel-position.html [ ImageOnlyFailure ]
+fast/borders/hidpi-border-clipping-right-after-move.html [ ImageOnlyFailure ]
+fast/borders/hidpi-border-painting-groove.html [ ImageOnlyFailure ]
+fast/borders/hidpi-border-painting-ridge.html [ ImageOnlyFailure ]
+fast/borders/hidpi-border-radius-with-subpixel-margin-not-renderable.html [ ImageOnlyFailure ]
+fast/borders/hidpi-double-border-with-border-radius-always-produce-solid-line.html [ ImageOnlyFailure ]
+fast/borders/hidpi-outline-hairline-painting.html [ ImageOnlyFailure ]
+fast/borders/hidpi-simple-hairline-border-painting.html [ ImageOnlyFailure ]
+fast/forms/hidpi-textfield-background-bleeding.html [ ImageOnlyFailure ]
+fast/inline/hidpi-inline-selection-leaves-gap.html [ ImageOnlyFailure ]
+fast/inline/hidpi-pixel-gap-between-adjacent-selection-inlines.html [ ImageOnlyFailure ]
+fast/inline/hidpi-select-inline-on-subpixel-position.html [ ImageOnlyFailure ]
+fast/layers/hidpi-box-positioned-off-by-one-when-transform-is-present.html [ ImageOnlyFailure ]
+fast/regions/hidpi-region-with-auto-margin-on-subpixel-position.html [ ImageOnlyFailure ]
+fast/text/hidpi-text-selection-gap-between-words.html [ ImageOnlyFailure ]
+
+#546
+fast/hidpi/video-controls-in-hidpi.html [ ImageOnlyFailure ]
 
 # ============================================================================= #
 # Failing fast Tests
@@ -1236,10 +1210,19 @@ fast/borders/border-mixed-alpha.html [ ImageOnlyFailure ]
 # FIXME when plugin tests are enabled
 fullscreen/full-screen-plugin.html [ Skip ]
 
+# ============================================================================= #
+# Touch Adjustment
+# ============================================================================= #
+
+#473
+touchadjustment/focusout-on-touch.html [ Failure ]
 
 # ============================================================================= #
 # Failing WebGL Tests
 # ============================================================================= #
+
+[ Debug ] webgl/1.0.2/conformance/uniforms/gl-uniform-arrays.html [ Timeout ]
+[ Debug ] webgl/1.0.2/conformance/canvas/to-data-url-test.html [ Failure ]
 
 #404
   webgl/1.0.2/conformance/extensions/oes-texture-float-with-video.html [ Skip ]
@@ -1332,12 +1315,10 @@ fullscreen/full-screen-plugin.html [ Skip ]
   fast/events/touch/gesture/gesture-tap-active-state-iframe.html [ Skip ]
   fast/events/touch/gesture/long-press-on-draggable-element-in-iframe-triggers-drag.html [ Skip ]
   fast/events/touch/gesture/long-press-on-draggable-element-in-nested-iframes-triggers-drag.html [ Skip ]
-  fast/events/touch/inserted-fragment-touch-target.html [ Skip ]
   fast/events/touch/ios/touch-event-in-scaled-document.html [ Skip ]
   fast/events/touch/ios/touch-event-rtl.html [ Skip ]
   fast/events/touch/ios/touch-event.html [ Skip ]
   fast/events/touch/touch-active-state.html [ Skip ]
-  fast/events/touch/touch-inside-iframe-scrolled.html [ Skip ]
   fast/events/touch/zoomed-touch-event-pageXY.html [ Skip ]
   fast/events/wheel-event-destroys-frame.html [ Skip ]
 
@@ -1368,22 +1349,15 @@ http/tests/messaging/cross-domain-message-send.html
 
 http/tests/media/remove-while-loading.html [ Skip ]
 http/tests/contentdispositionattachmentsandbox/referer-header-stripped-with-meta-referer-no-referrer.html [ Skip ]
-http/tests/local/formdata/send-form-data-with-empty-blob-filename.html [ Skip ]
-http/tests/local/blob/send-data-blob.html [ Skip ]
 http/tests/contentdispositionattachmentsandbox/referer-header-stripped-with-meta-referer-no-referrer-when-downgrade.html [ Skip ]
 http/tests/inspector/dom/disconnect-dom-tree-after-main-frame-navigation.html [ Skip ]
 http/tests/contentdispositionattachmentsandbox/referer-header-stripped-with-meta-referer-never.html [ Skip ]
 http/tests/inspector/console/cross-domain-inspected-node-access.html [ Skip ]
-http/tests/fileapi/xhr-send-form-data-mimetype-normalization.html [ Skip ]
 http/tests/contentdispositionattachmentsandbox/referer-header-stripped-with-meta-referer-always.html [ Skip ]
 http/tests/contentdispositionattachmentsandbox/referer-header-stripped-with-meta-referer-default.html [ Skip ]
-http/tests/fileapi/xhr-send-form-data-filename-escaping.html [ Skip ]
 http/tests/contentdispositionattachmentsandbox/referer-header-stripped-with-meta-referer-origin.html [ Skip ]
-http/tests/local/blob/send-hybrid-blob.html [ Skip ]
 http/tests/contentdispositionattachmentsandbox/referer-header-stripped-with-meta-referer-unsafe-url.html [ Skip ]
-http/tests/local/formdata/send-form-data-with-sliced-file.html [ Skip ]
   http/tests/contentdispositionattachmentsandbox/referer-header-stripped.html [ Skip ]
-  http/tests/local/blob/send-sliced-data-blob.html [ Skip ]
   http/tests/media/clearkey/clear-key-hls-aes128.html [ Skip ]
   http/tests/media/hls/hls-accessiblity-describes-video.html [ Skip ]
   http/tests/media/hls/hls-audio-tracks-has-audio.html [ Skip ]
@@ -1429,7 +1403,6 @@ http/tests/w3c/webperf/submission/Google/resource-timing/html/test_resource_cach
 http/tests/w3c/webperf/submission/Google/resource-timing/html/test_resource_connection_reuse.html
 
   http/tests/w3c/webperf/submission/Google/resource-timing/html/test_resource_iframe_self_navigation.html [ Skip ]
-  http/tests/xmlhttprequest/post-blob-content-type-sync.html [ Skip ]
 
 js/regress/getter-richards-try-catch.html [ Timeout Pass ]
 
@@ -1596,6 +1569,11 @@ http/tests/cookies/js-get-and-set-http-only-cookie.html [ Failure ]
 
 # https://bugs.webkit.org/show_bug.cgi?id=109799
 webkit.org/b/90007 http/tests/security/mixedContent/insecure-audio-video-in-main-frame.html [ Failure ]
+
+# [Qt] new http/tests/xmlhttprequest/post-blob-content-type-sync.html and ~async.html fail since introduced in r136893
+# https://bugs.webkit.org/show_bug.cgi?id=104352
+http/tests/xmlhttprequest/post-blob-content-type-async.html [ Failure ]
+http/tests/xmlhttprequest/post-blob-content-type-sync.html [ Failure ]
 
 # =========================================================================== #
 #       Failing xmlhttprequest tests                                          #
@@ -2558,8 +2536,6 @@ js/date-constructor.html [ Failure ]
 # http
 # ============================================================================= #
 
-[ Release ]  http/tests/local/fileapi/upload-zip-bundle-as-blob.html [ Failure ]
-[ Release ]  http/tests/xmlhttprequest/post-blob-content-type-async.html [ Failure ]
 
 # Regressions: Unexpected text-only failures (184)
   http/tests/appcache/origin-delete.html [ Failure ]
@@ -2583,7 +2559,6 @@ js/date-constructor.html [ Failure ]
   http/tests/loading/main-resource-delegates-on-back-navigation.html [ Failure ]
   http/tests/loading/promote-img-preload-priority.html [ Failure ]
   http/tests/loading/redirect-methods.html [ Failure ]
-  http/tests/loading/sizes/preload-image-sizes-2x.html [ Failure ]
   http/tests/local/drag-over-remote-content.html [ Failure ]
   http/tests/local/fileapi/file-last-modified-after-delete.html [ Failure ]
   http/tests/local/fileapi/file-last-modified.html [ Failure ]
@@ -2622,7 +2597,6 @@ js/date-constructor.html [ Failure ]
   http/tests/security/XFrameOptions/x-frame-options-multiple-headers-sameorigin-deny.html [ Failure ]
   http/tests/security/XFrameOptions/x-frame-options-parent-same-origin-allow.html [ Failure ]
   http/tests/security/XFrameOptions/x-frame-options-parent-same-origin-deny.html [ Failure ]
-  http/tests/security/appcache-switching-private-browsing.html [ Failure ]
   http/tests/security/blocked-on-redirect.html [ Failure ]
   http/tests/security/clipboard/clipboard-file-access.html [ Failure ]
   http/tests/security/contentSecurityPolicy/1.1/plugintypes-affects-child.html [ Failure ]
@@ -2630,10 +2604,7 @@ js/date-constructor.html [ Failure ]
   http/tests/security/contentSecurityPolicy/1.1/plugintypes-url-01.html [ Failure ]
   http/tests/security/contentSecurityPolicy/embed-src-url-blocked.html [ Failure ]
   http/tests/security/contentSecurityPolicy/object-src-none-allowed.html [ Failure ]
-  http/tests/security/contentSecurityPolicy/report-cross-origin-no-cookies-when-private-browsing-enabled.php [ Failure ]
-  http/tests/security/contentSecurityPolicy/report-cross-origin-no-cookies-when-private-browsing-toggled.php [ Failure ]
   http/tests/security/contentSecurityPolicy/report-same-origin-no-cookies-when-private-browsing-toggled.php [ Failure ]
-  http/tests/security/contentSecurityPolicy/report-same-origin-with-cookies-when-private-browsing-enabled.php [ Failure ]
   http/tests/security/contentSecurityPolicy/source-list-parsing-paths-01.html [ Failure ]
   http/tests/security/contentTypeOptions/nosniff-script-blocked.html [ Failure ]
   http/tests/security/contentTypeOptions/nosniff-script-without-content-type-blocked.html [ Failure ]
@@ -2642,7 +2613,6 @@ js/date-constructor.html [ Failure ]
   http/tests/security/cors-post-redirect-303.html [ Failure ]
   http/tests/security/cors-post-redirect-307.html [ Failure ]
   http/tests/security/cors-post-redirect-308.html [ Failure ]
-  http/tests/security/cross-frame-access-private-browsing.html [ Failure ]
   http/tests/security/cross-origin-local-storage-allowed.html [ Failure ]
   http/tests/security/cross-origin-local-storage-wk1.html [ Failure ]
   http/tests/security/cross-origin-local-storage.html [ Failure ]
@@ -3171,7 +3141,6 @@ js/date-constructor.html [ Failure ]
   svg/clip-path/mask-objectboundingbox-content-clip.svg [ ImageOnlyFailure ]
   svg/clip-path/mask-userspaceonuse-content-clip-transform.svg [ ImageOnlyFailure ]
   svg/clip-path/mask-userspaceonuse-content-clip.svg [ ImageOnlyFailure ]
-  svg/css/svg-resource-fragment-identifier-img-src.html [ ImageOnlyFailure ]
   svg/custom/anchor-on-use.svg [ ImageOnlyFailure ]
   svg/custom/filter-update-different-root.html [ ImageOnlyFailure ]
   svg/custom/hidpi-masking-clipping.svg [ ImageOnlyFailure ]

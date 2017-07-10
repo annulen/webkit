@@ -28,7 +28,6 @@
 
 #if ENABLE(PLUGIN_PROCESS)
 
-#include "NetscapePlugin.h"
 #include "PluginProcessCreationParameters.h"
 #include <WebCore/NotImplemented.h>
 
@@ -38,7 +37,7 @@ void PluginProcess::platformInitializeProcess(const ChildProcessInitializationPa
 {
 }
 
-void PluginProcess::platformInitializePluginProcess(const PluginProcessCreationParameters&)
+void PluginProcess::platformInitializePluginProcess(PluginProcessCreationParameters&&)
 {
     notImplemented();
 }

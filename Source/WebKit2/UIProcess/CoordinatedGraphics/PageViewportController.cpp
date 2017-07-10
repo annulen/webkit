@@ -78,10 +78,12 @@ float PageViewportController::deviceScaleFactor() const
     return m_webPageProxy->deviceScaleFactor();
 }
 
+#if PLATFORM(EFL)
 static inline bool isIntegral(float value)
 {
     return static_cast<int>(value) == value;
 }
+#endif
 
 FloatPoint PageViewportController::pixelAlignedFloatPoint(const FloatPoint& framePosition)
 {
@@ -249,6 +251,12 @@ void PageViewportController::didChangeViewportSize(const FloatSize& newSize)
         return;
 
     m_viewportSize = newSize;
+
+#if PLATFORM(QT)
+    // Let the WebProcess know about the new viewport size, so that
+    // it can resize the content accordingly.
+    m_webPageProxy->drawingArea()->setSize(roundedIntSize(newSize), IntSize(), IntSize());
+#endif
 }
 
 void PageViewportController::didChangeContentsVisibility(const FloatPoint& position, float scale, const FloatPoint& trajectoryVector)

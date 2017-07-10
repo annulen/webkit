@@ -69,10 +69,13 @@ QWEBKIT_EXPORT void qt_networkAccessAllowed(bool isAllowed)
 
 class QWebSettingsPrivate {
 public:
-    QWebSettingsPrivate(WebCore::Settings* wcSettings = 0)
+    QWebSettingsPrivate(WebCore::Page* page = nullptr)
         : offlineStorageDefaultQuota(0)
-        , settings(wcSettings)
+        , page(page)
+        , settings(nullptr)
     {
+        if (page)
+            settings = &page->settings();
     }
 
     QHash<int, QString> fontFamilies;
@@ -87,6 +90,7 @@ public:
     qint64 offlineStorageDefaultQuota;
     QWebSettings::ThirdPartyCookiePolicy thirdPartyCookiePolicy;
     void apply();
+    WebCore::Page* page;
     WebCore::Settings* settings;
 };
 
@@ -153,9 +157,7 @@ void QWebSettingsPrivate::apply()
         value = attributes.value(QWebSettings::AcceleratedCompositingEnabled,
                                       global->attributes.value(QWebSettings::AcceleratedCompositingEnabled));
 
-        // FIXME: Temporary disabled until AC is fully working
-        // settings->setAcceleratedCompositingEnabled(value);
-        settings->setAcceleratedCompositingEnabled(false);
+        settings->setAcceleratedCompositingEnabled(value);
 
 #if ENABLE(ACCELERATED_2D_CANVAS)
         value = value && attributes.value(QWebSettings::Accelerated2dCanvasEnabled,
@@ -213,13 +215,9 @@ void QWebSettingsPrivate::apply()
                                       global->attributes.value(QWebSettings::PluginsEnabled));
         settings->setPluginsEnabled(value);
 
-// FIXME: setPrivateBrowsingEnabled was removed, instead we have Page::enableLegacyPrivateBrowsing
-//        and ephemeral sessions (and I guess it's better to use the latter)
-/*
         value = attributes.value(QWebSettings::PrivateBrowsingEnabled,
                                       global->attributes.value(QWebSettings::PrivateBrowsingEnabled));
-        settings->setPrivateBrowsingEnabled(value);
-*/
+        page->setSessionID(value ? WebCore::SessionID::legacyPrivateSessionID() : WebCore::SessionID::defaultSessionID());
 
         value = attributes.value(QWebSettings::SpatialNavigationEnabled,
                                       global->attributes.value(QWebSettings::SpatialNavigationEnabled));
@@ -274,6 +272,11 @@ void QWebSettingsPrivate::apply()
                                       global->attributes.value(QWebSettings::LocalContentCanAccessFileUrls));
         settings->setAllowFileAccessFromFileURLs(value);
 
+        value = attributes.value(QWebSettings::AllowRunningInsecureContent,
+                                      global->attributes.value(QWebSettings::AllowRunningInsecureContent));
+        settings->setAllowDisplayOfInsecureContent(value);
+        settings->setAllowRunningOfInsecureContent(value);
+
         value = attributes.value(QWebSettings::XSSAuditingEnabled,
                                       global->attributes.value(QWebSettings::XSSAuditingEnabled));
         settings->setXSSAuditorEnabled(value);
@@ -310,6 +313,9 @@ void QWebSettingsPrivate::apply()
         value = attributes.value(QWebSettings::FullScreenSupportEnabled, global->attributes.value(QWebSettings::FullScreenSupportEnabled));
         settings->setFullScreenEnabled(value);
 #endif
+
+        value = attributes.value(QWebSettings::ImagesEnabled, global->attributes.value(QWebSettings::ImagesEnabled));
+        settings->setImagesEnabled(value);
 
         settings->setUsesPageCache(WebCore::PageCache::singleton().maxSize());
     } else {
@@ -519,6 +525,8 @@ QWebSettings* QWebSettings::globalSettings()
         This is disabled by default.
     \value SiteSpecificQuirksEnabled This setting enables WebKit's workaround for broken sites. It is
         enabled by default.
+    \value CSSRegionsEnabled This setting enables support for the CSS 3 Regions module. This
+        CSS module is currently only a draft and support for it is enabled by default.
     \value ScrollAnimatorEnabled This setting enables animated scrolling. It is disabled by default.
     \value CaretBrowsingEnabled This setting enables caret browsing. It is disabled by default.
     \value NotificationsEnabled Specifies whether support for the HTML 5 web notifications is enabled
@@ -530,6 +538,10 @@ QWebSettings* QWebSettings::globalSettings()
         strongly discouraged as it makes the browser more prone to malicious code. This setting is intended
         primarily for site-specific browsers (i.e. when the user can't navigate to unsecure web page) and for testing
         web applications before deployment.
+    \value WebGLEnabled This setting enables support for WebGL.
+        It is enabled by default.
+    \value HyperlinkAuditingEnabled This setting enables support for hyperlink auditing (<a ping>).
+        It is disabled by default.
 */
 
 /*!
@@ -590,6 +602,8 @@ QWebSettings::QWebSettings()
     d->attributes.insert(QWebSettings::Accelerated2dCanvasEnabled, false);
     d->attributes.insert(QWebSettings::WebSecurityEnabled, true);
     d->attributes.insert(QWebSettings::FullScreenSupportEnabled, true);
+    d->attributes.insert(QWebSettings::ImagesEnabled, true);
+    d->attributes.insert(QWebSettings::AllowRunningInsecureContent, false);
     d->offlineStorageDefaultQuota = 5 * 1024 * 1024;
     d->defaultTextEncoding = QLatin1String("iso-8859-1");
     d->thirdPartyCookiePolicy = AlwaysAllowThirdPartyCookies;
@@ -598,8 +612,8 @@ QWebSettings::QWebSettings()
 /*!
     \internal
 */
-QWebSettings::QWebSettings(WebCore::Settings* settings)
-    : d(new QWebSettingsPrivate(settings))
+QWebSettings::QWebSettings(WebCore::Page* page)
+    : d(new QWebSettingsPrivate(page))
 {
     d->apply();
     allSettings()->append(d);

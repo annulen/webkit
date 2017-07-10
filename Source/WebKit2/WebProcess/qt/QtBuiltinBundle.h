@@ -28,7 +28,6 @@
 #define QtBuiltinBundle_h
 
 #include "WKBundle.h"
-#include "WKBundlePage.h"
 #include <wtf/HashMap.h>
 
 namespace WebKit {
@@ -56,7 +55,7 @@ public:
 private:
     void handleMessageToNavigatorQtObject(WKBundlePageRef, WKTypeRef messageBody);
     void handleSetNavigatorQtObjectEnabled(WKBundlePageRef, WKTypeRef messageBody);
-#ifdef HAVE_WEBCHANNEL
+#if ENABLE(QT_WEBCHANNEL)
     void handleMessageToNavigatorQtWebChannelTransport(WKBundlePageRef, WKTypeRef messageBody);
 #endif
 

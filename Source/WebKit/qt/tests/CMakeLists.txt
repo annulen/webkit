@@ -1,25 +1,22 @@
-cmake_minimum_required(VERSION 2.8.12)
+remove_definitions(-DQT_ASCII_CAST_WARNINGS)
 
 include_directories(
-    "${CMAKE_BINARY_DIR}"
     "${CMAKE_SOURCE_DIR}/Source"
-    "${DERIVED_SOURCES_DIR}/ForwardingHeaders"
-    "${DERIVED_SOURCES_WEBKIT_DIR}"
-    "${WEBCORE_DIR}"
-    "${WEBCORE_DIR}/platform"
-    "${WEBCORE_DIR}/platform/qt"
+    "${FORWARDING_HEADERS_DIR}"
     "${WEBKIT_DIR}/qt/Api"
     "${WEBKIT_DIR}/qt/WidgetApi"
-
-    "${JAVASCRIPTCORE_DIR}"
-    "${WTF_DIR}"
 )
 
 include_directories(SYSTEM
     ${ICU_INCLUDE_DIRS}
+    ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
     ${Qt5Widgets_INCLUDE_DIRS}
     ${Qt5Test_INCLUDE_DIRS}
 )
+
+if (ENABLE_TEST_SUPPORT)
+    add_definitions(-DHAVE_QTTESTSUPPORT)
+endif ()
 
 set(QtWK1ApiTests_LIBRARIES
     ${Qt5Gui_LIBRARIES}
@@ -35,6 +32,7 @@ set(QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY
 )
 
 set(QtWK1ApiTests
+    hybridPixmap
     qgraphicswebview
     qobjectbridge
     qwebelement
@@ -42,22 +40,25 @@ set(QtWK1ApiTests
     qwebhistory
     qwebhistoryinterface
     qwebinspector
+    qwebpage
     qwebsecurityorigin
     qwebview
 )
 
-if (ENABLE_API_TESTS)
-    foreach (testName ${QtWK1ApiTests})
-        set(tst_${testName}_SOURCES ${testName}/tst_${testName}.cpp)
-        if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${testName}/tst_${testName}.qrc")
-            qt5_add_resources(tst_${testName}_SOURCES ${testName}/tst_${testName}.qrc)
-        endif ()
+set(tst_hybridPixmap_SOURCES hybridPixmap/widget.cpp)
+qt5_wrap_ui(tst_hybridPixmap_SOURCES hybridPixmap/widget.ui)
 
-        add_executable(tst_${testName} ${tst_${testName}_SOURCES})
-        target_link_libraries(tst_${testName} ${QtWK1ApiTests_LIBRARIES})
-        set_target_properties(tst_${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY})
+foreach (testName ${QtWK1ApiTests})
+    list(APPEND tst_${testName}_SOURCES ${testName}/tst_${testName}.cpp)
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${testName}/tst_${testName}.qrc")
+        qt5_add_resources(tst_${testName}_SOURCES ${testName}/tst_${testName}.qrc)
+    endif ()
 
-        add_test(${testName} "${QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY}/tst_${testName}")
-        set_tests_properties(${testName} PROPERTIES TIMEOUT 60)
-    endforeach ()
-endif ()
+    add_executable(tst_${testName} ${tst_${testName}_SOURCES})
+    target_include_directories(tst_${testName} PRIVATE ${testName})
+    target_link_libraries(tst_${testName} ${QtWK1ApiTests_LIBRARIES})
+    set_target_properties(tst_${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY} AUTOMOC ON)
+
+    add_test(${testName} "${QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY}/tst_${testName}")
+    set_tests_properties(${testName} PROPERTIES TIMEOUT 60)
+endforeach ()
