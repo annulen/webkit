@@ -31,6 +31,8 @@
 #include <wtf/text/AtomicStringHash.h>
 #include <wtf/text/TextPosition.h>
 
+#include <functional>
+
 namespace WebCore {
 
 class CSSStyleSheet;
