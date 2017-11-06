@@ -1,6 +1,7 @@
 set(WOFF2_DIR "${THIRDPARTY_DIR}/woff2")
 
 set(WOFF2_INCLUDE_DIRECTORIES
+  "${WOFF2_DIR}/include"
   "${WOFF2_DIR}/src"
 )
 
@@ -12,7 +13,7 @@ set(WOFF2_SOURCES
   ${WOFF2_DIR}/src/woff2_out.cc
 )
 
-include_directories("${THIRDPARTY_DIR}/brotli/dec")
+include_directories("${THIRDPARTY_DIR}/brotli/include")
 include_directories("${WOFF2_INCLUDE_DIRECTORIES}")
 add_library(woff2 STATIC ${WOFF2_SOURCES})
 target_link_libraries(woff2 brotli)

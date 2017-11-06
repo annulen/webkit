@@ -929,10 +929,12 @@ void FrameLoaderClientQt::convertMainResourceLoadToDownload(DocumentLoader* docu
 
     QNetworkReply* reply = handler->release();
     if (reply) {
-        if (m_webFrame->pageAdapter->forwardUnsupportedContent)
+        if (m_webFrame->pageAdapter->forwardUnsupportedContent) {
             emit unsupportedContent(reply);
-        else
+        } else {
             reply->abort();
+            reply->deleteLater();
+        }
     }
 }
 
@@ -1233,7 +1235,9 @@ void FrameLoaderClientQt::startDownload(const WebCore::ResourceRequest& request,
     if (!m_webFrame)
         return;
 
-    m_webFrame->pageAdapter->emitDownloadRequested(request.toNetworkRequest(m_frame->loader().networkingContext()));
+    QNetworkRequest r = request.toNetworkRequest(m_frame->loader().networkingContext());
+    if (r.url().isValid())
+        m_webFrame->pageAdapter->emitDownloadRequested(r);
 }
 
 RefPtr<Frame> FrameLoaderClientQt::createFrame(const URL& url, const String& name, HTMLFrameOwnerElement* ownerElement, const String& referrer, bool allowsScrolling, int marginWidth, int marginHeight)
@@ -1513,12 +1517,6 @@ String FrameLoaderClientQt::overrideMediaType() const
         return m_webFrame->pageAdapter->settings->cssMediaType();
 
     return String();
-}
-
-QString FrameLoaderClientQt::chooseFile(const QString& oldFile)
-{
-    QStringList result = m_webFrame->pageAdapter->chooseFiles(m_webFrame, /*allowMulti*/ false, (QStringList() << oldFile));
-    return result.isEmpty() ? QString() : result.first();
 }
 
 PassRefPtr<FrameNetworkingContext> FrameLoaderClientQt::createNetworkingContext()

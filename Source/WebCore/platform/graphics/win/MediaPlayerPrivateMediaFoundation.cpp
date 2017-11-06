@@ -47,6 +47,7 @@
 
 #include <wtf/MainThread.h>
 #include <wtf/NeverDestroyed.h>
+#include <wtf/text/win/WCharStringExtras.h>
 
 SOFT_LINK_LIBRARY(Mf);
 SOFT_LINK_OPTIONAL(Mf, MFCreateSourceResolver, HRESULT, STDAPICALLTYPE, (IMFSourceResolver**));
@@ -98,6 +99,7 @@ MediaPlayerPrivateMediaFoundation::MediaPlayerPrivateMediaFoundation(MediaPlayer
     , m_hasVideo(false)
     , m_preparingToPlay(false)
     , m_hwndVideo(nullptr)
+    , m_volume(1.0)
     , m_networkState(MediaPlayer::Empty)
     , m_readyState(MediaPlayer::HaveNothing)
     , m_weakPtrFactory(this)
@@ -147,7 +149,7 @@ static const HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeCache()
     if (SUCCEEDED(hr)) {
         CALPWSTR mimeTypeArray = propVarMimeTypeArray.calpwstr;
         for (unsigned i = 0; i < mimeTypeArray.cElems; i++)
-            cachedTypes.get().add(mimeTypeArray.pElems[i]);
+            cachedTypes.get().add(nullTerminatedWCharToString(mimeTypeArray.pElems[i]));
     }
 
     PropVariantClear(&propVarMimeTypeArray);
@@ -173,6 +175,11 @@ MediaPlayer::SupportsType MediaPlayerPrivateMediaFoundation::supportsType(const 
 
 void MediaPlayerPrivateMediaFoundation::load(const String& url)
 {
+    {
+        LockHolder locker(m_cachedNaturalSizeLock);
+        m_cachedNaturalSize = FloatSize();
+    }
+
     startCreateMediaSource(url);
 
     m_networkState = MediaPlayer::Loading;
@@ -215,9 +222,10 @@ bool MediaPlayerPrivateMediaFoundation::supportsFullscreen() const
     return true;
 }
 
-FloatSize MediaPlayerPrivateMediaFoundation::naturalSize() const 
+FloatSize MediaPlayerPrivateMediaFoundation::naturalSize() const
 {
-    return m_size;
+    LockHolder locker(m_cachedNaturalSizeLock);
+    return m_cachedNaturalSize;
 }
 
 bool MediaPlayerPrivateMediaFoundation::hasVideo() const
@@ -299,16 +307,27 @@ bool MediaPlayerPrivateMediaFoundation::paused() const
     return m_paused;
 }
 
-void MediaPlayerPrivateMediaFoundation::setVolume(float volume)
+bool MediaPlayerPrivateMediaFoundation::setAllChannelVolumes(float volume)
 {
     if (!MFGetServicePtr())
-        return;
+        return false;
 
-    COMPtr<IMFSimpleAudioVolume> audioVolume;
-    if (SUCCEEDED(MFGetServicePtr()(m_mediaSession.get(), MR_POLICY_VOLUME_SERVICE, __uuidof(IMFSimpleAudioVolume), (void **)&audioVolume))) {
-        HRESULT hr = audioVolume->SetMasterVolume(volume);
-        ASSERT(SUCCEEDED(hr));
-    }
+    COMPtr<IMFAudioStreamVolume> audioVolume;
+    if (!SUCCEEDED(MFGetServicePtr()(m_mediaSession.get(), MR_STREAM_VOLUME_SERVICE, __uuidof(IMFAudioStreamVolume), (void **)&audioVolume)))
+        return false;
+
+    UINT32 channelsCount;
+    HRESULT hr = audioVolume->GetChannelCount(&channelsCount);
+    ASSERT(SUCCEEDED(hr));
+
+    Vector<float> volumes(channelsCount, volume);
+    return SUCCEEDED(audioVolume->SetAllVolumes(channelsCount, volumes.data()));
+}
+
+void MediaPlayerPrivateMediaFoundation::setVolume(float volume)
+{
+    if (setAllChannelVolumes(volume))
+        m_volume = volume;
 }
 
 bool MediaPlayerPrivateMediaFoundation::supportsMuting() const
@@ -318,14 +337,7 @@ bool MediaPlayerPrivateMediaFoundation::supportsMuting() const
 
 void MediaPlayerPrivateMediaFoundation::setMuted(bool muted)
 {
-    if (!MFGetServicePtr())
-        return;
-
-    COMPtr<IMFSimpleAudioVolume> audioVolume;
-    if (SUCCEEDED(MFGetServicePtr()(m_mediaSession.get(), MR_POLICY_VOLUME_SERVICE, __uuidof(IMFSimpleAudioVolume), (void **)&audioVolume))) {
-        HRESULT hr = audioVolume->SetMute(muted ? TRUE : FALSE);
-        ASSERT(SUCCEEDED(hr));
-    }
+    setAllChannelVolumes(muted ? 0.0 : m_volume);
 }
 
 MediaPlayer::NetworkState MediaPlayerPrivateMediaFoundation::networkState() const
@@ -465,7 +477,7 @@ bool MediaPlayerPrivateMediaFoundation::startCreateMediaSource(const String& url
         return false;
 
     COMPtr<IUnknown> cancelCookie;
-    Vector<UChar> urlSource = url.charactersWithNullTermination();
+    Vector<wchar_t> urlSource = stringToNullTerminatedWChar(url);
 
     AsyncCallback* callback = new AsyncCallback(this, false);
 
@@ -526,6 +538,16 @@ bool MediaPlayerPrivateMediaFoundation::endGetEvent(IMFAsyncResult* asyncResult)
             if (!weakPtr)
                 return;
             weakPtr->onTopologySet();
+        });
+        break;
+    }
+
+    case MESessionStarted: {
+        auto weakPtr = m_weakPtrFactory.createWeakPtr();
+        callOnMainThread([weakPtr] {
+            if (!weakPtr)
+                return;
+            weakPtr->onSessionStarted();
         });
         break;
     }
@@ -749,6 +771,12 @@ void MediaPlayerPrivateMediaFoundation::notifyDeleted()
         (*it)->onMediaPlayerDeleted();
 }
 
+void MediaPlayerPrivateMediaFoundation::setNaturalSize(const FloatSize& size)
+{
+    LockHolder locker(m_cachedNaturalSizeLock);
+    m_cachedNaturalSize = size;
+}
+
 bool MediaPlayerPrivateMediaFoundation::createOutputNode(COMPtr<IMFStreamDescriptor> sourceSD, COMPtr<IMFTopologyNode>& node)
 {
     if (!MFCreateTopologyNodePtr() || !MFCreateAudioRendererActivatePtr() || !MFCreateVideoRendererActivatePtr())
@@ -918,6 +946,11 @@ void MediaPlayerPrivateMediaFoundation::onBufferingStarted()
 }
 
 void MediaPlayerPrivateMediaFoundation::onBufferingStopped()
+{
+    updateReadyState();
+}
+
+void MediaPlayerPrivateMediaFoundation::onSessionStarted()
 {
     updateReadyState();
 }
@@ -1554,6 +1587,22 @@ static bool areMediaTypesEqual(IMFMediaType* type1, IMFMediaType* type2)
     return S_OK == type1->IsEqual(type2, &flags);
 }
 
+static FloatSize calculateNaturalSize(IMFMediaType* mediaType)
+{
+    UINT32 width = 0, height = 0;
+    HRESULT hr = MFGetAttributeSize(mediaType, MF_MT_FRAME_SIZE, &width, &height);
+    if (FAILED(hr) || !height)
+        return FloatSize();
+
+    UINT32 pixelAspectRatioNumerator = 0;
+    UINT32 pixelAspectRatioDenominator = 0;
+    hr = MFGetAttributeRatio(mediaType, MF_MT_PIXEL_ASPECT_RATIO, &pixelAspectRatioNumerator, &pixelAspectRatioDenominator);
+    if (SUCCEEDED(hr) && pixelAspectRatioNumerator && pixelAspectRatioDenominator)
+        return FloatSize(float(width) * pixelAspectRatioNumerator / pixelAspectRatioDenominator, height);
+
+    return FloatSize();
+}
+
 HRESULT MediaPlayerPrivateMediaFoundation::CustomVideoPresenter::setMediaType(IMFMediaType* mediaType)
 {
     if (!mediaType) {
@@ -1610,6 +1659,10 @@ HRESULT MediaPlayerPrivateMediaFoundation::CustomVideoPresenter::setMediaType(IM
         const MFRatio defaultFrameRate = { 30, 1 };
         m_scheduler.setFrameRate(defaultFrameRate);
     }
+
+    // Update natural size
+    if (m_mediaPlayer)
+        m_mediaPlayer->setNaturalSize(calculateNaturalSize(mediaType));
 
     ASSERT(mediaType);
     m_mediaType = mediaType;

@@ -265,8 +265,6 @@ macro(WEBKIT_FRAMEWORK _target)
         ${${_target}_HEADERS}
         ${${_target}_SOURCES}
         ${${_target}_DERIVED_SOURCES}
-        ${${_target}_PRIVATE_HEADERS}
-        ${${_target}_PUBLIC_HEADERS}
     )
     target_link_libraries(${_target} ${${_target}_LIBRARIES})
     set_target_properties(${_target} PROPERTIES COMPILE_DEFINITIONS "BUILDING_${_target}")
@@ -377,22 +375,12 @@ macro(GENERATE_WEBKIT2_MESSAGE_SOURCES _output_source _input_files)
     endforeach ()
 endmacro()
 
-macro(MAKE_JS_FILE_ARRAYS _output_cpp _output_h _scripts _scripts_dependencies)
-    if (NOT CMAKE_VERSION VERSION_LESS 3.1)
-        set(_python_path ${CMAKE_COMMAND} -E env "PYTHONPATH=${JavaScriptCore_SCRIPTS_DIR}")
-    elseif (WIN32)
-        set(_python_path set "PYTHONPATH=${JavaScriptCore_SCRIPTS_DIR}" &&)
-    else ()
-        set(_python_path "PYTHONPATH=${JavaScriptCore_SCRIPTS_DIR}")
-    endif ()
-
+macro(MAKE_JS_FILE_ARRAYS _output_cpp _output_h _namespace _scripts _scripts_dependencies)
     add_custom_command(
         OUTPUT ${_output_h} ${_output_cpp}
-        MAIN_DEPENDENCY ${WEBCORE_DIR}/Scripts/make-js-file-arrays.py
-        DEPENDS ${${_scripts}}
-        COMMAND ${_python_path} ${PYTHON_EXECUTABLE} ${WEBCORE_DIR}/Scripts/make-js-file-arrays.py ${_output_h} ${_output_cpp} ${${_scripts}}
+        DEPENDS ${JavaScriptCore_SCRIPTS_DIR}/make-js-file-arrays.py ${${_scripts}}
+        COMMAND ${PYTHON_EXECUTABLE} ${JavaScriptCore_SCRIPTS_DIR}/make-js-file-arrays.py -n ${_namespace} ${_output_h} ${_output_cpp} ${${_scripts}}
         VERBATIM)
-    list(APPEND WebCore_DERIVED_SOURCES ${_output_cpp})
     ADD_SOURCE_DEPENDENCIES(${${_scripts_dependencies}} ${_output_h} ${_output_cpp})
 endmacro()
 

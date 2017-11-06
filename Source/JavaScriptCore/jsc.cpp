@@ -68,6 +68,7 @@
 
 #if OS(WINDOWS)
 #include <direct.h>
+#include <wtf/text/win/WCharStringExtras.h>
 #else
 #include <unistd.h>
 #endif
@@ -868,8 +869,7 @@ static bool currentWorkingDirectory(DirectoryName& directoryName)
     // https://msdn.microsoft.com/en-us/library/windows/desktop/ff381407.aspx
     auto buffer = std::make_unique<wchar_t[]>(bufferLength);
     DWORD lengthNotIncludingNull = ::GetCurrentDirectoryW(bufferLength, buffer.get());
-    static_assert(sizeof(wchar_t) == sizeof(UChar), "In Windows, both are UTF-16LE");
-    String directoryString = String(reinterpret_cast<UChar*>(buffer.get()));
+    String directoryString = wcharToString(buffer.get(), lengthNotIncludingNull);
     // We don't support network path like \\host\share\<path name>.
     if (directoryString.startsWith("\\\\"))
         return false;
@@ -999,9 +999,7 @@ static bool fetchModuleFromLocalFileSystem(const String& fileName, Vector<char>&
     // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx#maxpath
     // Use long UNC to pass the long path name to the Windows APIs.
     String longUNCPathName = WTF::makeString("\\\\?\\", fileName);
-    static_assert(sizeof(wchar_t) == sizeof(UChar), "In Windows, both are UTF-16LE");
-    auto utf16Vector = longUNCPathName.charactersWithNullTermination();
-    FILE* f = _wfopen(reinterpret_cast<wchar_t*>(utf16Vector.data()), L"rb");
+    FILE* f = _wfopen(stringToNullTerminatedWChar(longUNCPathName).data(), L"rb");
 #else
     FILE* f = fopen(fileName.utf8().data(), "r");
 #endif
@@ -1122,23 +1120,29 @@ EncodedJSValue JSC_HOST_CALL functionCreateRoot(ExecState* exec)
 EncodedJSValue JSC_HOST_CALL functionCreateElement(ExecState* exec)
 {
     JSLockHolder lock(exec);
-    JSValue arg = exec->argument(0);
-    return JSValue::encode(Element::create(exec->vm(), exec->lexicalGlobalObject(), arg.isNull() ? nullptr : jsCast<Root*>(exec->argument(0))));
+    Root* root = jsDynamicCast<Root*>(exec->argument(0));
+    if (!root)
+        return JSValue::encode(exec->vm().throwException(exec, createError(exec, ASCIILiteral("Cannot create Element without a Root."))));
+    return JSValue::encode(Element::create(exec->vm(), exec->lexicalGlobalObject(), root));
 }
 
 EncodedJSValue JSC_HOST_CALL functionGetElement(ExecState* exec)
 {
     JSLockHolder lock(exec);
-    Element* result = jsCast<Root*>(exec->argument(0).asCell())->element();
+    Root* root = jsDynamicCast<Root*>(exec->argument(0));
+    if (!root)
+        return JSValue::encode(jsUndefined());
+    Element* result = root->element();
     return JSValue::encode(result ? result : jsUndefined());
 }
 
 EncodedJSValue JSC_HOST_CALL functionSetElementRoot(ExecState* exec)
 {
     JSLockHolder lock(exec);
-    Element* element = jsCast<Element*>(exec->argument(0));
-    Root* root = jsCast<Root*>(exec->argument(1));
-    element->setRoot(exec->vm(), root);
+    Element* element = jsDynamicCast<Element*>(exec->argument(0));
+    Root* root = jsDynamicCast<Root*>(exec->argument(1));
+    if (element && root)
+        element->setRoot(exec->vm(), root);
     return JSValue::encode(jsUndefined());
 }
 

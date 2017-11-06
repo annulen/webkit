@@ -1,0 +1,63 @@
+2017-04-13  Yusuke Suzuki  <utatane.tea@gmail.com>
+
+        [JSC] Date.parse should accept wider range of representation
+        https://bugs.webkit.org/show_bug.cgi?id=170720
+
+        Reviewed by Darin Adler.
+
+        * stress/date-relaxed.js: Added.
+        (shouldBe):
+        (throw.new.Error):
+
+2017-07-05  Yusuke Suzuki  <utatane.tea@gmail.com>
+
+        WTF::StringImpl::copyChars segfaults when built with GCC 7
+        https://bugs.webkit.org/show_bug.cgi?id=173407
+
+        Reviewed by Andreas Kling.
+
+        * stress/string-repeat-copy-chars-crash.js: Added.
+        (shouldBe):
+
+2016-10-20  Keith Miller  <keith_miller@apple.com>
+
+        Invalid assertion in arguments elimination
+        https://bugs.webkit.org/show_bug.cgi?id=163740
+        <rdar://problem/27911462>
+
+        Reviewed by Michael Saboff.
+
+        * stress/direct-arguments-osr-entry.js: Added.
+        (foo.):
+        (foo):
+
+2016-09-27  Filip Pizlo  <fpizlo@apple.com>
+
+        B3::lowerMacros forgets to before->updatePredecessorsAfter() when lowering ChillMod on ARM64
+        https://bugs.webkit.org/show_bug.cgi?id=162644
+
+        Reviewed by Keith Miller.
+
+        * stress/chill-mod-chill-mod.js: Added.
+        (foo):
+
+2016-08-18  Mark Lam  <mark.lam@apple.com>
+
+        ScopedArguments is using the wrong owner object for a write barrier.
+        https://bugs.webkit.org/show_bug.cgi?id=160976
+        <rdar://problem/27328506>
+
+        Reviewed by Keith Miller.
+
+        * stress/scoped-arguments-write-barrier-should-be-on-scope-object.js: Added.
+
+2016-08-17  Mark Lam  <mark.lam@apple.com>
+
+        Remove an invalid assertion in the DFG backend's GetById emitter.
+        https://bugs.webkit.org/show_bug.cgi?id=160925
+        <rdar://problem/27248961>
+
+        Reviewed by Filip Pizlo.
+
+        * stress/dfg-get-by-id-should-not-assert-non-null-prediction.js: Added.
+

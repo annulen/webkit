@@ -52,6 +52,7 @@
 #include "StyleInheritedData.h"
 #include "TransformState.h"
 #include <wtf/StackStats.h>
+#include <wtf/TemporaryChange.h>
 
 namespace WebCore {
 
@@ -195,6 +196,10 @@ bool RenderView::hitTest(const HitTestRequest& request, HitTestResult& result)
 bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& location, HitTestResult& result)
 {
     document().updateLayout();
+    
+#if !ASSERT_DISABLED
+    TemporaryChange<bool> hitTestRestorer { m_inHitTesting, true };
+#endif
 
     FrameFlatteningLayoutDisallower disallower(frameView());
 
@@ -612,7 +617,11 @@ void RenderView::repaintRootContents()
         layer()->setBackingNeedsRepaint(GraphicsLayer::DoNotClipToLayer);
         return;
     }
-    repaint();
+
+    // Always use layoutOverflowRect() to fix rdar://problem/27182267.
+    // This should be cleaned up via webkit.org/b/159913 and webkit.org/b/159914.
+    RenderLayerModelObject* repaintContainer = containerForRepaint();
+    repaintUsingContainer(repaintContainer, computeRectForRepaint(layoutOverflowRect(), repaintContainer));
 }
 
 void RenderView::repaintViewRectangle(const LayoutRect& repaintRect) const

@@ -1,3 +1,117 @@
+2017-09-20  Alberto Garcia  <berto@igalia.com>
+
+        Fix HPPA and Alpha builds
+        https://bugs.webkit.org/show_bug.cgi?id=177224
+
+        Reviewed by Alex Christensen.
+
+        * wtf/Platform.h:
+
+2017-10-18  Konstantin Tokarev  <annulen@yandex.ru>
+
+        REGRESSION(r217771): nullTerminatedWCharToString loses last character of input string
+        https://bugs.webkit.org/show_bug.cgi?id=178444
+
+        Reviewed by Per Arne Vollan.
+
+        * wtf/text/win/WCharStringExtras.h:
+        (WTF::nullTerminatedWCharToString):
+
+2017-04-13  Yusuke Suzuki  <utatane.tea@gmail.com>
+
+        [JSC] Date.parse should accept wider range of representation
+        https://bugs.webkit.org/show_bug.cgi?id=170720
+
+        Reviewed by Darin Adler.
+
+        We would like to relax Date.parse to accept the representation "May 8".
+        At that time, we choose `2000` as a default year. This is because of
+        the following reason.
+
+        1. According to the V8, this default value is compatible to the old KJS. While current V8 uses 2001,
+           SpiderMonkey does not have such a fallback path. So this reason is not big deal.
+
+        2. It is a leap year. When using `new Date("Feb 29")`, we assume that people want to save month and day.
+           Leap year can save user inputs if they is valid. If we use the current year instead, the current year
+           may not be a leap year. In that case, `new Date("Feb 29").getMonth()` becomes 2 (March).
+
+        * wtf/DateMath.cpp:
+        (WTF::parseDateFromNullTerminatedCharacters):
+
+2017-07-05  Yusuke Suzuki  <utatane.tea@gmail.com>
+
+        WTF::StringImpl::copyChars segfaults when built with GCC 7
+        https://bugs.webkit.org/show_bug.cgi?id=173407
+
+        Reviewed by Andreas Kling.
+
+        With GCC 7, StringImpl::copyChars() behaves as unexpected.
+        This function violates strict aliasing rule.
+
+        This optimization is originally introduced to improve performance
+        in SunSpider's string tests in 2008. When running it in my Linux
+        box, it no longer causes any observable difference. So, we just
+        remove this optimization.
+
+                                        baseline                  patched
+
+        string-base64                7.7544+-0.1761            7.6138+-0.2071          might be 1.0185x faster
+        string-fasta                10.5429+-0.2746     ?     10.7500+-0.2669        ? might be 1.0196x slower
+        string-tagcloud             14.8588+-0.2828           14.8039+-0.3039
+        string-unpack-code          36.1769+-0.4251           35.3397+-0.5398          might be 1.0237x faster
+        string-validate-input        8.5182+-0.2206            8.3514+-0.2179          might be 1.0200x faster
+
+        * wtf/text/StringImpl.h:
+        (WTF::StringImpl::copyChars):
+
+2017-01-25  Konstantin Tokarev  <annulen@yandex.ru>
+
+        Removed leftovers of pre-2015 VisualStudio support
+        https://bugs.webkit.org/show_bug.cgi?id=167434
+
+        Reviewed by Alex Christensen.
+
+        * wtf/Compiler.h:
+        * wtf/Platform.h:
+        * wtf/StringExtras.h:
+
+2016-12-11  Darin Adler  <darin@apple.com>
+
+        Use std::vsnprintf instead of vasprintf
+        https://bugs.webkit.org/show_bug.cgi?id=165740
+
+        Reviewed by Sam Weinig.
+
+        * wtf/Platform.h: Remove HAVE_VASPRINTF.
+        * wtf/StringExtras.h: Change the vsnprintf workaround to be used only
+        in older versions of Visual Studio, since the problem it works around
+        was resolved in Visual Studio 2015.
+
+2017-06-15  Konstantin Tokarev  <annulen@yandex.ru>
+
+        Implement FALLTHROUGH macro for compilers other than Clang
+        https://bugs.webkit.org/show_bug.cgi?id=173385
+
+        Reviewed by Alex Christensen.
+
+        FALLTHROUGH should be able to use [[gnu::fallthrough]] attribute of
+        GCC, and [[fallthrough]] from C++17, whichever is available.
+
+        * wtf/Compiler.h:
+
+2017-06-04  Konstantin Tokarev  <annulen@yandex.ru>
+
+        Fix build of Windows-specific code with ICU 59.1
+        https://bugs.webkit.org/show_bug.cgi?id=172729
+
+        Reviewed by Darin Adler.
+
+        * wtf/text/win/WCharStringExtras.h: Added new header file wuth helper
+        functions for conversion between WTF::String and wchart_t*.
+        (WTF::stringToNullTerminatedWChar):
+        (WTF::wcharToString):
+        (WTF::nullTerminatedWCharToString):
+
 2016-09-15  Keith Miller  <keith_miller@apple.com>
 
         Pragma out undefined-var-template warnings in JSC for JSObjects that are templatized
