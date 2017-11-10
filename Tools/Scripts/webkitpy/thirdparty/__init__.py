@@ -99,7 +99,7 @@ class AutoinstallImportHook(object):
                              "mechanize-0.2.5/mechanize")
 
     def _install_keyring(self):
-        self._install("http://pypi.python.org/packages/source/k/keyring/keyring-4.0.zip",
+        self._install("https://pypi.python.org/packages/source/k/keyring/keyring-4.0.zip",
                              "keyring")
 
     def _install_pep8(self):
