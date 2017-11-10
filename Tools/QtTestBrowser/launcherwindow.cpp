@@ -38,6 +38,10 @@
 #include "cookiejar.h"
 #include "urlloader.h"
 
+#include <QWebSettings>
+#include <QStandardPaths>
+#include <QSslSocket>
+
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
@@ -222,6 +226,14 @@ void LauncherWindow::applyPrefs()
     settings->setAttribute(QWebSettings::TiledBackingStoreEnabled, m_windowOptions.useTiledBackingStore);
     settings->setAttribute(QWebSettings::FrameFlatteningEnabled, m_windowOptions.useFrameFlattening);
     settings->setAttribute(QWebSettings::WebGLEnabled, m_windowOptions.useWebGL);
+    
+    settings->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    auto path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    settings->setOfflineStoragePath(path);
+    settings->enablePersistentStorage(path);
+
+    settings->setAttribute(QWebSettings::MediaSourceEnabled, true);  
+    
     m_windowOptions.useWebAudio = settings->testAttribute(QWebSettings::WebAudioEnabled);
     m_windowOptions.useMediaSource = settings->testAttribute(QWebSettings::MediaSourceEnabled);
 
