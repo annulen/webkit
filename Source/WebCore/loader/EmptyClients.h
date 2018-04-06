@@ -132,9 +132,6 @@ public:
 #if USE(COORDINATED_GRAPHICS)
     virtual void delegatedScrollRequested(const IntPoint&) override { }
 #endif
-#if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
-    virtual void scheduleAnimation() override { }
-#endif
 
     virtual IntPoint screenToRootView(const IntPoint& p) const override { return p; }
     virtual IntRect rootViewToScreen(const IntRect& r) const override { return r; }

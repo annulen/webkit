@@ -78,18 +78,6 @@ void ScrollAnimatorSmooth::scrollToOffsetWithoutAnimation(const FloatPoint& offs
     notifyPositionChanged(delta);
 }
 
-#if !USE(REQUEST_ANIMATION_FRAME_TIMER)
-void ScrollAnimatorSmooth::cancelAnimations()
-{
-    m_animation->stop();
-}
-
-void ScrollAnimatorSmooth::serviceScrollAnimations()
-{
-    m_animation->serviceAnimation();
-}
-#endif
-
 void ScrollAnimatorSmooth::willEndLiveResize()
 {
     m_animation->updateVisibleLengths();

@@ -94,14 +94,6 @@ void ScrollAnimationSmooth::setCurrentPosition(const FloatPoint& position)
     m_verticalData = PerAxisData(position.y(), m_verticalData.visibleLength);
 }
 
-#if !USE(REQUEST_ANIMATION_FRAME_TIMER)
-void ScrollAnimationSmooth::serviceAnimation()
-{
-    if (m_animationActive)
-        animationTimerFired();
-}
-#endif
-
 ScrollAnimationSmooth::~ScrollAnimationSmooth()
 {
 }
