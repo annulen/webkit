@@ -134,11 +134,6 @@ bool CompositingCoordinator::flushPendingLayerChanges()
 
 void CompositingCoordinator::syncDisplayState()
 {
-#if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER) && !USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
-    // Make sure that any previously registered animation callbacks are being executed before we flush the layers.
-    m_lastAnimationServiceTime = WTF::monotonicallyIncreasingTime();
-    m_page->mainFrame().view()->serviceScriptedAnimations(m_lastAnimationServiceTime);
-#endif
     m_page->mainFrame().view()->updateLayoutAndStyleIfNeededRecursive();
 }
 

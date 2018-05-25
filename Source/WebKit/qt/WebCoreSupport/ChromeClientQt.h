@@ -179,11 +179,6 @@ public:
     void setCursor(const Cursor&) final;
     void setCursorHiddenUntilMouseMoves(bool) final { }
 
-#if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
-    void scheduleAnimation() final;
-    void serviceScriptedAnimations();
-#endif
-
     void scrollRectIntoView(const IntRect&) const final { }
 
     bool selectItemWritingDirectionIsNatural() final;
@@ -211,9 +206,6 @@ public:
     bool statusBarVisible;
     bool menuBarVisible;
     QEventLoop* m_eventLoop;
-#if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
-    std::unique_ptr<RefreshAnimation> m_refreshAnimation;
-#endif
     MediaProducer::MediaStateFlags m_mediaState { WebCore::MediaProducer::IsNotPlaying };
 
 #if ENABLE(VIDEO) && (USE(GSTREAMER) || USE(QT_MULTIMEDIA))

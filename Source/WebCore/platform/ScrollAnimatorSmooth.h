@@ -48,11 +48,6 @@ public:
     virtual bool scroll(ScrollbarOrientation, ScrollGranularity, float step, float multiplier) override;
     virtual void scrollToOffsetWithoutAnimation(const FloatPoint&) override;
 
-#if !USE(REQUEST_ANIMATION_FRAME_TIMER)
-    virtual void cancelAnimations() override;
-    virtual void serviceScrollAnimations() override;
-#endif
-
     virtual void willEndLiveResize() override;
     virtual void didAddVerticalScrollbar(Scrollbar*) override;
     virtual void didAddHorizontalScrollbar(Scrollbar*) override;

@@ -189,9 +189,6 @@ private:
     virtual void setCursor(const WebCore::Cursor&) override;
     virtual void setCursorHiddenUntilMouseMoves(bool) override;
 #endif
-#if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
-    virtual void scheduleAnimation() override;
-#endif
 
     virtual void didAssociateFormControls(const Vector<RefPtr<WebCore::Element>>&) override;
     virtual bool shouldNotifyOnFormChanges() override;

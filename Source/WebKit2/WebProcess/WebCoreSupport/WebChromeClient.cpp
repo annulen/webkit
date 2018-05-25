@@ -737,15 +737,6 @@ void WebChromeClient::setCursorHiddenUntilMouseMoves(bool hiddenUntilMouseMoves)
 }
 #endif
 
-#if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
-void WebChromeClient::scheduleAnimation()
-{
-#if USE(COORDINATED_GRAPHICS)
-    m_page->drawingArea()->layerTreeHost()->scheduleAnimation();
-#endif
-}
-#endif
-
 void WebChromeClient::didAssociateFormControls(const Vector<RefPtr<WebCore::Element>>& elements)
 {
     return m_page->injectedBundleFormClient().didAssociateFormControls(m_page, elements);
