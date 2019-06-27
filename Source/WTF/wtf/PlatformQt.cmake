@@ -83,9 +83,11 @@ if (USE_GLIB)
     )
     list(APPEND WTF_PUBLIC_HEADERS
         glib/GLibUtilities.h
+        #glib/GMutexLocker.h
         glib/GRefPtr.h
         glib/GTypedefs.h
         glib/GUniquePtr.h
+        #glib/WTFGType.h
     )
 endif ()
 
