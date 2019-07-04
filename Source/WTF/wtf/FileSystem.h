@@ -53,7 +53,9 @@
 typedef const struct __CFData* CFDataRef;
 #endif
 
+#if !(PLATFORM(QT) && defined(Q_OS_MACOS))
 OBJC_CLASS NSString;
+#endif
 
 #if OS(WINDOWS)
 typedef void *HANDLE;
