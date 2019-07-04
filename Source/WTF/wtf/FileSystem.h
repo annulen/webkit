@@ -53,7 +53,7 @@
 typedef const struct __CFData* CFDataRef;
 #endif
 
-#if !(PLATFORM(QT) && defined(Q_OS_MACOS))
+#if !PLATFORM(QT)
 OBJC_CLASS NSString;
 #endif
 
