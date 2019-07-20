@@ -595,11 +595,10 @@ void QNetworkReplyHandler::sendResponseIfNeeded()
                               m_replyWrapper->encoding());
 
     if (url.isLocalFile()) {
-        if (client->usesAsyncCallbacks()) {
-            setLoadingDeferred(true);
-            client->didReceiveResponseAsync(m_resourceHandle, response);
-        } else
-            client->didReceiveResponse(m_resourceHandle, response);
+        setLoadingDeferred(true);
+        client->didReceiveResponseAsync(m_resourceHandle, WTFMove(response), [this]() {
+            continueDidReceiveResponse();
+        });
         return;
     }
 
@@ -622,33 +621,32 @@ void QNetworkReplyHandler::sendResponseIfNeeded()
         return;
     }
 
-    if (client->usesAsyncCallbacks()) {
-        setLoadingDeferred(true);
-        client->didReceiveResponseAsync(m_resourceHandle, response);
-    } else
-        client->didReceiveResponse(m_resourceHandle, response);
+    setLoadingDeferred(true);
+    client->didReceiveResponseAsync(m_resourceHandle, WTFMove(response), [this]() {
+        continueDidReceiveResponse();
+    });
 }
 
-void QNetworkReplyHandler::continueAfterWillSendRequest(const ResourceRequest& newRequest)
+void QNetworkReplyHandler::continueAfterWillSendRequest(ResourceRequest&& newRequest)
 {
     if (wasAborted()) // Network error cancelled the request.
         return;
 
-    m_request = newRequest.toNetworkRequest(m_resourceHandle->getInternal()->m_context.get());
+    m_request = WTFMove(newRequest).toNetworkRequest(m_resourceHandle->getInternal()->m_context.get());
 }
 
-void QNetworkReplyHandler::continueWillSendRequest(const ResourceRequest& newRequest)
+void QNetworkReplyHandler::continueWillSendRequest(ResourceRequest&& newRequest)
 {
-    ASSERT(!m_resourceHandle->client() || m_resourceHandle->client()->usesAsyncCallbacks());
+//    ASSERT(!m_resourceHandle->client() || m_resourceHandle->client()->usesAsyncCallbacks());
     ASSERT(m_queue.deferSignals());
     setLoadingDeferred(false);
 
-    continueAfterWillSendRequest(newRequest);
+    continueAfterWillSendRequest(WTFMove(newRequest));
 }
 
 void QNetworkReplyHandler::continueDidReceiveResponse()
 {
-    ASSERT(!m_resourceHandle->client() || m_resourceHandle->client()->usesAsyncCallbacks());
+//    ASSERT(!m_resourceHandle->client() || m_resourceHandle->client()->usesAsyncCallbacks());
     ASSERT(m_queue.deferSignals());
     setLoadingDeferred(false);
 }
@@ -694,13 +692,10 @@ void QNetworkReplyHandler::redirect(ResourceResponse& response, const QUrl& redi
     if (!newRequest.url().protocolIs("https") && protocolIs(newRequest.httpReferrer(), "https") && m_resourceHandle->context()->shouldClearReferrerOnHTTPSToHTTPRedirect())
         newRequest.clearHTTPReferrer();
 
-    if (client->usesAsyncCallbacks()) {
-        setLoadingDeferred(true);
-        client->willSendRequestAsync(m_resourceHandle, newRequest, response);
-    } else {
-        client->willSendRequest(m_resourceHandle, newRequest, response);
-        continueAfterWillSendRequest(newRequest);
-    }
+    setLoadingDeferred(true);
+    client->willSendRequestAsync(m_resourceHandle, WTFMove(newRequest), WTFMove(response), [this](ResourceRequest&& request) {
+        continueWillSendRequest(WTFMove(request));
+    });
 }
 
 void QNetworkReplyHandler::forwardData()
