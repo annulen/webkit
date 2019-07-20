@@ -118,9 +118,9 @@ list(APPEND WebCore_SOURCES
     platform/network/qt/PublicSuffixQt.cpp
     platform/network/qt/QNetworkReplyHandler.cpp
     platform/network/qt/QtMIMETypeSniffer.cpp
-#    platform/network/qt/ResourceHandleQt.cpp
-    #platform/network/qt/ResourceRequestQt.cpp
-    #    platform/network/qt/ResourceResponseQt.cpp
+    platform/network/qt/ResourceHandleQt.cpp
+    platform/network/qt/ResourceRequestQt.cpp
+    platform/network/qt/ResourceResponseQt.cpp
     platform/network/qt/SocketStreamHandleImplQt.cpp
     platform/network/qt/SynchronousLoaderClientQt.cpp
 
