@@ -30,7 +30,7 @@
 class QWebDatabasePrivate : public QSharedData {
 public:
     WTF::String name;
-    WTF::RefPtr<WebCore::SecurityOrigin> origin;
+    WTF::Ref<WebCore::SecurityOrigin> origin;
 };
 
 #endif

@@ -24,6 +24,7 @@
 #include "qwebsecurityorigin_p.h"
 #include <WebCore/DatabaseDetails.h>
 #include <WebCore/DatabaseManager.h>
+#include <WebCore/DatabaseTracker.h>
 
 using namespace WebCore;
 
@@ -153,7 +154,7 @@ QWebSecurityOrigin QWebDatabase::origin() const
 */
 void QWebDatabase::removeDatabase(const QWebDatabase& db)
 {
-    DatabaseManager::singleton().deleteDatabase(db.d->origin.get(), db.d->name);
+    DatabaseTracker::singleton().deleteDatabase(db.d->origin->data(), db.d->name);
 }
 
 /*!
@@ -165,7 +166,7 @@ void QWebDatabase::removeDatabase(const QWebDatabase& db)
 */
 void QWebDatabase::removeAllDatabases()
 {
-    DatabaseManager::singleton().deleteAllDatabases();
+    DatabaseTracker::singleton().deleteAllDatabasesImmediately();
 }
 
 /*!

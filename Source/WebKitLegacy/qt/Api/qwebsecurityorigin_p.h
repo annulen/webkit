@@ -26,14 +26,12 @@
 class QWebSecurityOriginPrivate : public QSharedData {
 public:
     QWebSecurityOriginPrivate(WTF::Ref<WebCore::SecurityOrigin>&& o)
-    {
-        Q_ASSERT(o);
-        origin = WTFMove(o);
-    }
-    ~QWebSecurityOriginPrivate()
+        : origin(WTFMove(o))
     {
     }
-    WTF::RefPtr<WebCore::SecurityOrigin> origin;
+
+    ~QWebSecurityOriginPrivate() = default;
+    WTF::Ref<WebCore::SecurityOrigin> origin;
 };
 
 #endif
