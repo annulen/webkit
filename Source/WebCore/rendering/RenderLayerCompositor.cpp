@@ -3756,17 +3756,17 @@ void RenderLayerCompositor::updateOverflowControlsLayers()
 
     if (requiresHorizontalScrollbarLayer()) {
         if (!m_layerForHorizontalScrollbar) {
-            m_layerForHorizontalScrollbar = GraphicsLayer::create(graphicsLayerFactory(), *this);
-            m_layerForHorizontalScrollbar->setAllowsBackingStoreDetaching(false);
-            m_layerForHorizontalScrollbar->setShowDebugBorder(m_showDebugBorders);
-            m_layerForHorizontalScrollbar->setName("horizontal scrollbar container");
-#if PLATFORM(COCOA) && USE(CA)
-            m_layerForHorizontalScrollbar->setAcceleratesDrawing(acceleratedDrawingEnabled());
-#endif
-            m_overflowControlsHostLayer->addChild(*m_layerForHorizontalScrollbar);
-
-            if (auto* scrollingCoordinator = this->scrollingCoordinator())
-                scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), HorizontalScrollbar);
+//            m_layerForHorizontalScrollbar = GraphicsLayer::create(graphicsLayerFactory(), *this);
+//            m_layerForHorizontalScrollbar->setAllowsBackingStoreDetaching(false);
+//            m_layerForHorizontalScrollbar->setShowDebugBorder(m_showDebugBorders);
+//            m_layerForHorizontalScrollbar->setName("horizontal scrollbar container");
+//#if PLATFORM(COCOA) && USE(CA)
+//            m_layerForHorizontalScrollbar->setAcceleratesDrawing(acceleratedDrawingEnabled());
+//#endif
+//            m_overflowControlsHostLayer->addChild(*m_layerForHorizontalScrollbar);
+//
+//            if (auto* scrollingCoordinator = this->scrollingCoordinator())
+//                scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), HorizontalScrollbar);
         }
     } else if (m_layerForHorizontalScrollbar) {
         GraphicsLayer::unparentAndClear(m_layerForHorizontalScrollbar);
@@ -3777,17 +3777,17 @@ void RenderLayerCompositor::updateOverflowControlsLayers()
 
     if (requiresVerticalScrollbarLayer()) {
         if (!m_layerForVerticalScrollbar) {
-            m_layerForVerticalScrollbar = GraphicsLayer::create(graphicsLayerFactory(), *this);
-            m_layerForVerticalScrollbar->setAllowsBackingStoreDetaching(false);
-            m_layerForVerticalScrollbar->setShowDebugBorder(m_showDebugBorders);
-            m_layerForVerticalScrollbar->setName("vertical scrollbar container");
-#if PLATFORM(COCOA) && USE(CA)
-            m_layerForVerticalScrollbar->setAcceleratesDrawing(acceleratedDrawingEnabled());
-#endif
-            m_overflowControlsHostLayer->addChild(*m_layerForVerticalScrollbar);
-
-            if (auto* scrollingCoordinator = this->scrollingCoordinator())
-                scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), VerticalScrollbar);
+//            m_layerForVerticalScrollbar = GraphicsLayer::create(graphicsLayerFactory(), *this);
+//            m_layerForVerticalScrollbar->setAllowsBackingStoreDetaching(false);
+//            m_layerForVerticalScrollbar->setShowDebugBorder(m_showDebugBorders);
+//            m_layerForVerticalScrollbar->setName("vertical scrollbar container");
+//#if PLATFORM(COCOA) && USE(CA)
+//            m_layerForVerticalScrollbar->setAcceleratesDrawing(acceleratedDrawingEnabled());
+//#endif
+//            m_overflowControlsHostLayer->addChild(*m_layerForVerticalScrollbar);
+//
+//            if (auto* scrollingCoordinator = this->scrollingCoordinator())
+//                scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), VerticalScrollbar);
         }
     } else if (m_layerForVerticalScrollbar) {
         GraphicsLayer::unparentAndClear(m_layerForVerticalScrollbar);
@@ -3798,14 +3798,14 @@ void RenderLayerCompositor::updateOverflowControlsLayers()
 
     if (requiresScrollCornerLayer()) {
         if (!m_layerForScrollCorner) {
-            m_layerForScrollCorner = GraphicsLayer::create(graphicsLayerFactory(), *this);
-            m_layerForScrollCorner->setAllowsBackingStoreDetaching(false);
-            m_layerForScrollCorner->setShowDebugBorder(m_showDebugBorders);
-            m_layerForScrollCorner->setName("scroll corner");
-#if PLATFORM(COCOA) && USE(CA)
-            m_layerForScrollCorner->setAcceleratesDrawing(acceleratedDrawingEnabled());
-#endif
-            m_overflowControlsHostLayer->addChild(*m_layerForScrollCorner);
+//            m_layerForScrollCorner = GraphicsLayer::create(graphicsLayerFactory(), *this);
+//            m_layerForScrollCorner->setAllowsBackingStoreDetaching(false);
+//            m_layerForScrollCorner->setShowDebugBorder(m_showDebugBorders);
+//            m_layerForScrollCorner->setName("scroll corner");
+//#if PLATFORM(COCOA) && USE(CA)
+//            m_layerForScrollCorner->setAcceleratesDrawing(acceleratedDrawingEnabled());
+//#endif
+//            m_overflowControlsHostLayer->addChild(*m_layerForScrollCorner);
         }
     } else
         GraphicsLayer::unparentAndClear(m_layerForScrollCorner);
@@ -3820,84 +3820,84 @@ void RenderLayerCompositor::ensureRootLayer()
          return;
 
     if (!m_rootContentsLayer) {
-        m_rootContentsLayer = GraphicsLayer::create(graphicsLayerFactory(), *this);
-        m_rootContentsLayer->setName("content root");
-        IntRect overflowRect = snappedIntRect(m_renderView.layoutOverflowRect());
-        m_rootContentsLayer->setSize(FloatSize(overflowRect.maxX(), overflowRect.maxY()));
-        m_rootContentsLayer->setPosition(FloatPoint());
+//        m_rootContentsLayer = GraphicsLayer::create(graphicsLayerFactory(), *this);
+//        m_rootContentsLayer->setName("content root");
+//        IntRect overflowRect = snappedIntRect(m_renderView.layoutOverflowRect());
+//        m_rootContentsLayer->setSize(FloatSize(overflowRect.maxX(), overflowRect.maxY()));
+//        m_rootContentsLayer->setPosition(FloatPoint());
 
-#if PLATFORM(IOS_FAMILY)
-        // Page scale is applied above this on iOS, so we'll just say that our root layer applies it.
-        auto& frame = m_renderView.frameView().frame();
-        if (frame.isMainFrame())
-            m_rootContentsLayer->setAppliesPageScale();
-#endif
+//#if PLATFORM(IOS_FAMILY)
+//        // Page scale is applied above this on iOS, so we'll just say that our root layer applies it.
+//        auto& frame = m_renderView.frameView().frame();
+//        if (frame.isMainFrame())
+//            m_rootContentsLayer->setAppliesPageScale();
+//#endif
 
-        // Need to clip to prevent transformed content showing outside this frame
-        updateRootContentLayerClipping();
+//        // Need to clip to prevent transformed content showing outside this frame
+//        updateRootContentLayerClipping();
     }
 
-    if (requiresScrollLayer(expectedAttachment)) {
-        if (!m_overflowControlsHostLayer) {
-            ASSERT(!m_scrolledContentsLayer);
-            ASSERT(!m_clipLayer);
+//    if (requiresScrollLayer(expectedAttachment)) {
+//        if (!m_overflowControlsHostLayer) {
+//            ASSERT(!m_scrolledContentsLayer);
+//            ASSERT(!m_clipLayer);
 
-            // Create a layer to host the clipping layer and the overflow controls layers.
-            m_overflowControlsHostLayer = GraphicsLayer::create(graphicsLayerFactory(), *this);
-            m_overflowControlsHostLayer->setName("overflow controls host");
+//            // Create a layer to host the clipping layer and the overflow controls layers.
+//            m_overflowControlsHostLayer = GraphicsLayer::create(graphicsLayerFactory(), *this);
+//            m_overflowControlsHostLayer->setName("overflow controls host");
 
-            m_scrolledContentsLayer = GraphicsLayer::create(graphicsLayerFactory(), *this, GraphicsLayer::Type::ScrolledContents);
-            m_scrolledContentsLayer->setName("scrolled contents");
-            m_scrolledContentsLayer->setAnchorPoint({ });
+//            m_scrolledContentsLayer = GraphicsLayer::create(graphicsLayerFactory(), *this, GraphicsLayer::Type::ScrolledContents);
+//            m_scrolledContentsLayer->setName("scrolled contents");
+//            m_scrolledContentsLayer->setAnchorPoint({ });
 
-#if PLATFORM(IOS_FAMILY)
-            if (m_renderView.settings().asyncFrameScrollingEnabled()) {
-                m_scrollContainerLayer = GraphicsLayer::create(graphicsLayerFactory(), *this, GraphicsLayer::Type::ScrollContainer);
+//#if PLATFORM(IOS_FAMILY)
+//            if (m_renderView.settings().asyncFrameScrollingEnabled()) {
+//                m_scrollContainerLayer = GraphicsLayer::create(graphicsLayerFactory(), *this, GraphicsLayer::Type::ScrollContainer);
 
-                m_scrollContainerLayer->setName("scroll container");
-                m_scrollContainerLayer->setMasksToBounds(true);
-                m_scrollContainerLayer->setAnchorPoint({ });
+//                m_scrollContainerLayer->setName("scroll container");
+//                m_scrollContainerLayer->setMasksToBounds(true);
+//                m_scrollContainerLayer->setAnchorPoint({ });
 
-                m_scrollContainerLayer->addChild(*m_scrolledContentsLayer);
-                m_overflowControlsHostLayer->addChild(*m_scrollContainerLayer);
-            }
-#endif
-            // FIXME: m_scrollContainerLayer and m_clipLayer have similar roles here, but m_clipLayer has some special positioning to
-            // account for clipping and top content inset (see FrameView::yPositionForInsetClipLayer()).
-            if (!m_scrollContainerLayer) {
-                m_clipLayer = GraphicsLayer::create(graphicsLayerFactory(), *this);
-                m_clipLayer->setName("frame clipping");
-                m_clipLayer->setMasksToBounds(true);
-                m_clipLayer->setAnchorPoint({ });
+//                m_scrollContainerLayer->addChild(*m_scrolledContentsLayer);
+//                m_overflowControlsHostLayer->addChild(*m_scrollContainerLayer);
+//            }
+//#endif
+//            // FIXME: m_scrollContainerLayer and m_clipLayer have similar roles here, but m_clipLayer has some special positioning to
+//            // account for clipping and top content inset (see FrameView::yPositionForInsetClipLayer()).
+//            if (!m_scrollContainerLayer) {
+//                m_clipLayer = GraphicsLayer::create(graphicsLayerFactory(), *this);
+//                m_clipLayer->setName("frame clipping");
+//                m_clipLayer->setMasksToBounds(true);
+//                m_clipLayer->setAnchorPoint({ });
 
-                m_clipLayer->addChild(*m_scrolledContentsLayer);
-                m_overflowControlsHostLayer->addChild(*m_clipLayer);
-            }
+//                m_clipLayer->addChild(*m_scrolledContentsLayer);
+//                m_overflowControlsHostLayer->addChild(*m_clipLayer);
+//            }
 
-            m_scrolledContentsLayer->addChild(*m_rootContentsLayer);
+//            m_scrolledContentsLayer->addChild(*m_rootContentsLayer);
 
-            updateScrollLayerClipping();
-            updateOverflowControlsLayers();
+//            updateScrollLayerClipping();
+//            updateOverflowControlsLayers();
 
-            if (hasCoordinatedScrolling())
-                scheduleLayerFlush(true);
-            else
-                updateScrollLayerPosition();
-        }
-    } else {
-        if (m_overflowControlsHostLayer) {
-            GraphicsLayer::unparentAndClear(m_overflowControlsHostLayer);
-            GraphicsLayer::unparentAndClear(m_clipLayer);
-            GraphicsLayer::unparentAndClear(m_scrollContainerLayer);
-            GraphicsLayer::unparentAndClear(m_scrolledContentsLayer);
-        }
-    }
+//            if (hasCoordinatedScrolling())
+//                scheduleLayerFlush(true);
+//            else
+//                updateScrollLayerPosition();
+//        }
+//    } else {
+//        if (m_overflowControlsHostLayer) {
+//            GraphicsLayer::unparentAndClear(m_overflowControlsHostLayer);
+//            GraphicsLayer::unparentAndClear(m_clipLayer);
+//            GraphicsLayer::unparentAndClear(m_scrollContainerLayer);
+//            GraphicsLayer::unparentAndClear(m_scrolledContentsLayer);
+//        }
+//    }
 
-    // Check to see if we have to change the attachment
-    if (m_rootLayerAttachment != RootLayerUnattached)
-        detachRootLayer();
+//    // Check to see if we have to change the attachment
+//    if (m_rootLayerAttachment != RootLayerUnattached)
+//        detachRootLayer();
 
-    attachRootLayer(expectedAttachment);
+//    attachRootLayer(expectedAttachment);
 }
 
 void RenderLayerCompositor::destroyRootLayer()

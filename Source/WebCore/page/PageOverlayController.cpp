@@ -59,10 +59,10 @@ void PageOverlayController::createRootLayersIfNeeded()
     ASSERT(!m_documentOverlayRootLayer);
     ASSERT(!m_viewOverlayRootLayer);
 
-    m_documentOverlayRootLayer = GraphicsLayer::create(m_page.chrome().client().graphicsLayerFactory(), *this);
-    m_viewOverlayRootLayer = GraphicsLayer::create(m_page.chrome().client().graphicsLayerFactory(), *this);
-    m_documentOverlayRootLayer->setName("Document overlay Container");
-    m_viewOverlayRootLayer->setName("View overlay container");
+//    m_documentOverlayRootLayer = GraphicsLayer::create(m_page.chrome().client().graphicsLayerFactory(), *this);
+//    m_viewOverlayRootLayer = GraphicsLayer::create(m_page.chrome().client().graphicsLayerFactory(), *this);
+//    m_documentOverlayRootLayer->setName("Document overlay Container");
+//    m_viewOverlayRootLayer->setName("View overlay container");
 }
 
 void PageOverlayController::installedPageOverlaysChanged()
@@ -185,31 +185,31 @@ void PageOverlayController::installPageOverlay(PageOverlay& overlay, PageOverlay
 
     m_pageOverlays.append(&overlay);
 
-    auto layer = GraphicsLayer::create(m_page.chrome().client().graphicsLayerFactory(), *this);
-    layer->setAnchorPoint({ });
-    layer->setBackgroundColor(overlay.backgroundColor());
-    layer->setName("Overlay content");
+//    auto layer = GraphicsLayer::create(m_page.chrome().client().graphicsLayerFactory(), *this);
+//    layer->setAnchorPoint({ });
+//    layer->setBackgroundColor(overlay.backgroundColor());
+//    layer->setName("Overlay content");
 
-    updateSettingsForLayer(layer.get());
+//    updateSettingsForLayer(layer.get());
 
-    switch (overlay.overlayType()) {
-    case PageOverlay::OverlayType::View:
-        m_viewOverlayRootLayer->addChild(layer.get());
-        break;
-    case PageOverlay::OverlayType::Document:
-        m_documentOverlayRootLayer->addChild(layer.get());
-        break;
-    }
+//    switch (overlay.overlayType()) {
+//    case PageOverlay::OverlayType::View:
+//        m_viewOverlayRootLayer->addChild(layer.get());
+//        break;
+//    case PageOverlay::OverlayType::Document:
+//        m_documentOverlayRootLayer->addChild(layer.get());
+//        break;
+//    }
 
-    auto& rawLayer = layer.get();
-    m_overlayGraphicsLayers.set(&overlay, WTFMove(layer));
+//    auto& rawLayer = layer.get();
+//    m_overlayGraphicsLayers.set(&overlay, WTFMove(layer));
 
     overlay.setPage(&m_page);
 
     if (FrameView* frameView = m_page.mainFrame().view())
         frameView->enterCompositingMode();
 
-    updateOverlayGeometry(overlay, rawLayer);
+//    updateOverlayGeometry(overlay, rawLayer);
 
     if (fadeMode == PageOverlay::FadeMode::Fade)
         overlay.startFadeInAnimation();
