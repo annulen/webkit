@@ -27,6 +27,7 @@
 #include "config.h"
 #include "BitmapTexture.h"
 
+#include "GraphicsContext.h"
 #include "GraphicsLayer.h"
 #include "ImageBuffer.h"
 #include "TextureMapper.h"
