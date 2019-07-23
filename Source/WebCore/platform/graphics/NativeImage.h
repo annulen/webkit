@@ -35,7 +35,7 @@
 typedef struct CGImage* CGImageRef;
 #elif PLATFORM(QT)
 QT_BEGIN_NAMESPACE
-class QPixmap;
+class QImage;
 QT_END_NAMESPACE
 #elif USE(CAIRO)
 #include "RefPtrCairo.h"
@@ -58,7 +58,7 @@ class GraphicsContext;
 #if USE(CG)
 typedef RetainPtr<CGImageRef> NativeImagePtr;
 #elif PLATFORM(QT)
-typedef QPixmap* NativeImagePtr;
+typedef QImage* NativeImagePtr;
 #elif USE(DIRECT2D)
 typedef COMPtr<ID2D1Bitmap> NativeImagePtr;
 #elif USE(CAIRO)

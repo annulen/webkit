@@ -608,7 +608,7 @@ public:
 #endif // OS(WINDOWS)
 
 #if PLATFORM(QT)
-    void pushTransparencyLayerInternal(const QRect&, qreal, QPixmap&);
+    void pushTransparencyLayerInternal(const QRect&, qreal, QImage&);
     void popTransparencyLayerInternal();
     void takeOwnershipOfPlatformContext();
 #endif
