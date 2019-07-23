@@ -19,40 +19,46 @@
 
 #include "qwebelement.h"
 
-#include "APICast.h"
+//#include "APICast.h"
 #include "qwebelement_p.h"
-#include "CSSComputedStyleDeclaration.h"
-#include "CSSParser.h"
-#include "CSSRule.h"
-#include "CSSRuleList.h"
-#include "CSSStyleRule.h"
-#include "Document.h"
-#include "DocumentFragment.h"
-#include "FrameView.h"
-#include "GraphicsContext.h"
-#include "HTMLElement.h"
-#include "StyleProperties.h"
-#include "StyleRule.h"
-#include "Completion.h"
-#include "JSGlobalObject.h"
-#include "JSHTMLElement.h"
-#include "JSObject.h"
-#include "PropertyNameArray.h"
-#include <QWebFrameAdapter.h>
-#include <parser/SourceCode.h>
-#include "qt_runtime.h"
-#include "NodeList.h"
-#include "RenderImage.h"
-#include "ScriptController.h"
-#include "ScriptSourceCode.h"
-#include "ScriptState.h"
-#include "StaticNodeList.h"
-#include "StyleResolver.h"
-#include "markup.h"
-#include "runtime_root.h"
-#include <JSDocument.h>
-#include <wtf/Vector.h>
-#include <wtf/text/CString.h>
+#include <WebCore/CSSPropertyParser.h>
+//#include "CSSComputedStyleDeclaration.h"
+//#include "CSSParser.h"
+//#include "CSSRule.h"
+//#include "CSSRuleList.h"
+//#include "CSSStyleRule.h"
+//#include "Document.h"
+//#include "DocumentFragment.h"
+//#include "FrameView.h"
+//#include "GraphicsContext.h"
+//#include "HTMLElement.h"
+//#include "StyleProperties.h"
+//#include "StyleRule.h"
+//#include "Completion.h"
+//#include "JSGlobalObject.h"
+//#include "JSHTMLElement.h"
+//#include "JSObject.h"
+//#include "PropertyNameArray.h"
+#include "QWebFrameAdapter.h"
+//#include <parser/SourceCode.h>
+//#include "qt_runtime.h"
+//#include "NodeList.h"
+//#include "RenderImage.h"
+#include <WebCore/ScriptController.h>
+//#include "ScriptSourceCode.h"
+//#include "ScriptState.h"
+//#include "StaticNodeList.h"
+//#include "StyleResolver.h"
+//#include "markup.h"
+//#include "runtime_root.h"
+//#include <JSDocument.h>
+//#include <wtf/Vector.h>
+//#include <wtf/text/CString.h>
+#include <wtf/NakedPtr.h>
+
+#include <WebCore/RenderElement.h>
+
+#include <WebCore/HTMLElement.h>
 
 #include <QPainter>
 
@@ -240,8 +246,10 @@ QWebElement QWebElement::findFirst(const QString &selectorQuery) const
 {
     if (!m_element)
         return QWebElement();
-    ExceptionCode exception = 0; // ###
-    return QWebElement(m_element->querySelector(selectorQuery, exception));
+    auto queryResult = m_element->querySelector(selectorQuery);
+    if (queryResult.hasException())
+        return QWebElement();
+    return QWebElement(queryResult.releaseReturnValue());
 }
 
 /*!
@@ -255,8 +263,8 @@ void QWebElement::setPlainText(const QString &text)
 {
     if (!m_element || !m_element->isHTMLElement())
         return;
-    ExceptionCode exception = 0;
-    static_cast<HTMLElement*>(m_element)->setInnerText(text, exception);
+    // QTFIXME: Report result?
+    static_cast<HTMLElement*>(m_element)->setInnerText(text);
 }
 
 /*!
@@ -287,10 +295,8 @@ void QWebElement::setOuterXml(const QString &markup)
 {
     if (!m_element || !m_element->isHTMLElement())
         return;
-
-    ExceptionCode exception = 0;
-
-    static_cast<HTMLElement*>(m_element)->setOuterHTML(markup, exception);
+    // QTFIXME: Report result?
+    static_cast<HTMLElement*>(m_element)->setOuterHTML(markup);
 }
 
 /*!
@@ -327,10 +333,8 @@ void QWebElement::setInnerXml(const QString &markup)
 {
     if (!m_element || !m_element->isHTMLElement())
         return;
-
-    ExceptionCode exception = 0;
-
-    static_cast<HTMLElement*>(m_element)->setInnerHTML(markup, exception);
+    // QTFIXME: Report result?
+    static_cast<HTMLElement*>(m_element)->setInnerHTML(markup);
 }
 
 /*!
@@ -363,8 +367,8 @@ void QWebElement::setAttribute(const QString &name, const QString &value)
 {
     if (!m_element)
         return;
-    ExceptionCode exception = 0;
-    m_element->setAttribute(name, value, exception);
+    // QTFIXME: Report result?
+    m_element->setAttribute(String(name), String(value));
 }
 
 /*!
@@ -378,8 +382,8 @@ void QWebElement::setAttributeNS(const QString &namespaceUri, const QString &nam
 {
     if (!m_element)
         return;
-    WebCore::ExceptionCode exception = 0;
-    m_element->setAttributeNS(namespaceUri, name, value, exception);
+    // QTFIXME: Report result?
+    m_element->setAttributeNS(String(namespaceUri), String(name), String(value));
 }
 
 /*!
@@ -392,8 +396,8 @@ QString QWebElement::attribute(const QString &name, const QString &defaultValue)
 {
     if (!m_element)
         return QString();
-    if (m_element->hasAttribute(name))
-        return m_element->getAttribute(name);
+    if (m_element->hasAttribute(String(name)))
+        return m_element->getAttribute(String(name)).string();
     else
         return defaultValue;
 }
@@ -408,8 +412,8 @@ QString QWebElement::attributeNS(const QString &namespaceUri, const QString &nam
 {
     if (!m_element)
         return QString();
-    if (m_element->hasAttributeNS(namespaceUri, name))
-        return m_element->getAttributeNS(namespaceUri, name);
+    if (m_element->hasAttributeNS(String(namespaceUri), String(name)))
+        return m_element->getAttributeNS(String(namespaceUri), String(name)).string();
     else
         return defaultValue;
 }
@@ -424,7 +428,7 @@ bool QWebElement::hasAttribute(const QString &name) const
 {
     if (!m_element)
         return false;
-    return m_element->hasAttribute(name);
+    return m_element->hasAttribute(String(name));
 }
 
 /*!
@@ -437,7 +441,7 @@ bool QWebElement::hasAttributeNS(const QString &namespaceUri, const QString &nam
 {
     if (!m_element)
         return false;
-    return m_element->hasAttributeNS(namespaceUri, name);
+    return m_element->hasAttributeNS(String(namespaceUri), String(name));
 }
 
 /*!
@@ -449,7 +453,7 @@ void QWebElement::removeAttribute(const QString &name)
 {
     if (!m_element)
         return;
-    m_element->removeAttribute(name);
+    m_element->removeAttribute(String(name));
 }
 
 /*!
@@ -462,7 +466,7 @@ void QWebElement::removeAttributeNS(const QString &namespaceUri, const QString &
 {
     if (!m_element)
         return;
-    m_element->removeAttributeNS(namespaceUri, name);
+    m_element->removeAttributeNS(String(namespaceUri), String(name));
 }
 
 /*!
@@ -495,7 +499,7 @@ QStringList QWebElement::attributeNames(const QString& namespaceUri) const
         for (unsigned i = 0; i < attrsCount; ++i) {
             const Attribute& attribute = m_element->attributeAt(i);
             if (namespaceUriString == attribute.namespaceURI())
-                attributeNameList.append(attribute.localName());
+                attributeNameList.append(attribute.localName().string());
         }
     }
     return attributeNameList;
@@ -563,7 +567,7 @@ QString QWebElement::prefix() const
 {
     if (!m_element)
         return QString();
-    return m_element->prefix();
+    return m_element->prefix().string();
 }
 
 /*!
@@ -574,7 +578,7 @@ QString QWebElement::localName() const
 {
     if (!m_element)
         return QString();
-    return m_element->localName();
+    return m_element->localName().string();
 }
 
 /*!
@@ -585,7 +589,7 @@ QString QWebElement::namespaceUri() const
 {
     if (!m_element)
         return QString();
-    return m_element->namespaceURI();
+    return m_element->namespaceURI().string();
 }
 
 /*!
@@ -697,7 +701,7 @@ QWebFrame *QWebElement::webFrame() const
     return frameAdapter->apiHandle();
 }
 
-static bool setupScriptContext(WebCore::Element* element, ScriptState*& state)
+static bool setupScriptContext(WebCore::Element* element, JSC::ExecState*& state)
 {
     if (!element)
         return false;
@@ -725,32 +729,32 @@ static bool setupScriptContext(WebCore::Element* element, ScriptState*& state)
 */
 QVariant QWebElement::evaluateJavaScript(const QString& scriptSource)
 {
-    if (scriptSource.isEmpty())
+//    if (scriptSource.isEmpty())
         return QVariant();
 
-    ScriptState* state = 0;
+//    JSC::ExecState* state = nullptr;
 
-    if (!setupScriptContext(m_element, state))
-        return QVariant();
+//    if (!setupScriptContext(m_element, state))
+//        return QVariant();
 
-    JSC::JSLockHolder lock(state);
-    RefPtr<Element> protect = m_element;
+//    JSC::JSLockHolder lock(state);
+//    RefPtr<Element> protect = m_element;
 
-    JSC::JSValue thisValue = toJS(state, toJSDOMGlobalObject(&m_element->document(), state), m_element);
-    if (!thisValue)
-        return QVariant();
+//    JSC::JSValue thisValue = toJS(state, toJSDOMGlobalObject(m_element->document(), state), m_element);
+//    if (!thisValue)
+//        return QVariant();
 
-    ScriptSourceCode sourceCode(scriptSource);
+//    ScriptSourceCode sourceCode(scriptSource);
 
-    NakedPtr<JSC::Exception> evaluationException;
-    JSC::JSValue evaluationResult = JSC::evaluate(state, sourceCode.jsSourceCode(), thisValue, evaluationException);
-    if (evaluationException)
-        return QVariant();
-    JSValueRef evaluationResultRef = toRef(state, evaluationResult);
+//    NakedPtr<JSC::Exception> evaluationException;
+//    JSC::JSValue evaluationResult = JSC::evaluate(state, sourceCode.jsSourceCode(), thisValue, evaluationException);
+//    if (evaluationException)
+//        return QVariant();
+//    JSValueRef evaluationResultRef = toRef(state, evaluationResult);
 
-    int distance = 0;
-    JSValueRef* ignoredException = 0;
-    return JSC::Bindings::convertValueToQVariant(toRef(state), evaluationResultRef, QMetaType::Void, &distance, ignoredException);
+//    int distance = 0;
+//    JSValueRef* ignoredException = 0;
+//    return JSC::Bindings::convertValueToQVariant(toRef(state), evaluationResultRef, QMetaType::Void, &distance, ignoredException);
 }
 
 /*!

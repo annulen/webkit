@@ -36,6 +36,12 @@ list(APPEND WebCore_PRIVATE_INCLUDE_DIRECTORIES
 )
 
 list(APPEND WebCore_PRIVATE_FRAMEWORK_HEADERS
+    css/CSSSelectorList.h
+    css/CSSSelector.h
+    css/StyleRule.h
+
+    css/parser/CSSPropertyParser.h
+
     platform/network/qt/CertificateInfo.h
     platform/network/qt/ResourceError.h
     platform/network/qt/ResourceRequest.h
@@ -105,6 +111,8 @@ list(APPEND WebCore_SOURCES
 
 #    platform/graphics/x11/PlatformDisplayX11.cpp
     platform/graphics/x11/XUniqueResource.cpp
+
+    platform/image-decoders/qt/ImageBackingStoreQt.cpp
 
     platform/network/MIMESniffing.cpp
 

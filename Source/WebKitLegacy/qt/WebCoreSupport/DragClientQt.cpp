@@ -25,14 +25,14 @@
 
 #include "DragClientQt.h"
 
-#include "ChromeClient.h"
-#include "DataTransfer.h"
-#include "DragController.h"
-#include "EventHandler.h"
-#include "Frame.h"
-#include "Page.h"
-#include "Pasteboard.h"
-#include "PlatformMouseEvent.h"
+//#include "ChromeClient.h"
+//#include "DataTransfer.h"
+//#include "DragController.h"
+//#include "EventHandler.h"
+//#include "Frame.h"
+//#include "Page.h"
+//#include "Pasteboard.h"
+//#include "PlatformMouseEvent.h"
 
 #include <QDrag>
 #include <QMimeData>
