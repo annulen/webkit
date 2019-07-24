@@ -87,7 +87,7 @@ FontPlatformData::FontPlatformData(const FontDescription& description, const Ato
     font.setFamily(familyName.string());
     if (requestedSize)
         font.setPixelSize(requestedSize);
-    font.setItalic(description.italic() != std::nullopt);
+    // QTFIXME font.setItalic(description.italic() != std::nullopt);
     font.setWeight(toQFontWeight(description.weight()));
     font.setWordSpacing(wordSpacing);
     font.setLetterSpacing(QFont::AbsoluteSpacing, letterSpacing);

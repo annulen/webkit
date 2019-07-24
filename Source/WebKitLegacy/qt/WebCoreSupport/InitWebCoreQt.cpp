@@ -68,10 +68,11 @@ static WebCore::QStyleFacade* createStyleForPage(WebCore::Page* page)
 // Called also from WebKit2's WebProcess
 Q_DECL_EXPORT void initializeWebKitQt()
 {
-    if (initCallback) {
-        WebCore::RenderThemeQStyle::setStyleFactoryFunction(createStyleForPage);
-        WebCore::RenderThemeQt::setCustomTheme(WebCore::RenderThemeQStyle::create, new WebCore::ScrollbarThemeQStyle);
-    }
+    // QTFIXME
+//    if (initCallback) {
+//        WebCore::RenderThemeQStyle::setStyleFactoryFunction(createStyleForPage);
+//        WebCore::RenderThemeQt::setCustomTheme(WebCore::RenderThemeQStyle::create, new WebCore::ScrollbarThemeQStyle);
+//    }
 }
 
 Q_DECL_EXPORT void setImagePlatformResource(const char* name, const QPixmap& pixmap)
