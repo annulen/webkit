@@ -306,9 +306,9 @@ void RenderLayerBacking::clearBackingSharingLayers()
 
 Ref<GraphicsLayer> RenderLayerBacking::createGraphicsLayer(const String& name, GraphicsLayer::Type layerType)
 {
-//    auto* graphicsLayerFactory = renderer().page().chrome().client().graphicsLayerFactory();
+    auto* graphicsLayerFactory = renderer().page().chrome().client().graphicsLayerFactory();
 
-//    auto graphicsLayer = GraphicsLayer::create(graphicsLayerFactory, *this, layerType);
+    auto graphicsLayer = GraphicsLayer::create(graphicsLayerFactory, *this, layerType);
 
 //    graphicsLayer->setName(name);
 
@@ -317,7 +317,7 @@ Ref<GraphicsLayer> RenderLayerBacking::createGraphicsLayer(const String& name, G
 //    graphicsLayer->setUsesDisplayListDrawing(compositor().displayListDrawingEnabled());
 //#endif
     
-//    return graphicsLayer;
+    return graphicsLayer;
 }
 
 void RenderLayerBacking::setUsesDisplayListDrawing(bool usesDisplayListDrawing)
