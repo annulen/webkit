@@ -32,14 +32,16 @@
 #include <QMetaMethod>
 #include <QMetaObject>
 #include <QObject>
+#include <QThread>
 #include <QTimerEvent>
+#include <QDebug>
 
 namespace WTF {
 
-class RunLoop::TimerObject : public QObject {
+class RunLoop::PerformWorkTimerObject : public QObject {
     Q_OBJECT
 public:
-    TimerObject(RunLoop* runLoop)
+    PerformWorkTimerObject(RunLoop* runLoop)
         : m_runLoop(runLoop)
     {
         int methodIndex = metaObject()->indexOfMethod("performWork()");
@@ -49,6 +51,41 @@ public:
     Q_SLOT void performWork() { m_runLoop->performWork(); }
     inline void wakeUp() { m_method.invoke(this, Qt::QueuedConnection); }
 
+private:
+    RunLoop* m_runLoop;
+    QMetaMethod m_method;
+};
+
+class RunLoop::TimerObject : public QObject {
+    Q_OBJECT
+public:
+    TimerObject(RunLoop* runLoop)
+        : m_runLoop(runLoop)
+    {
+        qDebug() << ":::::: method" << metaObject()->indexOfMethod("start(WTF::RunLoop::TimerBase*,int)") << metaObject()->indexOfMethod("start()") << metaObject()->indexOfMethod("stop(WTF::RunLoop::TimerBase*)");
+        m_startMethod = metaObject()->method(metaObject()->indexOfMethod("start(WTF::RunLoop::TimerBase*,int)"));
+        m_stopMethod = metaObject()->method(metaObject()->indexOfMethod("stop(WTF::RunLoop::TimerBase*)"));
+    }
+
+    Q_SLOT void start(WTF::RunLoop::TimerBase *timer, int milliseconds) {
+        ASSERT(timer);
+        timer->m_ID = startTimer(milliseconds);
+        ASSERT(timer->m_ID);
+        m_runLoop->m_activeTimers.add(timer->m_ID, timer);
+    }
+
+    Q_SLOT void stop(WTF::RunLoop::TimerBase *timer) {
+        ASSERT(timer);
+        killTimer(timer->m_ID);
+        TimerMap::iterator it = m_runLoop->m_activeTimers.find(timer->m_ID);
+        if (it != m_runLoop->m_activeTimers.end())
+            m_runLoop->m_activeTimers.remove(it);
+        timer->m_ID = 0;
+    }
+
+    inline void startAsync(RunLoop::TimerBase *timer, int milliseconds) { m_startMethod.invoke(this, Qt::QueuedConnection, Q_ARG(RunLoop::TimerBase*, timer), Q_ARG(int, milliseconds)); }
+    inline void stopAsync(RunLoop::TimerBase *timer) { m_stopMethod.invoke(this, Qt::QueuedConnection, Q_ARG(RunLoop::TimerBase*, timer)); }
+
 protected:
     void timerEvent(QTimerEvent* event) override
     {
@@ -57,7 +94,8 @@ protected:
 
 private:
     RunLoop* m_runLoop;
-    QMetaMethod m_method;
+    QMetaMethod m_startMethod;
+    QMetaMethod m_stopMethod;
 };
 
 static QEventLoop* currentEventLoop;
@@ -71,7 +109,6 @@ void RunLoop::run()
         mainEventLoopIsRunning = false;
     } else {
         QEventLoop eventLoop;
-
         QEventLoop* previousEventLoop = currentEventLoop;
         currentEventLoop = &eventLoop;
 
@@ -90,18 +127,20 @@ void RunLoop::stop()
 }
 
 RunLoop::RunLoop()
-    : m_timerObject(new TimerObject(this))
 {
+    m_timer = new TimerObject(this);
+    m_performWorkTimer = new PerformWorkTimerObject(this);
 }
 
 RunLoop::~RunLoop()
 {
-    delete m_timerObject;
+    delete m_timer;
+    delete m_performWorkTimer;
 }
 
 void RunLoop::wakeUp()
 {
-    m_timerObject->wakeUp();
+    m_performWorkTimer->wakeUp();
 }
 
 // RunLoop::Timer
@@ -112,12 +151,8 @@ void RunLoop::TimerBase::timerFired(RunLoop* runLoop, int ID)
     ASSERT(it != runLoop->m_activeTimers.end());
     TimerBase* timer = it->value;
 
-    if (!timer->m_isRepeating) {
-        // Stop the timer (calling stop would need another hash table lookup).
-        runLoop->m_activeTimers.remove(it);
-        runLoop->m_timerObject->killTimer(timer->m_ID);
-        timer->m_ID = 0;
-    }
+    if (!timer->m_isRepeating)
+        timer->stop();
 
     timer->fired();
 }
@@ -137,29 +172,52 @@ RunLoop::TimerBase::~TimerBase()
 void RunLoop::TimerBase::start(Seconds nextFireInterval, bool repeat)
 {
     stop();
+
     int millis = nextFireInterval.millisecondsAs<int>();
+    m_isActive = true;
     m_isRepeating = repeat;
-    m_ID = m_runLoop->m_timerObject->startTimer(millis);
-    ASSERT(m_ID);
-    m_runLoop->m_activeTimers.set(m_ID, this);
+
+    if (m_runLoop->m_timer->thread() == QThread::currentThread()) {
+        m_runLoop->m_timer->start(this, millis);
+    } else {
+        QThread* thread = QThread::currentThread();
+        TimerObjectMap::iterator it = m_runLoop->m_timerObjects.find(thread);
+        TimerObject* timer = 0;
+        if (it == m_runLoop->m_timerObjects.end()) {
+            timer = new TimerObject(m_runLoop.ptr());
+            timer->moveToThread(thread);
+            m_runLoop->m_timerObjects.set(thread, timer);
+        } else
+            timer = it->value;
+
+        ASSERT(timer);
+        timer->startAsync(this, millis);
+    }
 }
 
 void RunLoop::TimerBase::stop()
 {
-    if (!m_ID)
-        return;
-    TimerMap::iterator it = m_runLoop->m_activeTimers.find(m_ID);
-    if (it == m_runLoop->m_activeTimers.end())
+    if (!m_isActive)
         return;
 
-    m_runLoop->m_activeTimers.remove(it);
-    m_runLoop->m_timerObject->killTimer(m_ID);
-    m_ID = 0;
+    m_isActive = false;
+
+    if (m_runLoop->m_timer->thread() == QThread::currentThread()) {
+        m_runLoop->m_timer->stop(this);
+    } else {
+        QThread* thread = QThread::currentThread();
+        TimerObjectMap::iterator it = m_runLoop->m_timerObjects.find(thread);
+        TimerObject* timer = 0;
+        if (it != m_runLoop->m_timerObjects.end())
+            timer = it->value;
+        ASSERT(timer);
+        timer->stopAsync(this);
+    }
 }
 
 bool RunLoop::TimerBase::isActive() const
 {
-    return m_ID;
+    return m_isActive;
 }
 
 #include "RunLoopQt.moc"
