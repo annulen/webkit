@@ -41,6 +41,7 @@ InspectorClientWebPage::InspectorClientWebPage()
     QWebView* view = new QWebView;
     view->setPage(this);
     setParent(view);
+    settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
     connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(javaScriptWindowObjectCleared()));
 }
 
