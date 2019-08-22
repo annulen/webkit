@@ -1271,7 +1271,8 @@ QString QWebPageAdapter::contextMenuItemTagForAction(QWebPageAdapter::MenuAction
     case ToggleMediaLoop:
         *checkable = true;
         return contextMenuItemTagToggleMediaLoop();
-//    case ToggleMediaPlayPause:
+    case ToggleMediaPlayPause:
+        return QString();
 //        return contextMenuItemTagMediaPlayPause();
     case ToggleMediaMute:
         *checkable = true;
