@@ -45,8 +45,27 @@ WebInspector.ImageResourceContentView = class ImageResourceContentView extends W
 
         var objectURL = this.resource.createObjectURL();
         this._imageElement = document.createElement("img");
-        this._imageElement.addEventListener("load", function() { URL.revokeObjectURL(objectURL); });
-        this._imageElement.src = objectURL;
+
+        var imageElement = this._imageElement;
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", objectURL, true);
+        xhr.responseType = "blob";
+        xhr.onload = function() {
+            if (this.status == 200) {
+                var reader = new FileReader();
+                reader.onload = function() {
+                    imageElement.src = reader.result;
+
+                    URL.revokeObjectURL(objectURL);
+                }
+
+                reader.readAsDataURL(this.response);
+            } else {
+                imageElement.addEventListener("load", function() { URL.revokeObjectURL(objectURL) });
+                imageElement.src = objectURL;
+            }
+        };
+        xhr.send();
 
         this.element.appendChild(this._imageElement);
     }
