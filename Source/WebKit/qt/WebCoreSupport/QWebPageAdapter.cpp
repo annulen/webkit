@@ -192,19 +192,6 @@ static WebCore::FrameLoadRequest frameLoadRequest(const QUrl &url, WebCore::Fram
         );
 }
 
-static void openNewWindow(const QUrl& url, Frame* frame)
-{
-    if (Page* oldPage = frame->page()) {
-        WindowFeatures features;
-        NavigationAction action;
-        FrameLoadRequest request = frameLoadRequest(url, frame);
-        if (Page* newPage = oldPage->chrome().createWindow(frame, request, features, action)) {
-            newPage->mainFrame().loader().loadFrameRequest(request, /*event*/ 0, /*FormState*/ 0);
-            newPage->chrome().show();
-        }
-    }
-}
-
 // FIXME: Find a better place
 static UserContentController& userContentProvider()
 {
@@ -1589,4 +1576,17 @@ bool QWebPageAdapter::swallowContextMenuEvent(QContextMenuEvent *event, QWebFram
     // on maps.google.com for example.
 
     return !menu;
+}
+
+void QWebPageAdapter::openNewWindow(const QUrl& url, Frame* frame)
+{
+    if (Page* oldPage = frame->page()) {
+        WindowFeatures features;
+        NavigationAction action;
+        FrameLoadRequest request = frameLoadRequest(url, frame);
+        if (Page* newPage = oldPage->chrome().createWindow(frame, request, features, action)) {
+            newPage->mainFrame().loader().loadFrameRequest(request, /*event*/ 0, /*FormState*/ 0);
+            newPage->chrome().show();
+        }
+    }
 }

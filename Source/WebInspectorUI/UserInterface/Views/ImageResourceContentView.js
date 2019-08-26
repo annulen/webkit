@@ -45,6 +45,7 @@ WebInspector.ImageResourceContentView = class ImageResourceContentView extends W
 
         var objectURL = this.resource.createObjectURL();
         this._imageElement = document.createElement("img");
+        this._imageElement.dataset.url = this.resource.url;
 
         var imageElement = this._imageElement;
         var xhr = new XMLHttpRequest();

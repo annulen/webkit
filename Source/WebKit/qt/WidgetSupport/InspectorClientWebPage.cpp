@@ -32,7 +32,14 @@
 #include "config.h"
 #include "InspectorClientWebPage.h"
 
+#include <QApplication>
+#include <QClipboard>
+#include <QContextMenuEvent>
+
+#include <qwebelement.h>
 #include <qwebframe.h>
+#include <qwebframe_p.h>
+#include <qwebpage_p.h>
 
 using namespace WebKit;
 
@@ -67,6 +74,18 @@ QWebPage* InspectorClientWebPage::createWindow(QWebPage::WebWindowType)
     return page;
 }
 
+bool InspectorClientWebPage::event(QEvent* ev)
+{
+    if (ev->type() == QEvent::ContextMenu) {
+        auto* contextMenuEvent = static_cast<QContextMenuEvent*>(ev);
+
+        if (contextMenuEvent)
+            m_clickPos = contextMenuEvent->pos();
+    }
+
+    return QWebPage::event(ev);
+}
+
 void InspectorClientWebPage::javaScriptWindowObjectCleared()
 {
     QVariant inspectorJavaScriptWindowObjects = property("_q_inspectorJavaScriptWindowObjects");
@@ -83,3 +102,28 @@ void InspectorClientWebPage::javaScriptWindowObjectCleared()
     }
 }
 
+void InspectorClientWebPage::triggerAction(WebAction action, bool checked)
+{
+    const QWebHitTestResult hitTestResult = mainFrame()->hitTestContent(m_clickPos);
+
+    if (hitTestResult.imageUrl().isValid() && hitTestResult.element().hasAttribute(QStringLiteral("data-url"))) {
+        switch (action) {
+        case OpenImageInNewWindow: {
+            auto* frame = static_cast<QWebFramePrivate*>(hitTestResult.frame()->d);
+
+            if (frame) {
+                QWebPagePrivate::openNewWindow(QUrl(hitTestResult.element().attribute(QStringLiteral("data-url"))), frame->frame);
+                return;
+            }
+        }
+
+        case CopyImageUrlToClipboard:
+            QApplication::clipboard()->setText(hitTestResult.element().attribute(QStringLiteral("data-url")));
+            return;
+        default:
+            break;
+        }
+    }
+
+    QWebPage::triggerAction(action, checked);
+}

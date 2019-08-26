@@ -49,6 +49,7 @@ class ChromeClientQt;
 class DeviceOrientationClient;
 class DeviceMotionClient;
 class GeolocationClientQt;
+class Frame;
 class Page;
 class UndoStep;
 struct ViewportArguments;
@@ -394,6 +395,8 @@ public:
 
     const QWebElement& fullScreenElement() const;
     void setFullScreenElement(const QWebElement&);
+
+    static void openNewWindow(const QUrl&, WebCore::Frame*);
 
     QWebSettings *settings;
 

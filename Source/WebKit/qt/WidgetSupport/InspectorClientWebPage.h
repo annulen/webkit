@@ -43,9 +43,16 @@ public:
     InspectorClientWebPage();
 
     QWebPage* createWindow(QWebPage::WebWindowType) final;
+    bool event(QEvent*) final;
 
 public Q_SLOTS:
     void javaScriptWindowObjectCleared();
+
+protected:
+    void triggerAction(WebAction, bool checked = false) final;
+
+private:
+    QPoint m_clickPos;
 };
 
 } // namespace WebKit

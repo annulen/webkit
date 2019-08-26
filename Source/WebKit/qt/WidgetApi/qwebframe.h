@@ -59,6 +59,9 @@ namespace WebCore {
     class ChromeClientQt;
     class TextureMapperLayerClientQt;
 }
+namespace WebKit {
+    class InspectorClientWebPage;
+}
 class QWebFrameData;
 class QWebHitTestResultPrivate;
 class QWebFrame;
@@ -242,6 +245,7 @@ private:
     friend class WebCore::FrameLoaderClientQt;
     friend class WebCore::ChromeClientQt;
     friend class WebCore::TextureMapperLayerClientQt;
+    friend class WebKit::InspectorClientWebPage;
     QWebFramePrivate *d;
     Q_PRIVATE_SLOT(d, void _q_orientationChanged())
 };
