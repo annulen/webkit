@@ -38,6 +38,9 @@
 
 #if USE(GLIB_EVENT_LOOP)
 #include <wtf/glib/GRefPtr.h>
+#elif PLATFORM(QT)
+#include <QMetaType> 
+class QThread;
 #endif
 
 namespace WTF {
@@ -125,7 +128,8 @@ public:
 #elif PLATFORM(QT)
         static void timerFired(RunLoop*, int ID);
         int m_ID;
-        bool m_isRepeating;
+        bool m_isActive { false };
+        bool m_isRepeating { false };
 #elif USE(GLIB_EVENT_LOOP)
         void updateReadyTime();
         GRefPtr<GSource> m_source;
@@ -182,10 +186,15 @@ private:
     RetainPtr<CFRunLoopRef> m_runLoop;
     RetainPtr<CFRunLoopSourceRef> m_runLoopSource;
 #elif PLATFORM(QT)
+    class TimerObject;
+    class PerformWorkTimerObject;
+    PerformWorkTimerObject* m_performWorkTimer;
+    TimerObject* m_timer;
     typedef HashMap<int, TimerBase*> TimerMap;
     TimerMap m_activeTimers;
-    class TimerObject;
-    TimerObject* m_timerObject;
+    typedef HashMap<QThread*, TimerObject*> TimerObjectMap;
+    TimerObjectMap m_timerObjects;
+    Lock m_loopLock;
 #elif USE(GLIB_EVENT_LOOP)
     GRefPtr<GMainContext> m_mainContext;
     Vector<GRefPtr<GMainLoop>> m_mainLoops;
@@ -223,3 +232,7 @@ private:
 } // namespace WTF
 
 using WTF::RunLoop;
+
+#if PLATFORM(QT)
+Q_DECLARE_METATYPE(WTF::RunLoop::TimerBase*)
+#endif
