@@ -35,7 +35,7 @@ Development of the WebKit engine happens at https://webkit.org. All development 
 
 ## Helping out
 
-Aside from pull requests I would also apreaciate fianical support via Patreon: https://www.patreon.com/annulen
+Aside from pull requests I would also appreciate financial support via Patreon: https://www.patreon.com/annulen
 
 ## More information
 
