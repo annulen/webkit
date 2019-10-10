@@ -214,7 +214,7 @@ Path absolutePathForRenderer(RenderObject* const o)
             if (layerRenderer->hasOverflowClip() && layerRenderer != currentRenderer) {
                 bool containerSkipped = false;
                 // Skip ancestor layers that are not containers for the current renderer.
-                currentRenderer->container(layerRenderer, &containerSkipped);
+                currentRenderer->container(layerRenderer, containerSkipped);
                 if (containerSkipped)
                     continue;
                 FloatQuad ringQuad = currentRenderer->localToContainerQuad(FloatQuad(ringRect), layerRenderer);
