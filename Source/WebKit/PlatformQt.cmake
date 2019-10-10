@@ -58,7 +58,7 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
 )
 
 list(APPEND WebKit_SOURCES
-    DatabaseProcess/qt/DatabaseProcessMainQt.cpp
+    #DatabaseProcess/qt/DatabaseProcessMainQt.cpp
 
     NetworkProcess/CustomProtocols/qt/CustomProtocolManagerQt.cpp
 
@@ -68,7 +68,7 @@ list(APPEND WebKit_SOURCES
     NetworkProcess/qt/NetworkProcessMainQt.cpp
     NetworkProcess/qt/NetworkProcessQt.cpp
     NetworkProcess/qt/QtNetworkAccessManager.cpp
-    NetworkProcess/qt/RemoteNetworkingContextQt.cpp
+    #NetworkProcess/qt/RemoteNetworkingContextQt.cpp
 
     Platform/qt/LoggingQt.cpp
     Platform/qt/ModuleQt.cpp
@@ -81,27 +81,27 @@ list(APPEND WebKit_SOURCES
 
     Shared/Authentication/qt/AuthenticationManagerQt.cpp
 
-    Shared/CoordinatedGraphics/CoordinatedBackingStore.cpp
-    Shared/CoordinatedGraphics/CoordinatedGraphicsArgumentCoders.cpp
+    #Shared/CoordinatedGraphics/CoordinatedBackingStore.cpp
+    #Shared/CoordinatedGraphics/CoordinatedGraphicsArgumentCoders.cpp
     Shared/CoordinatedGraphics/CoordinatedGraphicsScene.cpp
-    Shared/CoordinatedGraphics/WebCoordinatedSurface.cpp
+    #Shared/CoordinatedGraphics/WebCoordinatedSurface.cpp
 
     Shared/Plugins/Netscape/unix/NetscapePluginModuleUnix.cpp
 
     Shared/Plugins/unix/PluginSearchPath.cpp
 
-    Shared/qt/ArgumentCodersQt.cpp
+    #Shared/qt/ArgumentCodersQt.cpp
     Shared/qt/ChildProcessMainQt.cpp
     Shared/qt/NativeWebKeyboardEventQt.cpp
     Shared/qt/NativeWebMouseEventQt.cpp
     Shared/qt/NativeWebTouchEventQt.cpp
     Shared/qt/NativeWebWheelEventQt.cpp
     Shared/qt/ProcessExecutablePathQt.cpp
-    Shared/qt/QtNetworkReplyData.cpp
-    Shared/qt/QtNetworkRequestData.cpp
-    Shared/qt/ShareableBitmapQt.cpp
-    Shared/qt/WebCoreArgumentCodersQt.cpp
-    Shared/qt/WebEventFactoryQt.cpp
+    #Shared/qt/QtNetworkReplyData.cpp
+    #Shared/qt/QtNetworkRequestData.cpp
+    #Shared/qt/ShareableBitmapQt.cpp
+    #Shared/qt/WebCoreArgumentCodersQt.cpp
+    #Shared/qt/WebEventFactoryQt.cpp
     Shared/qt/WebGestureEvent.cpp
 
     UIProcess/BackingStore.cpp
@@ -132,13 +132,13 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/qt/qwebpermissionrequest.cpp
     UIProcess/API/qt/qwebpreferences.cpp
 
-    UIProcess/CoordinatedGraphics/CoordinatedDrawingAreaProxy.cpp
-    UIProcess/CoordinatedGraphics/CoordinatedLayerTreeHostProxy.cpp
-    UIProcess/CoordinatedGraphics/PageViewportController.cpp
-    UIProcess/CoordinatedGraphics/WebPageProxyCoordinatedGraphics.cpp
+    #UIProcess/CoordinatedGraphics/CoordinatedDrawingAreaProxy.cpp
+    #UIProcess/CoordinatedGraphics/CoordinatedLayerTreeHostProxy.cpp
+    #UIProcess/CoordinatedGraphics/PageViewportController.cpp
+    #UIProcess/CoordinatedGraphics/WebPageProxyCoordinatedGraphics.cpp
 
-    UIProcess/InspectorServer/qt/WebInspectorServerQt.cpp
-    UIProcess/InspectorServer/qt/WebSocketServerQt.cpp
+    #UIProcess/InspectorServer/qt/WebInspectorServerQt.cpp
+    #UIProcess/InspectorServer/qt/WebSocketServerQt.cpp
 
     UIProcess/Launcher/qt/ProcessLauncherQt.cpp
 
@@ -148,7 +148,7 @@ list(APPEND WebKit_SOURCES
 
     UIProcess/Plugins/unix/PluginInfoStoreUnix.cpp
 
-    UIProcess/Storage/StorageManager.cpp
+    #UIProcess/Storage/StorageManager.cpp
 
     UIProcess/WebsiteData/unix/WebsiteDataStoreUnix.cpp
 
@@ -201,9 +201,9 @@ list(APPEND WebKit_SOURCES
     WebProcess/WebCoreSupport/qt/WebFrameNetworkingContext.cpp
     WebProcess/WebCoreSupport/qt/WebPopupMenuQt.cpp
 
-    WebProcess/WebPage/CoordinatedGraphics/CoordinatedDrawingArea.cpp
-    WebProcess/WebPage/CoordinatedGraphics/CoordinatedLayerTreeHost.cpp
-    WebProcess/WebPage/CoordinatedGraphics/WebPageCoordinatedGraphics.cpp
+    #WebProcess/WebPage/CoordinatedGraphics/CoordinatedDrawingArea.cpp
+    #WebProcess/WebPage/CoordinatedGraphics/CoordinatedLayerTreeHost.cpp
+    #WebProcess/WebPage/CoordinatedGraphics/WebPageCoordinatedGraphics.cpp
 
     WebProcess/WebPage/gstreamer/WebPageGStreamer.cpp
 
