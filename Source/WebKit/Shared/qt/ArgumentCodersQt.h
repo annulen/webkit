@@ -20,18 +20,18 @@
 #ifndef ArgumentCodersQt_h
 #define ArgumentCodersQt_h
 
-#include "ArgumentDecoder.h"
-#include "ArgumentEncoder.h"
+#include "Decoder.h"
+#include "Encoder.h"
 #include "DragData.h"
 
 namespace IPC {
 
-void encode(ArgumentEncoder&, const WebCore::DragData&);
-bool decode(ArgumentDecoder&, WebCore::DragData&);
+void encode(Encoder&, const WebCore::DragData&);
+bool decode(Decoder&, WebCore::DragData&);
 
-template<> struct ArgumentCoder<WebCore::DragData> {
-    static void encode(ArgumentEncoder&, const WebCore::DragData&);
-    static bool decode(ArgumentDecoder&, WebCore::DragData&);
+template<> struct Coder<WebCore::DragData> {
+    static void encode(Encoder&, const WebCore::DragData&);
+    static bool decode(Decoder&, WebCore::DragData&);
 };
 
 }
