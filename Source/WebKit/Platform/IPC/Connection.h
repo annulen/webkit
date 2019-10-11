@@ -51,10 +51,6 @@
 #include <wtf/spi/darwin/XPCSPI.h>
 #endif
 
-#if PLATFORM(QT)
-#include "PlatformProcessIdentifier.h"
-#endif
-
 #if USE(GLIB)
 #include "GSocketMonitor.h"
 #endif
@@ -175,9 +171,6 @@ public:
 
     void setOnlySendMessagesAsDispatchWhenWaitingForSyncReplyWhenProcessingSuchAMessage(bool);
     void setShouldExitOnSyncMessageSendFailure(bool);
-#if PLATFORM(QT) && USE(UNIX_DOMAIN_SOCKETS)
-    void setShouldCloseConnectionOnProcessTermination(WebKit::PlatformProcessIdentifier);
-#endif
 
     // The set callback will be called on the connection work queue when the connection is closed, 
     // before didCall is called on the client thread. Must be called before the connection is opened.
