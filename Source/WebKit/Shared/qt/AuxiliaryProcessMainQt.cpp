@@ -27,7 +27,7 @@
  */
 
 #include "config.h"
-#include "ChildProcessMain.h"
+#include "AuxiliaryProcessMain.h"
 
 #include <QDebug>
 
@@ -39,7 +39,7 @@ extern "C" kern_return_t bootstrap_look_up2(mach_port_t, const name_t, mach_port
 
 namespace WebKit {
 
-bool ChildProcessMainBase::parseCommandLine(int argc, char** argv)
+bool AuxiliaryProcessMainBase::parseCommandLine(int argc, char** argv)
 {
     ASSERT(argc >= 2);
     if (argc < 2)

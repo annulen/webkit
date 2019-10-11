@@ -89,7 +89,7 @@ list(APPEND WebKit_SOURCES
     Shared/Plugins/unix/PluginSearchPath.cpp
 
     #Shared/qt/ArgumentCodersQt.cpp
-    Shared/qt/ChildProcessMainQt.cpp
+    Shared/qt/AuxiliaryProcessMainQt.cpp
     Shared/qt/NativeWebKeyboardEventQt.cpp
     Shared/qt/NativeWebMouseEventQt.cpp
     Shared/qt/NativeWebTouchEventQt.cpp
