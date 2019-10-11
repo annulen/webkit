@@ -58,10 +58,10 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
 )
 
 list(APPEND WebKit_SOURCES
-    NetworkProcess/CustomProtocols/qt/CustomProtocolManagerQt.cpp
+    #NetworkProcess/CustomProtocols/qt/CustomProtocolManagerQt.cpp
 
-    NetworkProcess/Downloads/qt/DownloadQt.cpp
-    NetworkProcess/Downloads/qt/QtFileDownloader.cpp
+    #NetworkProcess/Downloads/qt/DownloadQt.cpp
+    #NetworkProcess/Downloads/qt/QtFileDownloader.cpp
 
     NetworkProcess/qt/NetworkProcessMainQt.cpp
     NetworkProcess/qt/NetworkProcessQt.cpp
