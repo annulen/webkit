@@ -29,6 +29,7 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
     "${WEBCORE_DIR}/platform/graphics/qt"
     "${WEBCORE_DIR}/platform/network/qt"
     "${WEBCORE_DIR}/platform/qt"
+    "${WEBCORE_DIR}/platform/sql"
 
     # The WebKit Qt APIs depend on qwebkitglobal.h, which lives in WebKitLegacy
     "${WEBKITLEGACY_DIR}/qt/Api"
