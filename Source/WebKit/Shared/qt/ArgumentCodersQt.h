@@ -22,17 +22,12 @@
 
 #include "Decoder.h"
 #include "Encoder.h"
-#include "DragData.h"
+#include <WebCore/DragData.h>
 
 namespace IPC {
 
 void encode(Encoder&, const WebCore::DragData&);
 bool decode(Decoder&, WebCore::DragData&);
-
-template<> struct Coder<WebCore::DragData> {
-    static void encode(Encoder&, const WebCore::DragData&);
-    static bool decode(Decoder&, WebCore::DragData&);
-};
 
 }
 
