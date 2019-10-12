@@ -26,8 +26,7 @@
 
 namespace IPC {
 
-void encode(Encoder&, const WebCore::DragData&);
-bool decode(Decoder&, WebCore::DragData&);
+//WIP
 
 }
 
