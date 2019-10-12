@@ -30,7 +30,7 @@
 
 #include <QNetworkDiskCache>
 #include <WebCore/CertificateInfo.h>
-#include <WebCore/CookieJarQt.h>
+#include "SharedCookieJarQt.h"
 
 using namespace WebCore;
 
