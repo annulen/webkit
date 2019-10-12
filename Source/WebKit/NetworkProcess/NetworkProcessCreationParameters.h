@@ -33,7 +33,7 @@
 #include <wtf/Vector.h>
 #include <wtf/text/WTFString.h>
 
-#if USE(SOUP) || PLATFORM(QT)
+#if USE(SOUP)
 #include "HTTPCookieAcceptPolicy.h"
 #include <WebCore/SoupNetworkProxySettings.h>
 #endif
