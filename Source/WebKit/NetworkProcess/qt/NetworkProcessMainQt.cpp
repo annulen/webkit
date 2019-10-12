@@ -28,7 +28,7 @@
 #include "config.h"
 #include "NetworkProcess.h"
 
-#include "ChildProcessMain.h"
+#include "AuxiliaryProcessMain.h"
 
 #include <QCoreApplication>
 #include <QNetworkProxyFactory>
@@ -106,7 +106,7 @@ static void initializeProxy()
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 }
 
-class NetworkProcessMain final: public ChildProcessMainBase {
+class NetworkProcessMain final: public AuxiliaryProcessMainBase {
 public:
 
     bool platformInitialize() final
@@ -116,10 +116,16 @@ public:
     }
 };
 
+template<>
+void initializeAuxiliaryProcess<NetworkProcess>(AuxiliaryProcessInitializationParameters&& parameters)
+{
+    static NeverDestroyed<NetworkProcess> networkProcess(WTFMove(parameters));
+}
+
 Q_DECL_EXPORT int NetworkProcessMainQt(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-    return ChildProcessMain<NetworkProcess, ChildProcessMainBase>(argc, argv);
+    return AuxiliaryProcessMain<NetworkProcess, NetworkProcessMain>(argc, argv);
 }
 
 } // namespace WebKit
