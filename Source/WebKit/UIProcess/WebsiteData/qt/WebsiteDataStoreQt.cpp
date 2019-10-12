@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-#include "APIWebsiteDataStore.h"
+#include "WebsiteDataStore.h"
 
 #include "QtWebContext.h"
 

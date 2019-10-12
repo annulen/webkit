@@ -111,7 +111,6 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/cpp/qt/WKStringQt.cpp
     UIProcess/API/cpp/qt/WKURLQt.cpp
 
-    UIProcess/API/qt/APIWebsiteDataStoreQt.cpp
     UIProcess/API/qt/qquicknetworkreply.cpp
     UIProcess/API/qt/qquicknetworkrequest.cpp
     UIProcess/API/qt/qquickurlschemedelegate.cpp
@@ -149,6 +148,7 @@ list(APPEND WebKit_SOURCES
     #UIProcess/Storage/StorageManager.cpp
 
     UIProcess/WebsiteData/unix/WebsiteDataStoreUnix.cpp
+    UIProcess/WebSiteData/qt/WebsiteDataStoreQt.cpp
 
     UIProcess/gstreamer/InstallMissingMediaPluginsPermissionRequest.cpp
     UIProcess/gstreamer/WebPageProxyGStreamer.cpp
