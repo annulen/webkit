@@ -22,7 +22,7 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QStringList>
-#include <SchemeRegistry.h>
+#include <WebCore/SchemeRegistry.h>
 #include <SecurityOrigin.h>
 #include <WebKit/WKBase.h>
 #include <WebKit/WKRetainPtr.h>
