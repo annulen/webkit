@@ -85,6 +85,11 @@ struct NetworkProcessCreationParameters {
     WebCore::SoupNetworkProxySettings proxySettings;
 #endif
 
+#if PLATFORM(QT)
+    String cookiePersistentStoragePath;
+    String diskCacheDirectory;
+#endif
+
     Vector<String> urlSchemesRegisteredAsSecure;
     Vector<String> urlSchemesRegisteredAsBypassingContentSecurityPolicy;
     Vector<String> urlSchemesRegisteredAsLocal;
