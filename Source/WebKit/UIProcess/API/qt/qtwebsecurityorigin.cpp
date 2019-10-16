@@ -22,8 +22,8 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QStringList>
-#include <SchemeRegistry.h>
-#include <SecurityOrigin.h>
+#include <WebCore/SchemeRegistry.h>
+#include <WebCore/SecurityOrigin.h>
 #include <WebKit/WKBase.h>
 #include <WebKit/WKRetainPtr.h>
 #include <WebKit/WKSecurityOriginRef.h>
