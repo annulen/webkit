@@ -78,8 +78,6 @@ list(APPEND WebKit_SOURCES
 
     Shared/API/c/qt/WKImageQt.cpp
 
-    Shared/Authentication/qt/AuthenticationManagerQt.cpp
-
     #Shared/CoordinatedGraphics/CoordinatedBackingStore.cpp
     #Shared/CoordinatedGraphics/CoordinatedGraphicsArgumentCoders.cpp
     Shared/CoordinatedGraphics/CoordinatedGraphicsScene.cpp
