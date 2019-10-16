@@ -138,8 +138,6 @@ list(APPEND WebKit_SOURCES
 
     UIProcess/Launcher/qt/ProcessLauncherQt.cpp
 
-    UIProcess/Network/CustomProtocols/qt/CustomProtocolManagerProxyQt.cpp
-
     UIProcess/Plugins/qt/PluginProcessProxyQt.cpp
 
     UIProcess/Plugins/unix/PluginInfoStoreUnix.cpp
