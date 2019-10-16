@@ -34,7 +34,7 @@ using namespace WebKit;
 
 QImage WKImageCreateQImage(WKImageRef imageRef)
 {
-    return toImpl(imageRef)->bitmap()->createQImage().copy();
+    return toImpl(imageRef)->bitmap().createQImage().copy();
 }
 
 WKImageRef WKImageCreateFromQImage(const QImage& image)
@@ -45,10 +45,10 @@ WKImageRef WKImageCreateFromQImage(const QImage& image)
     ASSERT(image.bytesPerLine() == image.width() * 4);
 
     RefPtr<WebImage> webImage = WebImage::create(image.size(), static_cast<ImageOptions>(0));
-    if (!webImage->bitmap())
+    if (!webImage)
         return 0;
-    auto graphicsContext = webImage->bitmap()->createGraphicsContext();
+    auto graphicsContext = webImage->bitmap().createGraphicsContext();
     QPainter* painter = graphicsContext->platformContext();
     painter->drawImage(QPoint(0, 0), image);
-    return toAPI(webImage.release().leakRef());
+    return toAPI(webImage.leakRef());
 }
