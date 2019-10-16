@@ -226,19 +226,20 @@ void ProcessLauncher::launchProcess()
 #if OS(UNIX)
     setpriority(PRIO_PROCESS, webProcessOrSUIDHelper->pid(), 10);
 #endif
+    m_processObject = webProcessOrSUIDHelper;
     RefPtr<ProcessLauncher> protector(this);
     RunLoop::main().dispatch([protector, webProcessOrSUIDHelper, connector] {
-        protector->didFinishLaunchingProcess(webProcessOrSUIDHelper, connector);
+        protector->didFinishLaunchingProcess(webProcessOrSUIDHelper->processId(), connector);
     });
 }
 
 void ProcessLauncher::terminateProcess()
 {
-    if (!m_processIdentifier)
+    if (!m_processObject)
         return;
 
-    QObject::connect(m_processIdentifier, SIGNAL(finished(int)), m_processIdentifier, SLOT(deleteLater()), Qt::QueuedConnection);
-    m_processIdentifier->terminate();
+    QMetaObject::connect(m_processObject, SIGNAL(finished(int)), m_processObject, SLOT(deleteLater()), Qt::QueuedConnection);
+    m_processObject->terminate();
 }
 
 void ProcessLauncher::platformInvalidate()
