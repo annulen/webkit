@@ -65,11 +65,7 @@ void NetworkProcess::clearCacheForAllOrigins(uint32_t)
 {
 }
 
-void NetworkProcess::clearDiskCache(std::chrono::system_clock::time_point, std::function<void()>)
-{
-}
-
-void NetworkProcess::platformSetCacheModel(CacheModel)
+void NetworkProcess::clearDiskCache(WallTime,CompletionHandler<void()>&&)
 {
 }
 
