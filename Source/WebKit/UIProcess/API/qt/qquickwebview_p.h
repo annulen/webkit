@@ -27,6 +27,7 @@
 #include <QtQml/qqmllist.h>
 #include <QtQuick/qquickitem.h>
 #include <private/qquickflickable_p.h>
+#include <wtf/Ref.h>
 
 QT_BEGIN_NAMESPACE
 class QQmlComponent;
@@ -59,10 +60,6 @@ struct QtRefCountedNetworkRequestData;
 class PageViewportControllerClientQt;
 class QtWebPagePolicyClient;
 class QtWebPageUIClient;
-}
-
-namespace WTF {
-template<class T> class Ref;
 }
 
 typedef const struct OpaqueWKPageConfiguration* WKPageConfigurationRef;
