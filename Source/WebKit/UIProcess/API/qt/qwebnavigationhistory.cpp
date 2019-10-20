@@ -123,12 +123,12 @@ QVariant QWebNavigationListModel::data(const QModelIndex& index, int role) const
 
     WKRetainPtr<WKBackForwardListItemRef> itemRef = WKBackForwardListGetItemAtIndex(d->m_backForwardList.get(), (index.row() + 1) * d->indexSign);
     if (role == QWebNavigationHistory::UrlRole) {
-        WKRetainPtr<WKURLRef> url(AdoptWK, WKBackForwardListItemCopyURL(itemRef.get()));
+        WKRetainPtr<WKURLRef> url = adoptWK(WKBackForwardListItemCopyURL(itemRef.get()));
         return WKURLCopyQUrl(url.get());
     }
 
     if (role == QWebNavigationHistory::TitleRole) {
-        WKRetainPtr<WKStringRef> title(AdoptWK, WKBackForwardListItemCopyTitle(itemRef.get()));
+        WKRetainPtr<WKStringRef> title = adoptWK(WKBackForwardListItemCopyTitle(itemRef.get()));
         return WKStringCopyQString(title.get());
     }
 
