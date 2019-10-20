@@ -21,7 +21,7 @@
 #ifndef WebColorPickerQt_h
 #define WebColorPickerQt_h
 
-#include "IntRect.h"
+#include <WebCore/IntRect.h>
 #include "WebColorPicker.h"
 #include <QtCore/QObject>
 

@@ -84,7 +84,7 @@ class Region;
 class TextIndicator;
 class WebMediaSessionManager;
 
-#if PLATFORM(GTK)
+#if PLATFORM(GTK) || PLATFORM(QT)
 class SelectionData;
 #endif
 
