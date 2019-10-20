@@ -39,7 +39,7 @@ using namespace WebCore;
 
 namespace WebKit {
 
-Ref<QrcSchemeHandler> QrcSchemeHandler::create()
+RefPtr<QrcSchemeHandler> QrcSchemeHandler::create()
 {
     return adoptRef(*new QrcSchemeHandler());
 }
@@ -82,7 +82,7 @@ void QrcSchemeHandler::platformStartTask(WebPageProxy& page, WebURLSchemeTask& t
     sendResponse(task, fileName, fileData);
 
     // TODO: Wrap SharedBuffer around QByteArray when it's possible
-    auto result = task.didReceiveData(*SharedBuffer::create(fileData.data(), fileData.size()));
+    auto result = task.didReceiveData(SharedBuffer::create(fileData.data(), fileData.size()));
     ASSERT_UNUSED(result, result == WebURLSchemeTask::ExceptionType::None);
 
     result = task.didComplete(WebCore::ResourceError());
@@ -90,6 +90,10 @@ void QrcSchemeHandler::platformStartTask(WebPageProxy& page, WebURLSchemeTask& t
 }
 
 void QrcSchemeHandler::platformStopTask(WebPageProxy&, WebURLSchemeTask&)
+{
+}
+
+void QrcSchemeHandler::platformTaskCompleted(WebURLSchemeTask&)
 {
 }
 
