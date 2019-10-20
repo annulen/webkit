@@ -114,14 +114,14 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/qt/qquicknetworkrequest.cpp
     UIProcess/API/qt/qquickurlschemedelegate.cpp
     UIProcess/API/qt/qquickwebpage.cpp
-    UIProcess/API/qt/qquickwebview.cpp
+    #UIProcess/API/qt/qquickwebview.cpp
     UIProcess/API/qt/qtwebsecurityorigin.cpp
     UIProcess/API/qt/qwebchannelwebkittransport.cpp
     UIProcess/API/qt/qwebdownloaditem.cpp
     UIProcess/API/qt/qwebdownloaditem_p.h
     UIProcess/API/qt/qwebdownloaditem_p_p.h
     UIProcess/API/qt/qwebiconimageprovider.cpp
-    UIProcess/API/qt/qwebkittest.cpp
+    #UIProcess/API/qt/qwebkittest.cpp
     UIProcess/API/qt/qwebloadrequest.cpp
     UIProcess/API/qt/qwebnavigationhistory.cpp
     UIProcess/API/qt/qwebnavigationrequest.cpp
@@ -154,7 +154,6 @@ list(APPEND WebKit_SOURCES
     UIProcess/qt/ColorChooserContextObject.h
     UIProcess/qt/DialogContextObjects.h
     UIProcess/qt/ItemSelectorContextObject.cpp
-    UIProcess/qt/PageViewportControllerClientQt.cpp
     UIProcess/qt/QrcSchemeHandler.cpp
     UIProcess/qt/QtDialogRunner.cpp
     UIProcess/qt/QtDownloadManager.cpp
