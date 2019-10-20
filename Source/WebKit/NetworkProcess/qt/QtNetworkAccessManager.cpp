@@ -50,6 +50,7 @@ QtNetworkAccessManager::QtNetworkAccessManager()
 WebPage* QtNetworkAccessManager::obtainOriginatingWebPage(const QNetworkRequest& request)
 {
     // QTFIXME: Old process model
+#if 0
     if (!m_webProcess)
         return nullptr;
 
@@ -59,6 +60,8 @@ WebPage* QtNetworkAccessManager::obtainOriginatingWebPage(const QNetworkRequest&
 
     qulonglong pageID = originatingObject->property("pageID").toULongLong();
     return m_webProcess->webPage(pageID);
+#endif
+    return nullptr;
 }
 
 void QtNetworkAccessManager::onProxyAuthenticationRequired(const QNetworkProxy& proxy, QAuthenticator* authenticator)
