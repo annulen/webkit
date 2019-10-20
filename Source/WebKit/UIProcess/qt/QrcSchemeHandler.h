@@ -31,13 +31,14 @@ namespace WebKit {
 
 class QrcSchemeHandler final : public WebURLSchemeHandler {
 public:
-    static Ref<QrcSchemeHandler> create();
+    static RefPtr<QrcSchemeHandler> create();
 
 private:
     QrcSchemeHandler() = default;
 
     void platformStartTask(WebPageProxy&, WebURLSchemeTask&) final;
     void platformStopTask(WebPageProxy&, WebURLSchemeTask&) final;
+    void platformTaskCompleted(WebURLSchemeTask&) final;
 };
 
 } // namespace WebKit
