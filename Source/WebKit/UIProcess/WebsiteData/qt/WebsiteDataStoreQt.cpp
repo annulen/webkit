@@ -29,9 +29,9 @@
 #include "QtWebContext.h"
 
 #include <WebCore/ApplicationCacheStorage.h>
-#include <WebCore/FileSystem.h>
+#include <wtf/FileSystem.h>
 
-namespace API {
+namespace WebKit {
 
 String WebsiteDataStore::defaultApplicationCacheDirectory()
 {
@@ -73,18 +73,4 @@ String WebsiteDataStore::websiteDataDirectoryFileSystemRepresentation(const Stri
     return String();
 }
 
-WebKit::WebsiteDataStore::Configuration WebsiteDataStore::defaultDataStoreConfiguration()
-{
-    WebKit::WebsiteDataStore::Configuration configuration;
-
-    configuration.applicationCacheDirectory = defaultApplicationCacheDirectory();
-    configuration.networkCacheDirectory = defaultNetworkCacheDirectory();
-
-    configuration.webSQLDatabaseDirectory = defaultWebSQLDatabaseDirectory();
-    configuration.localStorageDirectory = defaultLocalStorageDirectory();
-    configuration.mediaKeysStorageDirectory = defaultMediaKeysStorageDirectory();
-
-    return configuration;
-}
-
-} // namespace API
+} // namespace WebKit
