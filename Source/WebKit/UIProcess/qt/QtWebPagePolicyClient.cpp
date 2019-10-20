@@ -124,8 +124,8 @@ static QQuickWebView::NavigationType toQuickWebViewNavigationType(WKFrameNavigat
 
 void QtWebPagePolicyClient::decidePolicyForNavigationAction(WKPageRef page, WKFrameRef frame, WKFrameNavigationType navigationType, WKEventModifiers modifiers, WKEventMouseButton mouseButton, WKFrameRef originatingFrame, WKURLRequestRef request, WKFramePolicyListenerRef listener, WKTypeRef, const void* clientInfo)
 {
-    WKRetainPtr<WKURLRef> frameURL(AdoptWK, WKFrameCopyURL(frame));
-    WKRetainPtr<WKURLRef> requestURL(AdoptWK, WKURLRequestCopyURL(request));
+    WKRetainPtr<WKURLRef> frameURL = adoptWK(WKFrameCopyURL(frame));
+    WKRetainPtr<WKURLRef> requestURL = adoptWK(WKURLRequestCopyURL(request));
     QUrl qUrl = WKURLCopyQUrl(requestURL.get());
     bool isMainFrame = (WKPageGetMainFrame(page) == frame);
     toQtWebPagePolicyClient(clientInfo)->decidePolicyForNavigationAction(qUrl, toQtMouseButton(mouseButton), toQtKeyboardModifiers(modifiers), toQuickWebViewNavigationType(navigationType), isMainFrame, listener);
