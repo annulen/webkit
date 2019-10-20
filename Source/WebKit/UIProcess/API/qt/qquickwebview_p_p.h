@@ -22,7 +22,7 @@
 #define qquickwebview_p_p_h
 
 #include "DefaultUndoController.h"
-#include "PageViewportController.h"
+#include "SimpleViewportController.h"
 #include "QtPageClient.h"
 #include "QtWebPageUIClient.h"
 
@@ -86,7 +86,7 @@ public:
     void setNeedsDisplay();
     void didRenderFrame();
 
-    virtual WebKit::PageViewportController* viewportController() const { return 0; }
+    virtual WebKit::SimpleViewportController* viewportController() const { return 0; }
     virtual void updateViewportSize() { }
     void updateTouchViewportSize();
 
@@ -242,15 +242,14 @@ public:
     void onComponentComplete() Q_DECL_OVERRIDE;
 
     void didChangeViewportProperties(const WebCore::ViewportAttributes&) Q_DECL_OVERRIDE;
-    WebKit::PageViewportController* viewportController() const Q_DECL_OVERRIDE { return m_pageViewportController.data(); }
+    WebKit::SimpleViewportController* viewportController() const Q_DECL_OVERRIDE { return m_pageViewportController.data(); }
     void updateViewportSize() Q_DECL_OVERRIDE;
 
     void pageDidRequestScroll(const QPoint& pos) Q_DECL_OVERRIDE;
     void handleMouseEvent(QMouseEvent*) Q_DECL_OVERRIDE;
 
 private:
-    QScopedPointer<WebKit::PageViewportController> m_pageViewportController;
-    QScopedPointer<WebKit::PageViewportControllerClientQt> m_pageViewportControllerClient;
+    QScopedPointer<WebKit::SimpleViewportController> m_pageViewportController;
 };
 
 #endif // qquickwebview_p_p_h
