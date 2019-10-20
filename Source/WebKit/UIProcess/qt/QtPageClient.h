@@ -46,26 +46,21 @@ public:
     void initialize(QQuickWebView*, QtWebPageEventHandler*, WebKit::DefaultUndoController*);
 
     // QQuickWebView.
-    void setViewNeedsDisplay(const WebCore::IntRect&) override;
-    void didRenderFrame(const WebCore::IntSize& contentsSize, const WebCore::IntRect& coveredRect) override;
+    void setViewNeedsDisplay(const WebCore::Region&) override;
     WebCore::IntSize viewSize() override;
     bool isViewFocused() override;
     bool isViewVisible() override;
-    void pageDidRequestScroll(const WebCore::IntPoint&) override;
     void didChangeContentSize(const WebCore::IntSize&) override;
     void didChangeViewportProperties(const WebCore::ViewportAttributes&) override;
     void processDidExit() override;
     void didRelaunchProcess() override;
-    std::unique_ptr<DrawingAreaProxy> createDrawingAreaProxy() override;
-    void handleDownloadRequest(DownloadProxy*) override;
+    std::unique_ptr<DrawingAreaProxy> createDrawingAreaProxy(WebProcessProxy&) override;
+    void handleDownloadRequest(DownloadProxy&) override;
     void handleApplicationSchemeRequest(Ref<QtRefCountedNetworkRequestData>&&); // QTFIXME
     void handleAuthenticationRequiredRequest(const String& hostname, const String& realm, const String& prefilledUsername, String& username, String& password) override;
     void handleCertificateVerificationRequest(const String& hostname, bool& ignoreErrors) override;
     void handleProxyAuthenticationRequiredRequest(const String& hostname, uint16_t port, const String& prefilledUsername, String& username, String& password) override;
 
-    void displayView() override;
-    bool canScrollView() override { return false; }
-    void scrollView(const WebCore::IntRect& scrollRect, const WebCore::IntSize& scrollOffset) override;
     bool isViewWindowActive() override;
     bool isViewInWindow() override;
     void enterAcceleratedCompositingMode(const LayerTreeContext&) override;
@@ -74,17 +69,17 @@ public:
     void pageClosed() override { }
     void preferencesDidChange() override { }
 #if ENABLE(DRAG_SUPPORT)
-    void startDrag(const WebCore::DragData&, Ref<ShareableBitmap>&& dragImage) override;
+    void startDrag(Ref<WebCore::SelectionData>&&, WebCore::DragOperation, RefPtr<ShareableBitmap>&& dragImage) override;
 #endif
     void setCursor(const WebCore::Cursor&) override;
     void setCursorHiddenUntilMouseMoves(bool) override;
     void toolTipChanged(const String&, const String&) override;
 
     // DefaultUndoController
-    void registerEditCommand(Ref<WebEditCommandProxy>&&, WebPageProxy::UndoOrRedo) override;
+    void registerEditCommand(Ref<WebEditCommandProxy>&&, UndoOrRedo) override;
     void clearAllEditCommands() override;
-    bool canUndoRedo(WebPageProxy::UndoOrRedo) override;
-    void executeUndoRedo(WebPageProxy::UndoOrRedo) override;
+    bool canUndoRedo(UndoOrRedo) override;
+    void executeUndoRedo(UndoOrRedo) override;
 
     WebCore::FloatRect convertToDeviceSpace(const WebCore::FloatRect&) override;
     WebCore::FloatRect convertToUserSpace(const WebCore::FloatRect&) override;
@@ -92,12 +87,12 @@ public:
     WebCore::IntRect rootViewToScreen(const WebCore::IntRect&) override;
     void doneWithKeyEvent(const NativeWebKeyboardEvent&, bool wasEventHandled) override { }
     RefPtr<WebPopupMenuProxy> createPopupMenuProxy(WebPageProxy&) override;
-    std::unique_ptr<WebContextMenuProxy> createContextMenuProxy(WebPageProxy&, const ContextMenuContextData&, const UserData&) override;
-#if ENABLE(INPUT_TYPE_COLOR)
-    RefPtr<WebColorPicker> createColorPicker(WebPageProxy*, const WebCore::Color& initialColor, const WebCore::IntRect&) override;
+#if ENABLE(CONTEXT_MENUS)
+    Ref<WebContextMenuProxy> createContextMenuProxy(WebPageProxy&, ContextMenuContextData&&, const UserData&) override;
 #endif
-    void pageTransitionViewportReady() override;
-    void didFindZoomableArea(const WebCore::IntPoint&, const WebCore::IntRect&) override;
+#if ENABLE(INPUT_TYPE_COLOR)
+    RefPtr<WebColorPicker> createColorPicker(WebPageProxy*, const WebCore::Color& initialColor, const WebCore::IntRect&, Vector<WebCore::Color>&&) override;
+#endif
     void updateTextInputState() override;
     void handleWillSetInputMethodState() override;
 #if ENABLE(QT_GESTURE_EVENTS)
@@ -126,9 +121,8 @@ private:
 
     // PageClient interface
 public:
-    void requestScroll(const WebCore::FloatPoint& scrollPosition, const WebCore::IntPoint& scrollOrigin, bool isProgrammaticScroll) override;
+    void requestScroll(const WebCore::FloatPoint& scrollPosition, const WebCore::IntPoint& scrollOrigin) override;
     void didCommitLoadForMainFrame(const WTF::String& mimeType, bool useCustomContentProvider) override;
-    void willEnterAcceleratedCompositingMode() override;
     void didFinishLoadingDataForCustomContentProvider(const WTF::String& suggestedFilename, const IPC::DataReference&) override;
     void navigationGestureDidBegin() override;
     void navigationGestureWillEnd(bool willNavigate, WebBackForwardListItem&) override;
@@ -143,6 +137,18 @@ public:
     void didChangeBackgroundColor() override;
     void refView() override;
     void derefView() override;
+    WebCore::FloatPoint viewScrollPosition() override;
+    void wheelEventWasNotHandledByWebCore(const NativeWebWheelEvent&) override;
+    WebCore::IntPoint accessibilityScreenToRootView(const WebCore::IntPoint&) override;
+    WebCore::IntRect rootViewToAccessibilityScreen(const WebCore::IntRect&) override;
+#if ENABLE(DATALIST_ELEMENT)
+    RefPtr<WebDataListSuggestionsDropdown> createDataListSuggestionsDropdown(WebPageProxy&) override;
+#endif
+    void isPlayingAudioWillChange() override;
+    void isPlayingAudioDidChange() override;
+    void didFinishProcessingAllPendingMouseEvents() override;
+    WebCore::UserInterfaceLayoutDirection userInterfaceLayoutDirection() override;
+    void requestDOMPasteAccess(const WebCore::IntRect& elementRect, const String& originIdentifier, CompletionHandler<void(WebCore::DOMPasteAccessResponse)>&&) override;
 #if ENABLE(VIDEO) && USE(GSTREAMER)
     bool decidePolicyForInstallMissingMediaPluginsPermissionRequest(InstallMissingMediaPluginsPermissionRequest&) override;
 #endif

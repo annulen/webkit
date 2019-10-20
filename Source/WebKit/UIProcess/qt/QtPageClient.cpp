@@ -457,4 +457,47 @@ void QtPageClient::didRestoreScrollPosition()
 {
 }
 
+WebCore::FloatPoint QtPageClient::viewScrollPosition()
+{
+}
+
+void QtPageClient::wheelEventWasNotHandledByWebCore(const NativeWebWheelEvent&)
+{
+}
+
+WebCore::IntPoint QtPageClient::accessibilityScreenToRootView(const WebCore::IntPoint&)
+{
+}
+
+WebCore::IntRect QtPageClient::rootViewToAccessibilityScreen(const WebCore::IntRect&)
+{
+}
+
+#if ENABLE(DATALIST_ELEMENT)
+RefPtr<WebDataListSuggestionsDropdown> QtPageClient::createDataListSuggestionsDropdown(WebPageProxy&)
+{
+}
+#endif
+
+void QtPageClient::isPlayingAudioWillChange()
+{
+}
+
+void QtPageClient::isPlayingAudioDidChange()
+{
+}
+
+void QtPageClient::didFinishProcessingAllPendingMouseEvents()
+{
+}
+
+WebCore::UserInterfaceLayoutDirection QtPageClient::userInterfaceLayoutDirection()
+{
+}
+
+void QtPageClient::requestDOMPasteAccess(const WebCore::IntRect& elementRect, const String& originIdentifier, CompletionHandler<void(WebCore::DOMPasteAccessResponse)>&&)
+{
+    //FIXME
+}
+
 } // namespace WebKit
