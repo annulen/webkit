@@ -238,7 +238,7 @@ void ProcessLauncher::terminateProcess()
     if (!m_processObject)
         return;
 
-    QMetaObject::connect(m_processObject, SIGNAL(finished(int)), m_processObject, SLOT(deleteLater()), Qt::QueuedConnection);
+    QObject::connect(m_processObject, SIGNAL(finished()), m_processObject, SLOT(deleteLater()), Qt::QueuedConnection);
     m_processObject->terminate();
 }
 
