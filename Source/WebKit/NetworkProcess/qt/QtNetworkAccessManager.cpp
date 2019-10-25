@@ -66,6 +66,8 @@ WebPage* QtNetworkAccessManager::obtainOriginatingWebPage(const QNetworkRequest&
 
 void QtNetworkAccessManager::onProxyAuthenticationRequired(const QNetworkProxy& proxy, QAuthenticator* authenticator)
 {
+#if 0
+    // WIP
     // FIXME: Check if there is a better way to get a reference to the page.
     WebPage* webPage = m_webProcess->focusedWebPage();
 
@@ -86,11 +88,13 @@ void QtNetworkAccessManager::onProxyAuthenticationRequired(const QNetworkProxy& 
          if (!password.isEmpty())
              authenticator->setPassword(password);
     }
-
+#endif
 }
 
 void QtNetworkAccessManager::onAuthenticationRequired(QNetworkReply* reply, QAuthenticator* authenticator)
 {
+#if 0
+    // WIP
     WebPage* webPage = obtainOriginatingWebPage(reply->request());
 
     // FIXME: This check can go away once our Qt version is up-to-date. See: QTBUG-23512.
@@ -111,10 +115,12 @@ void QtNetworkAccessManager::onAuthenticationRequired(QNetworkReply* reply, QAut
         if (!password.isEmpty())
             authenticator->setPassword(password);
     }
+#endif
 }
 
 void QtNetworkAccessManager::onSslErrors(QNetworkReply* reply, const QList<QSslError>& qSslErrors)
 {
+#if 0
 #ifndef QT_NO_SSL
     WebPage* webPage = obtainOriginatingWebPage(reply->request());
 
@@ -131,6 +137,7 @@ void QtNetworkAccessManager::onSslErrors(QNetworkReply* reply, const QList<QSslE
         if (ignoreErrors)
             reply->ignoreSslErrors(qSslErrors);
     }
+#endif
 #endif
 }
 

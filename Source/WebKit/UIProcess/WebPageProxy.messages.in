@@ -87,10 +87,11 @@ messages -> WebPageProxy {
 #endif // ENABLE(NETSCAPE_PLUGIN_API)
     SetCanShortCircuitHorizontalWheelEvents(bool canShortCircuitHorizontalWheelEvents)
 
-#if PLATFORM(QT)
-    AuthenticationRequiredRequest(String hostname, String realm, String prefilledUsername) -> (String username, String password)
-    CertificateVerificationRequest(String hostname) -> (bool ignoreErrors)
-    ProxyAuthenticationRequiredRequest(String hostname, uint16_t port, String prefilledUsername) -> (String username, String password)
+#if 0
+    //WIP
+    AuthenticationRequiredRequest(String hostname, String realm, String prefilledUsername) -> (String username, String password) Synchronous
+    CertificateVerificationRequest(String hostname) -> (bool ignoreErrors) Synchronous
+    ProxyAuthenticationRequiredRequest(String hostname, uint16_t port, String prefilledUsername) -> (String username, String password) Synchronous
 #endif
 
     DidChangeContentSize(WebCore::IntSize newSize)
