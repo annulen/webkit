@@ -33,9 +33,8 @@
 #include "WebProcessCreationParameters.h"
 
 #include <QCoreApplication>
-#include <WebCore/FileSystem.h>
+#include <wtf/FileSystem.h>
 #include <WebCore/MemoryCache.h>
-#include <WebCore/PageCache.h>
 #include <WebCore/RuntimeEnabledFeatures.h>
 #include <wtf/RAMSize.h>
 
@@ -54,49 +53,7 @@ namespace WebKit {
 
 void WebProcess::platformSetCacheModel(CacheModel cacheModel)
 {
-    uint64_t physicalMemorySizeInMegabytes = WTF::ramSize() / 1024 / 1024;
-
-    // QTFIXME: leftover of old process model
-#if 0
-    // The Mac port of WebKit2 uses a fudge factor of 1000 here to account for misalignment, however,
-    // that tends to overestimate the memory quite a bit (1 byte misalignment ~ 48 MiB misestimation).
-    // We use 1024 * 1023 for now to keep the estimation error down to +/- ~1 MiB.
-    QNetworkDiskCache* diskCache = qobject_cast<QNetworkDiskCache*>(m_networkAccessManager->cache());
-    uint64_t freeVolumeSpace = !diskCache ? 0 : WebCore::getVolumeFreeSizeForPath(diskCache->cacheDirectory().toLocal8Bit().constData()) / 1024 / 1023;
-#endif
-    uint64_t freeVolumeSpace = 0;
-
-    // The following variables are initialised to 0 because WebProcess::calculateCacheSizes might not
-    // set them in some rare cases.
-    unsigned cacheTotalCapacity = 0;
-    unsigned cacheMinDeadCapacity = 0;
-    unsigned cacheMaxDeadCapacity = 0;
-    auto deadDecodedDataDeletionInterval = std::chrono::seconds { 0 };
-    unsigned pageCacheCapacity = 0;
-    unsigned long urlCacheMemoryCapacity = 0;
-    unsigned long urlCacheDiskCapacity = 0;
-
-    calculateCacheSizes(cacheModel, physicalMemorySizeInMegabytes, freeVolumeSpace,
-                        cacheTotalCapacity, cacheMinDeadCapacity, cacheMaxDeadCapacity, deadDecodedDataDeletionInterval,
-                        pageCacheCapacity, urlCacheMemoryCapacity, urlCacheDiskCapacity);
-
-    // QTFIXME: leftover of old process model
-#if 0
-    if (diskCache)
-        diskCache->setMaximumCacheSize(urlCacheDiskCapacity);
-#endif
-
-    auto& memoryCache = MemoryCache::singleton();
-    memoryCache.setCapacities(cacheMinDeadCapacity, cacheMaxDeadCapacity, cacheTotalCapacity);
-    memoryCache.setDeadDecodedDataDeletionInterval(deadDecodedDataDeletionInterval);
-
-    PageCache::singleton().setMaxSize(pageCacheCapacity);
-
     // FIXME: Implement hybrid in-memory- and disk-caching as e.g. the Mac port does.
-}
-
-void WebProcess::platformClearResourceCaches(ResourceCachesToClear)
-{
 }
 
 #if defined(Q_OS_MACOS)
@@ -106,7 +63,7 @@ static void parentProcessDiedCallback(void*)
 }
 #endif
 
-void WebProcess::platformInitializeWebProcess(WebProcessCreationParameters&& parameters)
+void WebProcess::platformInitializeWebProcess(WebProcessCreationParameters& parameters)
 {
 #if ENABLE(SECCOMP_FILTERS)
     {
