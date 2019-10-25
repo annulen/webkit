@@ -20,13 +20,12 @@
 #include "config.h"
 #include "WebFrameNetworkingContext.h"
 
-#include "SessionTracker.h"
 #include "WebFrame.h"
 #include "WebPage.h"
 
 #include <QObject>
 #include <QVariant>
-#include <WebCore/SessionID.h>
+#include <WebCore/FrameLoader.h>
 
 using namespace WebCore;
 
@@ -36,11 +35,6 @@ WebFrameNetworkingContext::WebFrameNetworkingContext(WebFrame* frame)
     : FrameNetworkingContext(frame->coreFrame())
     , m_mimeSniffingEnabled(true)
 {
-    // Save the page ID for a valid page as it is needed later for HTTP authentication and SSL errors.
-    if (frame->page()) {
-        m_originatingObject.reset(new QObject);
-        m_originatingObject->setProperty("pageID", qulonglong(frame->page()->pageID()));
-    }
 }
 
 Ref<WebFrameNetworkingContext> WebFrameNetworkingContext::create(WebFrame* frame)
@@ -48,14 +42,12 @@ Ref<WebFrameNetworkingContext> WebFrameNetworkingContext::create(WebFrame* frame
     return adoptRef(*new WebFrameNetworkingContext(frame));
 }
 
-void WebFrameNetworkingContext::ensurePrivateBrowsingSession(SessionID sessionID)
+void WebFrameNetworkingContext::ensurePrivateBrowsingSession(WebsiteDataStoreParameters&&)
 {
-    ASSERT(isMainThread());
+}
 
-    if (SessionTracker::storageSession(sessionID))
-        return;
-
-    SessionTracker::setSession(sessionID, NetworkStorageSession::createPrivateBrowsingSession(String::number(sessionID.sessionID())));
+void WebFrameNetworkingContext::ensureWebsiteDataStoreSession(WebsiteDataStoreParameters&&)
+{
 }
 
 WebFrameLoaderClient* WebFrameNetworkingContext::webFrameLoaderClient() const
@@ -73,15 +65,6 @@ QNetworkAccessManager* WebFrameNetworkingContext::networkAccessManager() const
     // so we cannot just have ASSERT here.
     qWarning("QtWebKit bug: WebFrameNetworkingContext::networkAccessManager() is called");
     return nullptr;
-}
-
-WebCore::NetworkStorageSession& WebFrameNetworkingContext::storageSession() const
-{
-    if (frame() && frame()->page()->usesEphemeralSession())
-        return *SessionTracker::storageSession(SessionID::legacyPrivateSessionID());
-
-    return NetworkStorageSession::defaultStorageSession();
-
 }
 
 }
