@@ -68,6 +68,7 @@ list(APPEND WebCore_PRIVATE_FRAMEWORK_HEADERS
     platform/network/qt/ResourceError.h
     platform/network/qt/ResourceRequest.h
     platform/network/qt/ResourceResponse.h
+    platform/network/qt/SharedCookieJarQt.h
 
     platform/qt/KeyedDecoderQt.h
     platform/qt/KeyedEncoderQt.h
