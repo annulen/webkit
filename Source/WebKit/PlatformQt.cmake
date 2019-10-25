@@ -29,7 +29,6 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
     "${WEBCORE_DIR}/platform/graphics/qt"
     "${WEBCORE_DIR}/platform/network/qt"
     "${WEBCORE_DIR}/platform/qt"
-    "${WEBCORE_DIR}/platform/sql"
 
     # The WebKit Qt APIs depend on qwebkitglobal.h, which lives in WebKitLegacy
     "${WEBKITLEGACY_DIR}/qt/Api"
@@ -115,7 +114,7 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/qt/qquicknetworkreply.cpp
     UIProcess/API/qt/qquicknetworkrequest.cpp
     UIProcess/API/qt/qquickurlschemedelegate.cpp
-    UIProcess/API/qt/qquickwebpage.cpp
+    #UIProcess/API/qt/qquickwebpage.cpp
     #UIProcess/API/qt/qquickwebview.cpp
     UIProcess/API/qt/qtwebsecurityorigin.cpp
     UIProcess/API/qt/qwebchannelwebkittransport.cpp
@@ -128,7 +127,7 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/qt/qwebnavigationhistory.cpp
     UIProcess/API/qt/qwebnavigationrequest.cpp
     UIProcess/API/qt/qwebpermissionrequest.cpp
-    UIProcess/API/qt/qwebpreferences.cpp
+    #UIProcess/API/qt/qwebpreferences.cpp
 
     #UIProcess/CoordinatedGraphics/CoordinatedDrawingAreaProxy.cpp
     #UIProcess/CoordinatedGraphics/CoordinatedLayerTreeHostProxy.cpp
@@ -152,34 +151,34 @@ list(APPEND WebKit_SOURCES
     UIProcess/gstreamer/InstallMissingMediaPluginsPermissionRequest.cpp
     UIProcess/gstreamer/WebPageProxyGStreamer.cpp
 
-    UIProcess/qt/BackingStoreQt.cpp
-    UIProcess/qt/ColorChooserContextObject.h
-    UIProcess/qt/DialogContextObjects.h
-    UIProcess/qt/ItemSelectorContextObject.cpp
-    UIProcess/qt/QrcSchemeHandler.cpp
-    UIProcess/qt/QtDialogRunner.cpp
-    UIProcess/qt/QtDownloadManager.cpp
-    UIProcess/qt/QtGestureRecognizer.cpp
-    UIProcess/qt/QtPageClient.cpp
-    UIProcess/qt/QtPanGestureRecognizer.cpp
-    UIProcess/qt/QtPinchGestureRecognizer.cpp
-    UIProcess/qt/QtTapGestureRecognizer.cpp
-    UIProcess/qt/QtWebContext.cpp
-    UIProcess/qt/QtWebError.cpp
-    UIProcess/qt/QtWebIconDatabaseClient.cpp
-    UIProcess/qt/QtWebPageEventHandler.cpp
-    UIProcess/qt/QtWebPagePolicyClient.cpp
-    UIProcess/qt/QtWebPageSGNode.cpp
-    UIProcess/qt/QtWebPageUIClient.cpp
-    UIProcess/qt/TextCheckerQt.cpp
-    UIProcess/qt/WebColorPickerQt.cpp
-    UIProcess/qt/WebContextMenuProxyQt.cpp
-    UIProcess/qt/WebGeolocationProviderQt.cpp
-    UIProcess/qt/WebInspectorProxyQt.cpp
-    UIProcess/qt/WebPageProxyQt.cpp
-    UIProcess/qt/WebPopupMenuProxyQt.cpp
-    UIProcess/qt/WebPreferencesQt.cpp
-    UIProcess/qt/WebProcessPoolQt.cpp
+    #UIProcess/qt/BackingStoreQt.cpp
+    #UIProcess/qt/ColorChooserContextObject.h
+    #UIProcess/qt/DialogContextObjects.h
+    #UIProcess/qt/ItemSelectorContextObject.cpp
+    #UIProcess/qt/QrcSchemeHandler.cpp
+    #UIProcess/qt/QtDialogRunner.cpp
+    #UIProcess/qt/QtDownloadManager.cpp
+    #UIProcess/qt/QtGestureRecognizer.cpp
+    #UIProcess/qt/QtPageClient.cpp
+    #UIProcess/qt/QtPanGestureRecognizer.cpp
+    #UIProcess/qt/QtPinchGestureRecognizer.cpp
+    #UIProcess/qt/QtTapGestureRecognizer.cpp
+    ##UIProcess/qt/QtWebContext.cpp
+    #UIProcess/qt/QtWebError.cpp
+    #UIProcess/qt/QtWebIconDatabaseClient.cpp
+    #UIProcess/qt/QtWebPageEventHandler.cpp
+    #UIProcess/qt/QtWebPagePolicyClient.cpp
+    #UIProcess/qt/QtWebPageSGNode.cpp
+    #UIProcess/qt/QtWebPageUIClient.cpp
+    #UIProcess/qt/TextCheckerQt.cpp
+    #UIProcess/qt/WebColorPickerQt.cpp
+    #UIProcess/qt/WebContextMenuProxyQt.cpp
+    #UIProcess/qt/WebGeolocationProviderQt.cpp
+    #UIProcess/qt/WebInspectorProxyQt.cpp
+    #UIProcess/qt/WebPageProxyQt.cpp
+    #UIProcess/qt/WebPopupMenuProxyQt.cpp
+    #UIProcess/qt/WebPreferencesQt.cpp
+    #UIProcess/qt/WebProcessPoolQt.cpp
 
     WebProcess/Cookies/qt/WebCookieManagerQt.cpp
 
@@ -192,7 +191,7 @@ list(APPEND WebKit_SOURCES
     WebProcess/Plugins/Netscape/x11/NetscapePluginX11.cpp
 
     WebProcess/WebCoreSupport/qt/WebContextMenuClientQt.cpp
-    WebProcess/WebCoreSupport/qt/WebDragClientQt.cpp
+    #WebProcess/WebCoreSupport/qt/WebDragClientQt.cpp
     WebProcess/WebCoreSupport/qt/WebErrorsQt.cpp
     WebProcess/WebCoreSupport/qt/WebFrameNetworkingContext.cpp
     WebProcess/WebCoreSupport/qt/WebPopupMenuQt.cpp
@@ -206,8 +205,8 @@ list(APPEND WebKit_SOURCES
     WebProcess/WebPage/qt/WebInspectorUIQt.cpp
     WebProcess/WebPage/qt/WebPageQt.cpp
 
-    WebProcess/qt/QtBuiltinBundle.cpp
-    WebProcess/qt/QtBuiltinBundlePage.cpp
+    #WebProcess/qt/QtBuiltinBundle.cpp
+    #WebProcess/qt/QtBuiltinBundlePage.cpp
     WebProcess/qt/SeccompFiltersWebProcessQt.cpp
     WebProcess/qt/WebProcessMainQt.cpp
     WebProcess/qt/WebProcessQt.cpp
@@ -219,11 +218,11 @@ qt5_add_resources(WebKit_SOURCES
 
 if (USE_MACH_PORTS)
     list(APPEND WebKit_INCLUDE_DIRECTORIES
-        "${WEBKIT_DIR}/Platform/IPC/mac"
+        "${WEBKIT_DIR}/Platform/IPC/cocoa"
         "${WEBKIT_DIR}/Platform/mac"
     )
     list(APPEND WebKit_SOURCES
-        Platform/IPC/mac/ConnectionMac.mm
+        Platform/IPC/cocoa/ConnectionCocoa.mm
 
         Platform/cocoa/SharedMemoryCocoa.cpp
 
@@ -240,11 +239,17 @@ elseif (WIN32)
         Platform/win/SharedMemoryWin.cpp
     )
 else ()
+    list(APPEND WebKit_INCLUDE_DIRECTORIES
+        "${WEBKIT_DIR}/Platform/IPC/unix"
+        "${WEBKIT_DIR}/UIProcess/linux"
+    )
     list(APPEND WebKit_SOURCES
         Platform/IPC/unix/AttachmentUnix.cpp
         Platform/IPC/unix/ConnectionUnix.cpp
 
         Platform/unix/SharedMemoryUnix.cpp
+
+        UIProcess/linux/MemoryPressureMonitor.cpp
     )
 endif ()
 
