@@ -1963,6 +1963,7 @@ void NetworkProcess::cancelDownload(DownloadID downloadID)
 void NetworkProcess::startTransfer(DownloadID downloadID, const String& destination)
 {
     downloadManager().startTransfer(downloadID, destination);
+}
 #endif
 
 #if PLATFORM(COCOA)
