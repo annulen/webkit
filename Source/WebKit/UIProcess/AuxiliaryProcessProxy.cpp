@@ -205,7 +205,8 @@ void AuxiliaryProcessProxy::didFinishLaunching(ProcessLauncher*, IPC::Connection
 
     m_connection = IPC::Connection::createServerConnection(connectionIdentifier, *this);
 #if PLATFORM(QT) && USE(UNIX_DOMAIN_SOCKETS)
-    m_connection->setShouldCloseConnectionOnProcessTermination(processIdentifier());
+    //WIP
+    //m_connection->setShouldCloseConnectionOnProcessTermination(processIdentifier());
 #endif
 
     connectionWillOpen(*m_connection);

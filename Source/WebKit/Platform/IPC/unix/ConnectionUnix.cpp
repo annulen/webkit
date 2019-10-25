@@ -595,15 +595,4 @@ void Connection::didReceiveSyncReply(OptionSet<SendSyncOption>)
 {
 }
 
-#if PLATFORM(QT)
-void Connection::setShouldCloseConnectionOnProcessTermination(WebKit::PlatformProcessIdentifier process)
-{
-    RefPtr<Connection> protectedThis(this);
-    m_connectionQueue->dispatchOnTermination(process,
-        [protectedThis] {
-            protectedThis->connectionDidClose();
-        });
-}
-#endif
-
 } // namespace IPC
