@@ -28,8 +28,8 @@
 
 #if ENABLE(DRAG_SUPPORT)
 
-#include "DataTransfer.h"
-#include "DragData.h"
+#include <WebCore/DataTransfer.h>
+#include <WebCore/DragData.h>
 #include "GraphicsContext.h"
 #include "Pasteboard.h"
 #include "ShareableBitmap.h"
