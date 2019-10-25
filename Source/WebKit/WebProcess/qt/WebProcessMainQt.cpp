@@ -167,7 +167,7 @@ Q_DECL_EXPORT int WebProcessMainQt(QGuiApplication* app)
 #endif
 
 
-    WebKit::ChildProcessInitializationParameters parameters;
+    WebKit::AuxiliaryProcessInitializationParameters parameters;
     parameters.connectionIdentifier = identifier;
 
     WebKit::WebProcess::singleton().initialize(parameters);
