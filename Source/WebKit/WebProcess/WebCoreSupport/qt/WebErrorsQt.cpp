@@ -43,7 +43,7 @@ ResourceError cancelledError(const ResourceRequest& request)
 {
     ResourceError error = ResourceError("QtNetwork", QNetworkReply::OperationCanceledError, request.url(),
                                         QCoreApplication::translate("QWebFrame", "Request cancelled"));
-    error.setIsCancellation(true);
+    //error.setType(Type::Cancellation);
     return error;    
 }
 
