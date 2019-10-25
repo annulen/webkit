@@ -32,7 +32,8 @@ class WebFrameNetworkingContext : public WebCore::FrameNetworkingContext {
 public:
     static Ref<WebFrameNetworkingContext> create(WebFrame*);
 
-    static void ensurePrivateBrowsingSession(WebCore::SessionID);
+    static void ensurePrivateBrowsingSession(WebsiteDataStoreParameters&&);
+    static void ensureWebsiteDataStoreSession(WebsiteDataStoreParameters&&);
 
     WebFrameLoaderClient* webFrameLoaderClient() const;
 
@@ -44,7 +45,7 @@ private:
 
     QNetworkAccessManager* networkAccessManager() const override;
     bool mimeSniffingEnabled() const override { return m_mimeSniffingEnabled; }
-    WebCore::NetworkStorageSession& storageSession() const override;
+    WebCore::NetworkStorageSession* storageSession() const override { return nullptr; }
 
     std::unique_ptr<QObject> m_originatingObject;
     bool m_mimeSniffingEnabled;
