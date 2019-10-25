@@ -27,8 +27,8 @@
 #include "config.h"
 #include "WebPage.h"
 
-#include "NotImplemented.h"
-#include "PopupMenuClient.h"
+#include <WebCore/NotImplemented.h>
+#include <WebCore/PopupMenuClient.h>
 #include "WebEvent.h"
 #include "WebPageProxyMessages.h"
 #include "WebPopupMenu.h"
@@ -95,6 +95,10 @@ void WebPage::platformInitialize()
 {
 }
 
+void WebPage::platformReinitialize()
+{
+}
+
 void WebPage::platformDetach()
 {
 }
@@ -105,10 +109,6 @@ String WebPage::platformUserAgent(const WTF::URL&) const
 }
 
 void WebPage::platformEditorState(Frame&, EditorState&, WebPage::IncludePostLayoutDataHint) const
-{
-}
-
-void WebPage::platformPreferencesDidChange(const WebPreferencesStore&)
 {
 }
 
@@ -197,41 +197,6 @@ static const KeyPressEntry keyPressEntries[] = {
     { '\r',   AltKey | ShiftKey,  "InsertNewline"                               },
 };
 
-const char* WebPage::interpretKeyEvent(const KeyboardEvent* evt)
-{
-    ASSERT(evt->type() == eventNames().keydownEvent || evt->type() == eventNames().keypressEvent);
-    
-    static HashMap<int, const char*>* keyDownCommandsMap = 0;
-    static HashMap<int, const char*>* keyPressCommandsMap = 0;
-    
-    if (!keyDownCommandsMap) {
-        keyDownCommandsMap = new HashMap<int, const char*>;
-        keyPressCommandsMap = new HashMap<int, const char*>;
-        
-        for (unsigned i = 0; i < (sizeof(keyDownEntries) / sizeof(keyDownEntries[0])); i++)
-            keyDownCommandsMap->set(keyDownEntries[i].modifiers << 16 | keyDownEntries[i].virtualKey, keyDownEntries[i].name);
-        
-        for (unsigned i = 0; i < (sizeof(keyPressEntries) / sizeof(keyPressEntries[0])); i++)
-            keyPressCommandsMap->set(keyPressEntries[i].modifiers << 16 | keyPressEntries[i].charCode, keyPressEntries[i].name);
-    }
-    
-    unsigned modifiers = 0;
-    if (evt->shiftKey())
-        modifiers |= ShiftKey;
-    if (evt->altKey())
-        modifiers |= AltKey;
-    if (evt->ctrlKey())
-        modifiers |= CtrlKey;
-    
-    if (evt->type() == eventNames().keydownEvent) {
-        int mapKey = modifiers << 16 | evt->keyEvent()->windowsVirtualKeyCode();
-        return mapKey ? keyDownCommandsMap->get(mapKey) : 0;
-    }
-    
-    int mapKey = modifiers << 16 | evt->charCode();
-    return mapKey ? keyPressCommandsMap->get(mapKey) : 0;
-}
-
 bool WebPage::performDefaultBehaviorForKeyEvent(const WebKeyboardEvent& keyboardEvent)
 {
     if (keyboardEvent.type() != WebEvent::KeyDown && keyboardEvent.type() != WebEvent::RawKeyDown)
@@ -269,34 +234,10 @@ bool WebPage::performDefaultBehaviorForKeyEvent(const WebKeyboardEvent& keyboard
     return true;
 }
 
-bool WebPage::platformHasLocalDataForURL(const URL&)
-{
-    notImplemented();
-    return false;
-}
-
-String WebPage::cachedResponseMIMETypeForURL(const URL&)
-{
-    notImplemented();
-    return String();
-}
-
 bool WebPage::platformCanHandleRequest(const ResourceRequest&)
 {
     notImplemented();
     return true;
-}
-
-String WebPage::cachedSuggestedFilenameForURL(const URL&)
-{
-    notImplemented();
-    return String();
-}
-
-RefPtr<SharedBuffer> WebPage::cachedResponseDataForURL(const URL&)
-{
-    notImplemented();
-    return 0;
 }
 
 void WebPage::selectedIndex(int32_t newIndex)

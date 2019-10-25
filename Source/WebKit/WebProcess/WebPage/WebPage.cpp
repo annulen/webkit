@@ -275,7 +275,7 @@
 #include "DeviceMotionClientQt.h"
 #include "DeviceOrientationClientQt.h"
 #endif
-#include "HitTestResult.h"
+#include <WebCore/HitTestResult.h>
 #include <QMimeData>
 #endif
 
