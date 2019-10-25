@@ -36,7 +36,7 @@ void WebCookieManager::platformSetHTTPCookieAcceptPolicy(HTTPCookieAcceptPolicy)
 HTTPCookieAcceptPolicy WebCookieManager::platformGetHTTPCookieAcceptPolicy()
 {
     // FIXME: Not implemented.
-    return HTTPCookieAcceptPolicyAlways;
+    return HTTPCookieAcceptPolicy();
 }
 
 } // namespace WebKit
