@@ -38,44 +38,17 @@ using namespace WebCore;
 
 namespace WebKit {
 
-void Download::start()
-{
-    ASSERT(!m_qtDownloader);
-    m_qtDownloader = new QtFileDownloader(*this, m_request.toNetworkRequest());
-}
-
-void Download::startWithHandle(ResourceHandle* handle, const ResourceResponse& resp)
-{
-    ASSERT(!m_qtDownloader);
-    m_qtDownloader = new QtFileDownloader(*this, handle->getInternal()->m_job->release());
-}
-
-void Download::resume(const IPC::DataReference&, const WTF::String&, const SandboxExtension::Handle&)
+void Download::resume(const IPC::DataReference&, const WTF::String&, SandboxExtension::Handle&&)
 {
     notImplemented();
-}
-
-void Download::cancel()
-{
-    ASSERT(m_qtDownloader);
-    m_qtDownloader->cancel();
-}
-
-void Download::platformInvalidate()
-{
-    ASSERT(m_qtDownloader);
-    m_qtDownloader->deleteLater();
-    m_qtDownloader = nullptr;
 }
 
 void Download::startTransfer(const String& destination)
 {
+#if 0
+    //Tried to revive Qtfiledownloader but its very broke
     m_qtDownloader->startTransfer(destination);
-}
-
-void Download::platformDidFinish()
-{
-    notImplemented();
+#endif
 }
 
 } // namespace WebKit
