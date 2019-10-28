@@ -32,7 +32,9 @@
 QQuickUrlSchemeDelegate::QQuickUrlSchemeDelegate(QObject* parent)
     : QObject(parent)
     , m_request(new QQuickNetworkRequest(this))
+#if 0
     , m_reply(new QQuickNetworkReply(this))
+#endif
 { }
 
 QString QQuickUrlSchemeDelegate::scheme() const
