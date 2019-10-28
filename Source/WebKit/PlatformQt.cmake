@@ -212,10 +212,6 @@ list(APPEND WebKit_SOURCES
     WebProcess/qt/WebProcessQt.cpp
 )
 
-qt5_add_resources(WebKit_SOURCES
-    WebKit2.qrc
-)
-
 if (USE_MACH_PORTS)
     list(APPEND WebKit_INCLUDE_DIRECTORIES
         "${WEBKIT_DIR}/Platform/IPC/cocoa"
