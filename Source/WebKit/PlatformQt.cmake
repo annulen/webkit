@@ -311,10 +311,6 @@ list(APPEND NetworkProcess_SOURCES
     NetworkProcess/EntryPoint/qt/NetworkProcessMain.cpp
 )
 
-list(APPEND DatabaseProcess_SOURCES
-    DatabaseProcess/EntryPoint/qt/DatabaseProcessMain.cpp
-)
-
 list(APPEND PluginProcess_SOURCES
     qt/PluginMainQt.cpp
 )
