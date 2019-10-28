@@ -192,6 +192,7 @@ list(APPEND WebKit_SOURCES
 
     WebProcess/WebCoreSupport/qt/WebContextMenuClientQt.cpp
     #WebProcess/WebCoreSupport/qt/WebDragClientQt.cpp
+    WebProcess/WebCoreSupport/qt/WebEditorClientQt.cpp
     WebProcess/WebCoreSupport/qt/WebErrorsQt.cpp
     WebProcess/WebCoreSupport/qt/WebFrameNetworkingContext.cpp
     WebProcess/WebCoreSupport/qt/WebPopupMenuQt.cpp
