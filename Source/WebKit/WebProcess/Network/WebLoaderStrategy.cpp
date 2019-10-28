@@ -250,10 +250,6 @@ bool WebLoaderStrategy::tryLoadingUsingURLSchemeHandler(ResourceLoader& resource
 
 void WebLoaderStrategy::scheduleLoadFromNetworkProcess(ResourceLoader& resourceLoader, const ResourceRequest& request, const WebResourceLoader::TrackingParameters& trackingParameters, bool shouldClearReferrerOnHTTPSToHTTPRedirect, Seconds maximumBufferingTime)
 {
-    auto* webFrameLoaderClient = toWebFrameLoaderClient(resourceLoader.frameLoader()->client());
-    auto* webFrame = webFrameLoaderClient ? webFrameLoaderClient->webFrame() : nullptr;
-    auto* webPage = webFrame ? webFrame->page() : nullptr;
-
     ResourceLoadIdentifier identifier = resourceLoader.identifier();
     ASSERT(identifier);
 
@@ -423,11 +419,6 @@ void WebLoaderStrategy::remove(ResourceLoader* resourceLoader)
 
     if (m_internallyFailedResourceLoaders.contains(resourceLoader)) {
         m_internallyFailedResourceLoaders.remove(resourceLoader);
-        return;
-    }
-
-    if (auto task = m_urlSchemeHandlerTasks.take(resourceLoader->identifier())) {
-        task->stopLoading();
         return;
     }
     
