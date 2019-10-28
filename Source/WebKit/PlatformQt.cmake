@@ -60,13 +60,16 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
 list(APPEND WebKit_SOURCES
     #NetworkProcess/CustomProtocols/qt/CustomProtocolManagerQt.cpp
 
+    NetworkProcess/cache/NetworkCacheDataQt.cpp
+    NetworkProcess/cache/NetworkCacheIOChannelQt.cpp
+
     NetworkProcess/Downloads/qt/DownloadQt.cpp
     #NetworkProcess/Downloads/qt/QtFileDownloader.cpp
 
     NetworkProcess/qt/NetworkProcessMainQt.cpp
     NetworkProcess/qt/NetworkProcessQt.cpp
     NetworkProcess/qt/QtNetworkAccessManager.cpp
-    #NetworkProcess/qt/RemoteNetworkingContextQt.cpp
+    NetworkProcess/qt/RemoteNetworkingContextQt.cpp
 
     Platform/qt/LoggingQt.cpp
     Platform/qt/ModuleQt.cpp
