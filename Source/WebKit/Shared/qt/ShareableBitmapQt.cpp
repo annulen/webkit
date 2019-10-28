@@ -41,7 +41,7 @@ QImage ShareableBitmap::createQImage()
 {
     ref(); // Balanced by deref in releaseSharedMemoryData
     return QImage(reinterpret_cast<uchar*>(data()), m_size.width(), m_size.height(), m_size.width() * 4,
-                  m_flags & SupportsAlpha ? NativeImageQt::defaultFormatForAlphaEnabledImages() : NativeImageQt::defaultFormatForOpaqueImages(),
+                  NativeImageQt::defaultFormatForOpaqueImages(),//FIXME
                   releaseSharedMemoryData, this);
 }
 
@@ -52,8 +52,9 @@ void ShareableBitmap::releaseSharedMemoryData(void* typelessBitmap)
 
 RefPtr<Image> ShareableBitmap::createImage()
 {
-    QPixmap* pixmap = new QPixmap(QPixmap::fromImage(createQImage()));
-    return BitmapImage::create(pixmap);
+    //Should NativeImagePtr be QPixmap or QImage which is better - FIXME
+    QImage image = createQImage();
+    return BitmapImage::create(WTFMove(image));
 }
 
 std::unique_ptr<GraphicsContext> ShareableBitmap::createGraphicsContext()
@@ -88,6 +89,17 @@ void ShareableBitmap::paint(GraphicsContext& context, float scaleFactor, const I
     painter->scale(scaleFactor, scaleFactor);
     painter->drawImage(dstPoint, image, QRect(srcRect));
     painter->restore();
+}
+
+Checked<unsigned, RecordOverflow> ShareableBitmap::calculateBytesPerRow(WebCore::IntSize size, const ShareableBitmap::Configuration& config)
+{
+    unsigned bytes = calculateBytesPerPixel(config)*size.width();
+    return bytes;
+}
+
+unsigned ShareableBitmap::calculateBytesPerPixel(const Configuration&)
+{
+    return 4;	
 }
 
 }
