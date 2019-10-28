@@ -38,6 +38,7 @@ list(APPEND WebKit_INCLUDE_DIRECTORIES
     "${WEBKIT_DIR}/NetworkProcess/qt"
 
     "${WEBKIT_DIR}/Shared/CoordinatedGraphics"
+    "${WEBKIT_DIR}/Shared/CoordinatedGraphics/threadedcompositor"
     "${WEBKIT_DIR}/Shared/Plugins/unix"
     "${WEBKIT_DIR}/Shared/qt"
     "${WEBKIT_DIR}/Shared/unix"
@@ -111,7 +112,7 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/cpp/qt/WKStringQt.cpp
     UIProcess/API/cpp/qt/WKURLQt.cpp
 
-    UIProcess/API/qt/qquicknetworkreply.cpp
+    #UIProcess/API/qt/qquicknetworkreply.cpp
     UIProcess/API/qt/qquicknetworkrequest.cpp
     UIProcess/API/qt/qquickurlschemedelegate.cpp
     #UIProcess/API/qt/qquickwebpage.cpp
@@ -121,18 +122,15 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/qt/qwebdownloaditem.cpp
     UIProcess/API/qt/qwebdownloaditem_p.h
     UIProcess/API/qt/qwebdownloaditem_p_p.h
-    UIProcess/API/qt/qwebiconimageprovider.cpp
+    #UIProcess/API/qt/qwebiconimageprovider.cpp
     #UIProcess/API/qt/qwebkittest.cpp
-    UIProcess/API/qt/qwebloadrequest.cpp
+    #UIProcess/API/qt/qwebloadrequest.cpp
     UIProcess/API/qt/qwebnavigationhistory.cpp
     UIProcess/API/qt/qwebnavigationrequest.cpp
     UIProcess/API/qt/qwebpermissionrequest.cpp
     #UIProcess/API/qt/qwebpreferences.cpp
 
-    #UIProcess/CoordinatedGraphics/CoordinatedDrawingAreaProxy.cpp
-    #UIProcess/CoordinatedGraphics/CoordinatedLayerTreeHostProxy.cpp
-    #UIProcess/CoordinatedGraphics/PageViewportController.cpp
-    #UIProcess/CoordinatedGraphics/WebPageProxyCoordinatedGraphics.cpp
+    UIProcess/CoordinatedGraphics/DrawingAreaProxyCoordinatedGraphics.cpp
 
     #UIProcess/InspectorServer/qt/WebInspectorServerQt.cpp
     #UIProcess/InspectorServer/qt/WebSocketServerQt.cpp
@@ -197,9 +195,9 @@ list(APPEND WebKit_SOURCES
     WebProcess/WebCoreSupport/qt/WebFrameNetworkingContext.cpp
     WebProcess/WebCoreSupport/qt/WebPopupMenuQt.cpp
 
-    #WebProcess/WebPage/CoordinatedGraphics/CoordinatedDrawingArea.cpp
-    #WebProcess/WebPage/CoordinatedGraphics/CoordinatedLayerTreeHost.cpp
-    #WebProcess/WebPage/CoordinatedGraphics/WebPageCoordinatedGraphics.cpp
+    WebProcess/WebPage/CoordinatedGraphics/DrawingAreaCoordinatedGraphics.cpp
+    WebProcess/WebPage/CoordinatedGraphics/LayerTreeHost.cpp
+    WebProcess/WebPage/CoordinatedGraphics/CompositingCoordinator.cpp
 
     WebProcess/WebPage/gstreamer/WebPageGStreamer.cpp
 
