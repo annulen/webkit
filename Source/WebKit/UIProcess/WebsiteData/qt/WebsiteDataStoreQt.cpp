@@ -35,27 +35,42 @@ namespace WebKit {
 
 String WebsiteDataStore::defaultApplicationCacheDirectory()
 {
-    return WebKit::QtWebContext::preparedStoragePath(WebKit::QtWebContext::ApplicationCacheStorage);
+    return String();
+}
+
+String WebsiteDataStore::defaultCacheStorageDirectory()
+{
+    return String(); //WIP
 }
 
 String WebsiteDataStore::defaultNetworkCacheDirectory()
 {
-    return WebKit::QtWebContext::preparedStoragePath(WebKit::QtWebContext::DiskCacheStorage);
+    return String();
 }
 
 String WebsiteDataStore::defaultIndexedDBDatabaseDirectory()
 {
-    return WebKit::QtWebContext::preparedStoragePath(WebKit::QtWebContext::DatabaseStorage);
+    return String();
+}
+
+String WebsiteDataStore::defaultResourceLoadStatisticsDirectory()
+{
+    return String();
 }
 
 String WebsiteDataStore::defaultLocalStorageDirectory()
 {
-    return WebKit::QtWebContext::preparedStoragePath(WebKit::QtWebContext::LocalStorage);
+    return String();
 }
 
 String WebsiteDataStore::defaultMediaKeysStorageDirectory()
 {
     return String(); // QTFIXME: Add MediaKeys path
+}
+
+String WebsiteDataStore::defaultServiceWorkerRegistrationDirectory()
+{
+    return String();
 }
 
 String WebsiteDataStore::defaultWebSQLDatabaseDirectory()
@@ -71,6 +86,11 @@ String WebsiteDataStore::cacheDirectoryFileSystemRepresentation(const String& di
 String WebsiteDataStore::websiteDataDirectoryFileSystemRepresentation(const String& directoryName)
 {
     return String();
+}
+
+void WebsiteDataStore::platformRemoveRecentSearches(WallTime)
+{
+    
 }
 
 } // namespace WebKit
