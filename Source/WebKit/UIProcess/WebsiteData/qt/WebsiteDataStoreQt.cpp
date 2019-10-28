@@ -75,7 +75,7 @@ String WebsiteDataStore::defaultServiceWorkerRegistrationDirectory()
 
 String WebsiteDataStore::defaultWebSQLDatabaseDirectory()
 {
-    return WebKit::QtWebContext::preparedStoragePath(WebKit::QtWebContext::DatabaseStorage);
+    return String();
 }
 
 String WebsiteDataStore::cacheDirectoryFileSystemRepresentation(const String& directoryName)

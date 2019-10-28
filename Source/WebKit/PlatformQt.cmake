@@ -145,7 +145,7 @@ list(APPEND WebKit_SOURCES
     #UIProcess/Storage/StorageManager.cpp
 
     UIProcess/WebsiteData/unix/WebsiteDataStoreUnix.cpp
-    UIProcess/WebSiteData/qt/WebsiteDataStoreQt.cpp
+    UIProcess/WebSiteData/qt/WebSiteDataStoreQt.cpp
 
     UIProcess/gstreamer/InstallMissingMediaPluginsPermissionRequest.cpp
     UIProcess/gstreamer/WebPageProxyGStreamer.cpp
