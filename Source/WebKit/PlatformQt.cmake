@@ -170,15 +170,15 @@ list(APPEND WebKit_SOURCES
     #UIProcess/qt/QtWebPagePolicyClient.cpp
     #UIProcess/qt/QtWebPageSGNode.cpp
     #UIProcess/qt/QtWebPageUIClient.cpp
-    #UIProcess/qt/TextCheckerQt.cpp
+    UIProcess/qt/TextCheckerQt.cpp
     #UIProcess/qt/WebColorPickerQt.cpp
     #UIProcess/qt/WebContextMenuProxyQt.cpp
     #UIProcess/qt/WebGeolocationProviderQt.cpp
-    #UIProcess/qt/WebInspectorProxyQt.cpp
-    #UIProcess/qt/WebPageProxyQt.cpp
+    UIProcess/qt/WebInspectorProxyQt.cpp
+    UIProcess/qt/WebPageProxyQt.cpp
     #UIProcess/qt/WebPopupMenuProxyQt.cpp
-    #UIProcess/qt/WebPreferencesQt.cpp
-    #UIProcess/qt/WebProcessPoolQt.cpp
+    UIProcess/qt/WebPreferencesQt.cpp
+    UIProcess/qt/WebProcessPoolQt.cpp
 
     WebProcess/Cookies/qt/WebCookieManagerQt.cpp
 

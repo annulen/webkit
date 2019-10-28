@@ -96,6 +96,11 @@ bool TextChecker::spellingUIIsShowing()
     return false;
 }
 
+void TextChecker::setTestingMode(bool)
+{
+
+}
+
 void TextChecker::toggleSpellingUIIsShowing()
 {
     notImplemented();
@@ -111,7 +116,7 @@ void TextChecker::updateSpellingUIWithGrammarString(int64_t, const String&, cons
     notImplemented();
 }
 
-void TextChecker::getGuessesForWord(int64_t spellDocumentTag, const String& word, const String& context, Vector<String>& guesses)
+void TextChecker::getGuessesForWord(SpellDocumentTag, const String& word, const String& context, int32_t insertionPoint, Vector<String>& guesses, bool initialCapitalizationEnabled)
 {
     notImplemented();
 }
@@ -126,7 +131,7 @@ void TextChecker::ignoreWord(int64_t spellDocumentTag, const String& word)
     notImplemented();
 }
 
-void TextChecker::requestCheckingOfString(Ref<TextCheckerCompletion>&&)
+void TextChecker::requestCheckingOfString(Ref<TextCheckerCompletion>&&,int32_t)
 {
     notImplemented();
 }
