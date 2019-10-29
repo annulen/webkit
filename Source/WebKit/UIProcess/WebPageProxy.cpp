@@ -2252,7 +2252,7 @@ void WebPageProxy::performDragControllerAction(DragControllerAction action, Drag
 {
     if (!hasRunningProcess())
         return;
-#if PLATFORM(GTK) || PLATFORM(QT)
+#if PLATFORM(GTK)
     UNUSED_PARAM(dragStorageName);
     UNUSED_PARAM(sandboxExtensionHandle);
     UNUSED_PARAM(sandboxExtensionsForUpload);
@@ -2281,7 +2281,7 @@ void WebPageProxy::didPerformDragControllerAction(uint64_t dragOperation, WebCor
     setDragCaretRect(insertionRect);
 }
 
-#if PLATFORM(GTK) || PLATFORM(QT)
+#if PLATFORM(GTK)
 void WebPageProxy::startDrag(WebSelectionData&& selection, uint64_t dragOperation, const ShareableBitmap::Handle& dragImageHandle)
 {
     RefPtr<ShareableBitmap> dragImage = !dragImageHandle.isNull() ? ShareableBitmap::create(dragImageHandle) : nullptr;

@@ -30,41 +30,18 @@
 
 #include <WebCore/DataTransfer.h>
 #include <WebCore/DragData.h>
-#include "GraphicsContext.h"
-#include "Pasteboard.h"
-#include "ShareableBitmap.h"
-#include "WebPage.h"
-#include "WebPageProxyMessages.h"
 
 using namespace WebCore;
 
 namespace WebKit {
 
-static RefPtr<ShareableBitmap> convertQPixmapToShareableBitmap(QPixmap* pixmap)
+void WebDragClient::startDrag(WebCore::DragItem, WebCore::DataTransfer& dataTransfer, WebCore::Frame&)
 {
-    if (!pixmap)
-        return 0;
 
-    RefPtr<ShareableBitmap> bitmap = ShareableBitmap::createShareable(IntSize(pixmap->size()), ShareableBitmap::SupportsAlpha);
-    auto graphicsContext = bitmap->createGraphicsContext();
-
-    graphicsContext->platformContext()->drawPixmap(0, 0, *pixmap);
-    return bitmap.release();
 }
-
-void WebDragClient::startDrag(DragImageRef dragImage, const IntPoint& clientPosition, const IntPoint& globalPosition, DataTransfer& dataTransfer, Frame&, bool)
+void WebDragClient::didConcludeEditDrag()
 {
-    QMimeData* clipboardData = dataTransfer.pasteboard().clipboardData();
-    DragOperation dragOperationMask = dataTransfer.sourceOperation();
-    dataTransfer.pasteboard().invalidateWritableData();
-    DragData dragData(clipboardData, clientPosition, globalPosition, dragOperationMask);
 
-    RefPtr<ShareableBitmap> bitmap = convertQPixmapToShareableBitmap(dragImage);
-    ShareableBitmap::Handle handle;
-    if (bitmap && !bitmap->createHandle(handle))
-        return;
-
-    m_page->send(Messages::WebPageProxy::StartDrag(dragData, handle));
 }
 
 }

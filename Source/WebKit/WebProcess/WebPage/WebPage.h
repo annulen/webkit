@@ -859,11 +859,11 @@ public:
     void clearSelection();
     void restoreSelectionInFocusedEditableElement();
 
-#if ENABLE(DRAG_SUPPORT) && (PLATFORM(QT) || PLATFORM(GTK))
+#if ENABLE(DRAG_SUPPORT) && PLATFORM(GTK)
     void performDragControllerAction(DragControllerAction, const WebCore::IntPoint& clientPosition, const WebCore::IntPoint& globalPosition, uint64_t draggingSourceOperationMask, WebSelectionData&&, uint32_t flags);
 #endif
 
-#if ENABLE(DRAG_SUPPORT) && !PLATFORM(GTK) && !PLATFORM(QT)
+#if ENABLE(DRAG_SUPPORT) && !PLATFORM(GTK)
     void performDragControllerAction(DragControllerAction, const WebCore::DragData&, SandboxExtension::Handle&&, SandboxExtension::HandleArray&&);
 #endif
 

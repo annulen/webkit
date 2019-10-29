@@ -331,7 +331,7 @@ messages -> WebPageProxy {
     StartDrag(struct WebCore::DragItem dragItem, WebKit::ShareableBitmap::Handle dragImage)
     SetPromisedDataForImage(String pasteboardName, WebKit::SharedMemory::Handle imageHandle, uint64_t imageSize, String filename, String extension, String title, String url, String visibleURL, WebKit::SharedMemory::Handle archiveHandle, uint64_t archiveSize)
 #endif
-#if (PLATFORM(QT) || PLATFORM(GTK)) && ENABLE(DRAG_SUPPORT)
+#if PLATFORM(GTK) && ENABLE(DRAG_SUPPORT)
     StartDrag(struct WebKit::WebSelectionData selection, uint64_t dragOperation, WebKit::ShareableBitmap::Handle dragImage)
 #endif
 
