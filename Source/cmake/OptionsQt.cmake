@@ -563,7 +563,6 @@ if (ENABLE_WEBKIT)
         Quick
     )
     SET_AND_EXPOSE_TO_BUILD(USE_COORDINATED_GRAPHICS 0)
-    SET_AND_EXPOSE_TO_BUILD(USE_COORDINATED_GRAPHICS_MULTIPROCESS 0)
 endif ()
 
 # Mach ports and Unix sockets are currently used by WK2, but their USE() values
