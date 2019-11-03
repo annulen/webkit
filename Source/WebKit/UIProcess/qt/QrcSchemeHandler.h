@@ -31,7 +31,7 @@ namespace WebKit {
 
 class QrcSchemeHandler final : public WebURLSchemeHandler {
 public:
-    static RefPtr<QrcSchemeHandler> create();
+    static Ref<QrcSchemeHandler> create();
 
 private:
     QrcSchemeHandler() = default;

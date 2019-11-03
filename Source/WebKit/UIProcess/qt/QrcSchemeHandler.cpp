@@ -39,7 +39,7 @@ using namespace WebCore;
 
 namespace WebKit {
 
-RefPtr<QrcSchemeHandler> QrcSchemeHandler::create()
+Ref<QrcSchemeHandler> QrcSchemeHandler::create()
 {
     return adoptRef(*new QrcSchemeHandler());
 }
