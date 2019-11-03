@@ -38,7 +38,7 @@
 namespace WebKit {
 class CoordinatedGraphicsScene;
 class DownloadProxy;
-class DrawingAreaProxy;
+class DrawingAreaProxyCoordinatedGraphics;
 class QtDialogRunner;
 class PageViewportControllerClientQt;
 class QtWebContext;
@@ -46,6 +46,7 @@ class QtWebError;
 class QtWebPageEventHandler;
 class QtWebPagePolicyClient;
 class WebPageProxy;
+class WebOpenPanelResultListenerProxy;
 }
 
 class QWebNavigationHistory;
@@ -85,20 +86,23 @@ public:
     int loadProgress() const { return m_loadProgress; }
     void setNeedsDisplay();
     void didRenderFrame();
-
+#if 0
     virtual WebKit::SimpleViewportController* viewportController() const { return 0; }
+#endif
     virtual void updateViewportSize() { }
     void updateTouchViewportSize();
 
     virtual qreal zoomFactor() const { return 1; }
     virtual void setZoomFactor(qreal) { }
 
+    WebKit::WebPageProxy* getPageProxy() const { return webPageProxy.get(); }
+
     void _q_onVisibleChanged();
     void _q_onUrlChanged();
     void _q_onReceivedResponseFromDownload(QWebDownloadItem*);
     void _q_onIconChangedForPageURL(const QString&);
 
-    void chooseFiles(WKOpenPanelResultListenerRef, const QStringList& selectedFileNames, WebKit::QtWebPageUIClient::FileChooserType);
+    void chooseFiles(Ref<WebKit::WebOpenPanelResultListenerProxy>, const QStringList& selectedFileNames, WebKit::QtWebPageUIClient::FileChooserType);
     quint64 exceededDatabaseQuota(const QString& databaseName, const QString& displayName, WKSecurityOriginRef securityOrigin, quint64 currentQuota, quint64 currentOriginUsage, quint64 currentDatabaseUsage, quint64 expectedUsage);
     void runJavaScriptAlert(const QString&);
     bool runJavaScriptConfirm(const QString&);
@@ -129,7 +133,6 @@ public:
     WebCore::IntSize viewSize() const;
     virtual void pageDidRequestScroll(const QPoint& pos) { }
     void didRelaunchProcess();
-    std::unique_ptr<WebKit::DrawingAreaProxy> createDrawingAreaProxy();
     void handleDownloadRequest(WebKit::DownloadProxy*);
 
     void didReceiveMessageFromNavigatorQtObject(WKStringRef message);
@@ -179,7 +182,6 @@ protected:
 
     QQuickWebViewPrivate(QQuickWebView* viewport);
     RefPtr<WebKit::WebPageProxy> webPageProxy;
-    WKRetainPtr<WKPageRef> webPage;
 
     WebKit::QtPageClient pageClient;
     WebKit::DefaultUndoController undoController;
@@ -242,14 +244,17 @@ public:
     void onComponentComplete() Q_DECL_OVERRIDE;
 
     void didChangeViewportProperties(const WebCore::ViewportAttributes&) Q_DECL_OVERRIDE;
-    WebKit::SimpleViewportController* viewportController() const Q_DECL_OVERRIDE { return m_pageViewportController.data(); }
+    //WebKit::SimpleViewportController* viewportController() const Q_DECL_OVERRIDE { return m_pageViewportController.data(); }
     void updateViewportSize() Q_DECL_OVERRIDE;
 
     void pageDidRequestScroll(const QPoint& pos) Q_DECL_OVERRIDE;
     void handleMouseEvent(QMouseEvent*) Q_DECL_OVERRIDE;
 
 private:
+#if 0
+//FIXME - Coordinated Graphics
     QScopedPointer<WebKit::SimpleViewportController> m_pageViewportController;
+#endif
 };
 
 #endif // qquickwebview_p_p_h

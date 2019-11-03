@@ -115,9 +115,9 @@ list(APPEND WebKit_SOURCES
 
     #UIProcess/API/qt/qquicknetworkreply.cpp
     UIProcess/API/qt/qquicknetworkrequest.cpp
-    UIProcess/API/qt/qquickurlschemedelegate.cpp
-    #UIProcess/API/qt/qquickwebpage.cpp
-    #UIProcess/API/qt/qquickwebview.cpp
+    #UIProcess/API/qt/qquickurlschemedelegate.cpp
+    UIProcess/API/qt/qquickwebpage.cpp
+    UIProcess/API/qt/qquickwebview.cpp
     UIProcess/API/qt/qtwebsecurityorigin.cpp
     UIProcess/API/qt/qwebchannelwebkittransport.cpp
     UIProcess/API/qt/qwebdownloaditem.cpp
