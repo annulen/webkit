@@ -98,10 +98,6 @@ if (ENABLE_NETSCAPE_PLUGIN_API)
     target_link_libraries(TestNetscapePlugIn ${TestNetscapePlugIn_LIBRARIES})
 endif ()
 
-if (WIN32)
-    add_dependencies(DumpRenderTree DumpRenderTreeLib)
-endif ()
-
 if (${PORT} STREQUAL "Qt")
     set_target_properties(DumpRenderTree PROPERTIES AUTOMOC ON)
     if (ENABLE_NETSCAPE_PLUGIN_API)

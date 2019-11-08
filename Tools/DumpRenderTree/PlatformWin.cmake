@@ -119,5 +119,6 @@ add_definitions(-DUSE_CONSOLE_ENTRY_POINT)
 
 add_library(DumpRenderTreeLib SHARED ${DumpRenderTreeLib_SOURCES})
 target_link_libraries(DumpRenderTreeLib ${DumpRenderTreeLib_LIBRARIES})
+add_dependencies(DumpRenderTree DumpRenderTreeLib)
 
 add_definitions(-D_UNICODE)
