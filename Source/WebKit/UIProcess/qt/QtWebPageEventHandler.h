@@ -24,6 +24,7 @@
 #include "QtPanGestureRecognizer.h"
 #include "QtPinchGestureRecognizer.h"
 #include "QtTapGestureRecognizer.h"
+#include "QtPageClient.h"
 #include <QBasicTimer>
 #include <QTouchEvent>
 #include <WKPage.h>
@@ -46,7 +47,7 @@ class IntRect;
 namespace WebKit {
 
 class NativeWebTouchEvent;
-class PageViewportControllerClientQt;
+//class PageViewportControllerClientQt;
 class ShareableBitmap;
 class WebGestureEvent;
 class WebPageProxy;
@@ -92,14 +93,17 @@ public:
     void handleWillSetInputMethodState();
     void resetGestureRecognizers();
 
+#if 0
     PageViewportControllerClientQt* viewportController() { return m_viewportController; }
+#endif
     WebPageProxy* webPageProxy() { return m_webPageProxy; }
 
     void startDrag(const WebCore::DragData&, Ref<ShareableBitmap>&& dragImage);
 
 protected:
     WebPageProxy* m_webPageProxy;
-    PageViewportControllerClientQt* m_viewportController;
+    //PageViewportControllerClientQt* m_viewportController;
+    std::unique_ptr<WebKit::QtPageClient> m_pageClient;
     QtPanGestureRecognizer m_panGestureRecognizer;
     QtPinchGestureRecognizer m_pinchGestureRecognizer;
     QtTapGestureRecognizer m_tapGestureRecognizer;

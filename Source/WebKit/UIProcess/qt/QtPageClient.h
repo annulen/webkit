@@ -56,7 +56,10 @@ public:
     void didRelaunchProcess() override;
     std::unique_ptr<DrawingAreaProxy> createDrawingAreaProxy(WebProcessProxy&) override;
     void handleDownloadRequest(DownloadProxy&) override;
+#if 0
+//Should this be placed here?
     void handleApplicationSchemeRequest(Ref<QtRefCountedNetworkRequestData>&&); // QTFIXME
+#endif
     void handleAuthenticationRequiredRequest(const String& hostname, const String& realm, const String& prefilledUsername, String& username, String& password) override;
     void handleCertificateVerificationRequest(const String& hostname, bool& ignoreErrors) override;
     void handleProxyAuthenticationRequiredRequest(const String& hostname, uint16_t port, const String& prefilledUsername, String& username, String& password) override;

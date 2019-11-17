@@ -24,7 +24,7 @@
 #include "NativeWebKeyboardEvent.h"
 #include "NativeWebMouseEvent.h"
 #include "NativeWebWheelEvent.h"
-#include "PageViewportControllerClientQt.h"
+
 #include "WebPageProxy.h"
 #include "qquickwebpage_p.h"
 #include "qquickwebview_p.h"
@@ -91,7 +91,7 @@ static inline WebCore::DragOperation dropActionToDragOperation(Qt::DropActions a
 
 QtWebPageEventHandler::QtWebPageEventHandler(WKPageRef pageRef, QQuickWebPage* qmlWebPage, QQuickWebView* qmlWebView)
     : m_webPageProxy(toImpl(pageRef))
-    , m_viewportController(0)
+    //, m_viewportController(0)
     , m_panGestureRecognizer(this)
     , m_pinchGestureRecognizer(this)
     , m_tapGestureRecognizer(this)
@@ -240,7 +240,7 @@ void QtWebPageEventHandler::handleDropEvent(QDropEvent* ev)
     DragData dragData(ev->mimeData(), fromItemTransform.map(ev->pos()), QCursor::pos(), dropActionToDragOperation(ev->possibleActions()));
     SandboxExtension::Handle handle;
     SandboxExtension::HandleArray sandboxExtensionForUpload;
-    m_webPageProxy->performDragOperation(dragData, String(), handle, sandboxExtensionForUpload);
+    m_webPageProxy->performDragOperation(dragData, String(), WTFMove(handle), WTFMove(sandboxExtensionForUpload));
     ev->setDropAction(dragOperationToDropAction(m_webPageProxy->currentDragOperation()));
     ev->accept();
 
@@ -291,10 +291,11 @@ void QtWebPageEventHandler::handleDoubleTapEvent(const QTouchEvent::TouchPoint& 
 {
     if (!m_webView->isInteractive())
         return;
-
+#if 0
     deactivateTapHighlight();
     QTransform fromItemTransform = m_webPage->transformFromItem();
     m_webPageProxy->findZoomableAreaForPoint(fromItemTransform.map(point.pos()).toPoint(), IntSize(point.rect().size().toSize()));
+#endif
 }
 
 void QtWebPageEventHandler::timerEvent(QTimerEvent* ev)
@@ -318,18 +319,20 @@ void QtWebPageEventHandler::handleKeyReleaseEvent(QKeyEvent* ev)
 
 void QtWebPageEventHandler::handleFocusInEvent(QFocusEvent*)
 {
-    m_webPageProxy->viewStateDidChange(ViewState::IsFocused | ViewState::WindowIsActive);
+    
 }
 
 void QtWebPageEventHandler::handleFocusLost()
 {
-    m_webPageProxy->viewStateDidChange(ViewState::IsFocused | ViewState::WindowIsActive);
+
 }
 
+#if 0
 void QtWebPageEventHandler::setViewportController(PageViewportControllerClientQt* controller)
 {
     m_viewportController = controller;
 }
+#endif
 
 void QtWebPageEventHandler::handleInputMethodEvent(QInputMethodEvent* ev)
 {
@@ -358,7 +361,7 @@ void QtWebPageEventHandler::handleInputMethodEvent(QInputMethodEvent* ev)
             Color color = makeRGBA(qcolor.red(), qcolor.green(), qcolor.blue(), qcolor.alpha());
             int start = qMin(attr.start, (attr.start + attr.length));
             int end = qMax(attr.start, (attr.start + attr.length));
-            underlines.append(CompositionUnderline(start, end, color, false));
+            underlines.append(CompositionUnderline(start, end, CompositionUnderlineColor::TextColor, color, false));
             break;
         }
         case QInputMethodEvent::Cursor:
@@ -427,6 +430,7 @@ static void setInputPanelVisible(bool visible)
 
 void QtWebPageEventHandler::inputPanelVisibleChanged()
 {
+#if 0
     if (!m_viewportController)
         return;
 
@@ -437,6 +441,7 @@ void QtWebPageEventHandler::inputPanelVisibleChanged()
     const EditorState& editor = m_webPageProxy->editorState();
     if (editor.isContentEditable)
         m_viewportController->focusEditableArea(QRectF(editor.cursorRect), QRectF(editor.editorRect));
+#endif
 }
 
 void QtWebPageEventHandler::updateTextInputState()
@@ -479,6 +484,7 @@ void QtWebPageEventHandler::doneWithGestureEvent(const WebGestureEvent& event, b
 
 void QtWebPageEventHandler::handleInputEvent(const QInputEvent* event)
 {
+#if 0
     if (m_viewportController) {
         switch (event->type()) {
         case QEvent::MouseButtonPress:
@@ -599,7 +605,7 @@ void QtWebPageEventHandler::handleInputEvent(const QInputEvent* event)
         m_tapGestureRecognizer.cancel();
     else if (touchPointCount == 1)
         m_tapGestureRecognizer.update(currentTouchPoint);
-
+#endif
 }
 
 #if ENABLE(TOUCH_EVENTS)
@@ -621,19 +627,21 @@ void QtWebPageEventHandler::doneWithTouchEvent(const NativeWebTouchEvent& event,
 
 void QtWebPageEventHandler::didFindZoomableArea(const IntPoint& target, const IntRect& area)
 {
+#if 0
     if (!m_viewportController)
         return;
 
     // FIXME: As the find method might not respond immediately during load etc,
     // we should ignore all but the latest request.
     m_viewportController->zoomToAreaGestureEnded(QPointF(target), QRectF(area));
+#endif
 }
 
 void QtWebPageEventHandler::startDrag(const WebCore::DragData& dragData, Ref<ShareableBitmap>&& dragImage)
 {
 #if ENABLE(DRAG_SUPPORT)
     QImage dragQImage;
-    if (dragImage)
+    if (!dragImage.ptr())
         dragQImage = WTFMove(dragImage)->createQImage();
     else if (dragData.platformData() && dragData.platformData()->hasImage())
         dragQImage = qvariant_cast<QImage>(dragData.platformData()->imageData());
