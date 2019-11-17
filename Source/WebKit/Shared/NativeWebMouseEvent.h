@@ -63,7 +63,7 @@ public:
 #if USE(APPKIT)
     NativeWebMouseEvent(NSEvent *, NSEvent *lastPressureEvent, NSView *);
 #elif PLATFORM(QT)
-    explicit NativeWebMouseEvent(QMouseEvent*, const QTransform& fromItemTransform, int eventClickCount);
+    NativeWebMouseEvent(QMouseEvent*, const QTransform& fromItemTransform, int eventClickCount);
 #elif PLATFORM(GTK)
     NativeWebMouseEvent(const NativeWebMouseEvent&);
     NativeWebMouseEvent(GdkEvent*, int);
