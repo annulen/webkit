@@ -164,7 +164,7 @@ list(APPEND WebKit_SOURCES
     ##UIProcess/qt/QtWebContext.cpp
     #UIProcess/qt/QtWebError.cpp
     #UIProcess/qt/QtWebIconDatabaseClient.cpp
-    #UIProcess/qt/QtWebPageEventHandler.cpp
+    UIProcess/qt/QtWebPageEventHandler.cpp
     #UIProcess/qt/QtWebPagePolicyClient.cpp
     #UIProcess/qt/QtWebPageSGNode.cpp
     #UIProcess/qt/QtWebPageUIClient.cpp
