@@ -40,16 +40,32 @@ using namespace WebCore;
 
 namespace WebKit {
 
-static inline double currentTimeForEvent(const QInputEvent* event)
+static inline WallTime currentTimeForEvent(const QInputEvent* event)
 {
     ASSERT(event);
 
     // Use the input event timestamps if they are available.
     // These timestamps are in milliseconds, thus convert them to seconds.
     if (event->timestamp())
-        return static_cast<double>(event->timestamp()) / 1000;
+        return WallTime::fromRawSeconds(event->timestamp()/1000);
 
     return WTF::WallTime::now();
+}
+
+static inline unsigned short buttonsForEvent(QMouseEvent* event)
+{
+    unsigned short buttons = 0;
+
+    if(event->buttons() & Qt::LeftButton)
+        buttons |= 1;
+    
+    if(event->buttons() & Qt::RightButton)
+        buttons |= 4;
+
+    if(event->buttons() & Qt::MiddleButton)
+        buttons |= 2;
+
+    return buttons;
 }
 
 static WebMouseEvent::Button mouseButtonForEvent(QMouseEvent *event)
@@ -97,18 +113,18 @@ static WebEvent::Type webEventTypeForEvent(const QEvent* event)
     }
 }
 
-static inline WebEvent::Modifiers modifiersForEvent(Qt::KeyboardModifiers modifiers)
+static inline OptionSet<WebEvent::Modifier> modifiersForEvent(Qt::KeyboardModifiers modifiers)
 {
-    unsigned result = 0;
+    OptionSet<WebEvent::Modifier> result;
     if (modifiers & Qt::ShiftModifier)
-        result |= WebEvent::ShiftKey;
+        result.add(WebEvent::Modifier::ShiftKey);
     if (modifiers & Qt::ControlModifier)
-        result |= WebEvent::ControlKey;
+        result.add(WebEvent::Modifier::ControlKey);
     if (modifiers & Qt::AltModifier)
-        result |= WebEvent::AltKey;
+        result.add(WebEvent::Modifier::AltKey);
     if (modifiers & Qt::MetaModifier)
-        result |= WebEvent::MetaKey;
-    return (WebEvent::Modifiers)result;
+        result.add(WebEvent::Modifier::MetaKey);
+    return result;
 }
 
 WebMouseEvent WebEventFactory::createWebMouseEvent(QMouseEvent* event, const QTransform& fromItemTransform, int eventClickCount)
@@ -117,25 +133,26 @@ WebMouseEvent WebEventFactory::createWebMouseEvent(QMouseEvent* event, const QTr
 
     WebEvent::Type type             = webEventTypeForEvent(event);
     WebMouseEvent::Button button    = mouseButtonForEvent(event);
+    auto buttons                    = buttonsForEvent(event);
     float deltaX                    = event->pos().x() - lastPos.x();
     float deltaY                    = event->pos().y() - lastPos.y();
     int clickCount                  = eventClickCount;
-    WebEvent::Modifiers modifiers   = modifiersForEvent(event->modifiers());
-    double timestamp                = currentTimeForEvent(event);
+    OptionSet<WebEvent::Modifier> modifiers = modifiersForEvent(event->modifiers());
+    WallTime timestamp                = currentTimeForEvent(event);
     lastPos.set(event->localPos().x(), event->localPos().y());
 
-    return WebMouseEvent(type, button, fromItemTransform.map(event->localPos()).toPoint(), event->screenPos().toPoint(), deltaX, deltaY, 0.0f, clickCount, modifiers, timestamp);
+    return WebMouseEvent(type, button, buttons, fromItemTransform.map(event->localPos()).toPoint(), event->screenPos().toPoint(), deltaX, deltaY, 0.0f, clickCount, modifiers, timestamp);
 }
 
-WebWheelEvent WebEventFactory::createWebWheelEvent(QWheelEvent* e, const QTransform& fromItemTransform)
+    WebWheelEvent WebEventFactory::createWebWheelEvent(QWheelEvent* e, const QTransform& fromItemTransform)
 {
     float deltaX                            = 0;
     float deltaY                            = 0;
     float wheelTicksX                       = 0;
     float wheelTicksY                       = 0;
     WebWheelEvent::Granularity granularity  = WebWheelEvent::ScrollByPixelWheelEvent;
-    WebEvent::Modifiers modifiers           = modifiersForEvent(e->modifiers());
-    double timestamp                        = currentTimeForEvent(e);
+    OptionSet<WebEvent::Modifier> modifiers           = modifiersForEvent(e->modifiers());
+    WallTime timestamp                        = currentTimeForEvent(e);
 
     if (e->orientation() == Qt::Horizontal) {
         deltaX = e->delta();
@@ -175,8 +192,8 @@ WebKeyboardEvent WebEventFactory::createWebKeyboardEvent(QKeyEvent* event)
     int windowsVirtualKeyCode       = windowsKeyCodeForKeyEvent(event->key(), isKeypad);
     int nativeVirtualKeyCode        = event->nativeVirtualKey();
     int macCharCode                 = 0;
-    WebEvent::Modifiers modifiers   = modifiersForEvent(event->modifiers());
-    double timestamp                = currentTimeForEvent(event);
+    OptionSet<WebEvent::Modifier> modifiers           = modifiersForEvent(event->modifiers());
+    WallTime timestamp                = currentTimeForEvent(event);
 
     return WebKeyboardEvent(type, text, unmodifiedText, keyIdentifier, windowsVirtualKeyCode, nativeVirtualKeyCode, macCharCode, isAutoRepeat, isKeypad, isSystemKey, modifiers, timestamp);
 }
@@ -187,7 +204,7 @@ WebTouchEvent WebEventFactory::createWebTouchEvent(const QTouchEvent* event, con
     WebEvent::Type type  = webEventTypeForEvent(event);
     WebPlatformTouchPoint::TouchPointState state = static_cast<WebPlatformTouchPoint::TouchPointState>(0);
     unsigned id;
-    WebEvent::Modifiers modifiers   = modifiersForEvent(event->modifiers());
+    OptionSet<WebEvent::Modifier> modifiers           = modifiersForEvent(event->modifiers());
     double timestamp                = currentTimeForEvent(event);
 
     const QList<QTouchEvent::TouchPoint>& points = event->touchPoints();
