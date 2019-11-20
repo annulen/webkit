@@ -97,11 +97,11 @@ list(APPEND WebKit_SOURCES
     Shared/qt/NativeWebTouchEventQt.cpp
     Shared/qt/NativeWebWheelEventQt.cpp
     Shared/qt/ProcessExecutablePathQt.cpp
-    #Shared/qt/QtNetworkReplyData.cpp
+    Shared/qt/QtNetworkReplyData.cpp
     #Shared/qt/QtNetworkRequestData.cpp
     Shared/qt/ShareableBitmapQt.cpp
     Shared/qt/WebCoreArgumentCodersQt.cpp
-    #Shared/qt/WebEventFactoryQt.cpp
+    Shared/qt/WebEventFactoryQt.cpp
     Shared/qt/WebGestureEvent.cpp
 
     UIProcess/BackingStore.cpp

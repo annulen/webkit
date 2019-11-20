@@ -33,8 +33,8 @@
 #include <wtf/text/WTFString.h>
 
 namespace IPC {
-class ArgumentEncoder;
-class ArgumentDecoder;
+class Encoder;
+class Decoder;
 };
 
 namespace WebKit {
@@ -42,8 +42,8 @@ namespace WebKit {
 struct QtNetworkReplyData {
     QtNetworkReplyData();
 
-    void encode(IPC::ArgumentEncoder&) const;
-    static bool decode(IPC::ArgumentDecoder&, QtNetworkReplyData&);
+    void encode(IPC::Encoder&) const;
+    static bool decode(IPC::Decoder&, QtNetworkReplyData&);
 
     WTF::String m_urlString;
 
