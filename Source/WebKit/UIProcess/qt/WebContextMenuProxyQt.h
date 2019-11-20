@@ -37,10 +37,13 @@ class WebPageProxy;
 class WebContextMenuProxyQt : public QObject, public WebContextMenuProxy {
     Q_OBJECT
 public:
-    WebContextMenuProxyQt(const ContextMenuContextData&, const UserData&);
+    static Ref<WebContextMenuProxyQt> create(WebPageProxy& page,ContextMenuContextData&& context, const UserData& userData);
+    ~WebContextMenuProxyQt();
 
 private:
+    WebContextMenuProxyQt(WebPageProxy&, ContextMenuContextData&& context, const UserData& userData);
     void show() override;
+    void showContextMenuWithItems(Vector<Ref<WebContextMenuItem>>&&) override;
 };
 
 } // namespace WebKit

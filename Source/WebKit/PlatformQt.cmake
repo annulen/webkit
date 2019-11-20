@@ -113,9 +113,9 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/cpp/qt/WKStringQt.cpp
     UIProcess/API/cpp/qt/WKURLQt.cpp
 
-    #UIProcess/API/qt/qquicknetworkreply.cpp
+    UIProcess/API/qt/qquicknetworkreply.cpp
     UIProcess/API/qt/qquicknetworkrequest.cpp
-    #UIProcess/API/qt/qquickurlschemedelegate.cpp
+    UIProcess/API/qt/qquickurlschemedelegate.cpp
     UIProcess/API/qt/qquickwebpage.cpp
     UIProcess/API/qt/qquickwebview.cpp
     UIProcess/API/qt/qtwebsecurityorigin.cpp
@@ -158,7 +158,7 @@ list(APPEND WebKit_SOURCES
     #UIProcess/qt/QtDialogRunner.cpp
     #UIProcess/qt/QtDownloadManager.cpp
     #UIProcess/qt/QtGestureRecognizer.cpp
-    #UIProcess/qt/QtPageClient.cpp
+    UIProcess/qt/QtPageClient.cpp
     #UIProcess/qt/QtPanGestureRecognizer.cpp
     #UIProcess/qt/QtPinchGestureRecognizer.cpp
     #UIProcess/qt/QtTapGestureRecognizer.cpp
@@ -171,7 +171,7 @@ list(APPEND WebKit_SOURCES
     #UIProcess/qt/QtWebPageUIClient.cpp
     UIProcess/qt/TextCheckerQt.cpp
     #UIProcess/qt/WebColorPickerQt.cpp
-    #UIProcess/qt/WebContextMenuProxyQt.cpp
+    UIProcess/qt/WebContextMenuProxyQt.cpp
     #UIProcess/qt/WebGeolocationProviderQt.cpp
     UIProcess/qt/WebInspectorProxyQt.cpp
     UIProcess/qt/WebPageProxyQt.cpp
