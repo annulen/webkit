@@ -143,4 +143,36 @@ String WebInspectorProxy::inspectorBaseURL()
     return String();
 }
 
+void WebInspectorProxy::platformShowCertificate(const WebCore::CertificateInfo&)
+{
+    notImplemented();
+}
+
+void WebInspectorProxy::platformResetState()
+{
+    notImplemented();
+}
+
+void WebInspectorProxy::platformBringInspectedPageToFront()
+{
+    notImplemented();
+}
+
+void WebInspectorProxy::platformSetSheetRect(const WebCore::FloatRect&)
+{
+    notImplemented();
+}
+
+WebPageProxy* WebInspectorProxy::platformCreateFrontendPage()
+{
+}
+
+void WebInspectorProxy::platformCreateFrontendWindow()
+{
+}
+
+void WebInspectorProxy::platformCloseFrontendPageAndWindow()
+{
+}
+
 } // namespace WebKit
