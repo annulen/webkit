@@ -123,18 +123,15 @@ list(APPEND WebKit_SOURCES
     UIProcess/API/qt/qwebdownloaditem.cpp
     UIProcess/API/qt/qwebdownloaditem_p.h
     UIProcess/API/qt/qwebdownloaditem_p_p.h
-    #UIProcess/API/qt/qwebiconimageprovider.cpp
-    #UIProcess/API/qt/qwebkittest.cpp
-    #UIProcess/API/qt/qwebloadrequest.cpp
+    UIProcess/API/qt/qwebiconimageprovider.cpp
+    UIProcess/API/qt/qwebkittest.cpp
+    UIProcess/API/qt/qwebloadrequest.cpp
     UIProcess/API/qt/qwebnavigationhistory.cpp
     UIProcess/API/qt/qwebnavigationrequest.cpp
     UIProcess/API/qt/qwebpermissionrequest.cpp
-    #UIProcess/API/qt/qwebpreferences.cpp
+    UIProcess/API/qt/qwebpreferences.cpp
 
     UIProcess/CoordinatedGraphics/DrawingAreaProxyCoordinatedGraphics.cpp
-
-    #UIProcess/InspectorServer/qt/WebInspectorServerQt.cpp
-    #UIProcess/InspectorServer/qt/WebSocketServerQt.cpp
 
     UIProcess/Launcher/qt/ProcessLauncherQt.cpp
 
@@ -150,32 +147,32 @@ list(APPEND WebKit_SOURCES
     UIProcess/gstreamer/InstallMissingMediaPluginsPermissionRequest.cpp
     UIProcess/gstreamer/WebPageProxyGStreamer.cpp
 
-    #UIProcess/qt/BackingStoreQt.cpp
-    #UIProcess/qt/ColorChooserContextObject.h
+    UIProcess/qt/BackingStoreQt.cpp
+    UIProcess/qt/ColorChooserContextObject.h
     #UIProcess/qt/DialogContextObjects.h
-    #UIProcess/qt/ItemSelectorContextObject.cpp
-    #UIProcess/qt/QrcSchemeHandler.cpp
-    #UIProcess/qt/QtDialogRunner.cpp
-    #UIProcess/qt/QtDownloadManager.cpp
-    #UIProcess/qt/QtGestureRecognizer.cpp
+    UIProcess/qt/ItemSelectorContextObject.cpp
+    UIProcess/qt/QrcSchemeHandler.cpp
+    UIProcess/qt/QtDialogRunner.cpp
+    UIProcess/qt/QtDownloadManager.cpp
+    UIProcess/qt/QtGestureRecognizer.cpp
     UIProcess/qt/QtPageClient.cpp
-    #UIProcess/qt/QtPanGestureRecognizer.cpp
-    #UIProcess/qt/QtPinchGestureRecognizer.cpp
-    #UIProcess/qt/QtTapGestureRecognizer.cpp
-    ##UIProcess/qt/QtWebContext.cpp
-    #UIProcess/qt/QtWebError.cpp
-    #UIProcess/qt/QtWebIconDatabaseClient.cpp
+    UIProcess/qt/QtPanGestureRecognizer.cpp
+    UIProcess/qt/QtPinchGestureRecognizer.cpp
+    UIProcess/qt/QtTapGestureRecognizer.cpp
+    UIProcess/qt/QtWebContext.cpp
+    UIProcess/qt/QtWebError.cpp
+    UIProcess/qt/QtWebIconDatabaseClient.cpp
     UIProcess/qt/QtWebPageEventHandler.cpp
-    #UIProcess/qt/QtWebPagePolicyClient.cpp
+    UIProcess/qt/QtWebPagePolicyClient.cpp
     #UIProcess/qt/QtWebPageSGNode.cpp
-    #UIProcess/qt/QtWebPageUIClient.cpp
+    UIProcess/qt/QtWebPageUIClient.cpp
     UIProcess/qt/TextCheckerQt.cpp
-    #UIProcess/qt/WebColorPickerQt.cpp
+    UIProcess/qt/WebColorPickerQt.cpp
     UIProcess/qt/WebContextMenuProxyQt.cpp
     #UIProcess/qt/WebGeolocationProviderQt.cpp
     UIProcess/qt/WebInspectorProxyQt.cpp
     UIProcess/qt/WebPageProxyQt.cpp
-    #UIProcess/qt/WebPopupMenuProxyQt.cpp
+    UIProcess/qt/WebPopupMenuProxyQt.cpp
     UIProcess/qt/WebPreferencesQt.cpp
     UIProcess/qt/WebProcessPoolQt.cpp
 
