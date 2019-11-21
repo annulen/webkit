@@ -29,6 +29,7 @@
 
 #include "WebPopupMenuProxy.h"
 #include <QtCore/QObject>
+#include <wtf/Ref.h>
 
 QT_BEGIN_NAMESPACE
 class QQmlComponent;
