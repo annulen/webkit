@@ -27,7 +27,6 @@
 #include "QtPinchGestureRecognizer.h"
 
 
-#include "PageViewportControllerClientQt.h"
 #include "QtWebPageEventHandler.h"
 #include <QtCore/QLineF>
 
@@ -48,6 +47,7 @@ QtPinchGestureRecognizer::QtPinchGestureRecognizer(QtWebPageEventHandler* eventH
 
 bool QtPinchGestureRecognizer::update(const QTouchEvent::TouchPoint& point1, const QTouchEvent::TouchPoint& point2)
 {
+#if 0
     const qreal currentFingerDistance = QLineF(point1.screenPos(), point2.screenPos()).length();
     switch (m_state) {
     case NoGesture:
@@ -77,29 +77,33 @@ bool QtPinchGestureRecognizer::update(const QTouchEvent::TouchPoint& point1, con
         return true;
         break;
     }
-
+#endif
     ASSERT_NOT_REACHED();
     return false;
 }
 
 void QtPinchGestureRecognizer::finish()
 {
+#if 0
     if (m_state == NoGesture)
         return;
 
     if (viewportController())
         viewportController()->pinchGestureEnded();
     reset();
+#endif
 }
 
 void QtPinchGestureRecognizer::cancel()
 {
+#if 0
     if (m_state == NoGesture)
         return;
 
     if (viewportController())
         viewportController()->pinchGestureCancelled();
     reset();
+#endif
 }
 
 } // namespace WebKit

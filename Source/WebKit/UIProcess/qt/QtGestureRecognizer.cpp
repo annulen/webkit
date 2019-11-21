@@ -41,9 +41,11 @@ void QtGestureRecognizer::reset()
     m_state = NoGesture;
 }
 
+#if 0
 PageViewportControllerClientQt* QtGestureRecognizer::viewportController()
 {
     return m_eventHandler->viewportController();
 }
+#endif
 
 } // namespace WebKit

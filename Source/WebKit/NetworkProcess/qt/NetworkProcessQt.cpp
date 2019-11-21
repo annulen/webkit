@@ -31,6 +31,7 @@
 #include <QNetworkDiskCache>
 #include <WebCore/CertificateInfo.h>
 #include <WebCore/SharedCookieJarQt.h>
+#include <WebCore/NetworkStorageSession.h>
 
 using namespace WebCore;
 
@@ -69,4 +70,29 @@ void NetworkProcess::clearDiskCache(WallTime,CompletionHandler<void()>&&)
 {
 }
 
+std::unique_ptr<WebCore::NetworkStorageSession> NetworkProcess::platformCreateDefaultStorageSession() const
+{
+    return makeUnique<WebCore::NetworkStorageSession>(PAL::SessionID::defaultSessionID());
+}
+
+void NetworkProcess::platformPrepareToSuspend(CompletionHandler<void()>&& completionHandler)
+{
+    notImplemented();
+    completionHandler();
+}
+
+void NetworkProcess::platformProcessDidResume()
+{
+    notImplemented();
+}
+
+void NetworkProcess::platformProcessDidTransitionToForeground()
+{
+    notImplemented();
+}
+
+void NetworkProcess::platformProcessDidTransitionToBackground()
+{
+    notImplemented();
+}
 } // namespace WebKit

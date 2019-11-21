@@ -25,7 +25,6 @@
 #include "config.h"
 #include "QtPanGestureRecognizer.h"
 
-#include "PageViewportControllerClientQt.h"
 #include "QtWebPageEventHandler.h"
 
 namespace WebKit {
@@ -38,6 +37,7 @@ QtPanGestureRecognizer::QtPanGestureRecognizer(QtWebPageEventHandler* eventHandl
 
 bool QtPanGestureRecognizer::update(const QTouchEvent::TouchPoint& touchPoint, qint64 eventTimestampMillis)
 {
+#if 0
     m_lastPosition = touchPoint.pos();
     m_lastEventTimestampMillis = eventTimestampMillis;
 
@@ -67,6 +67,7 @@ bool QtPanGestureRecognizer::update(const QTouchEvent::TouchPoint& touchPoint, q
     default:
         ASSERT_NOT_REACHED();
     }
+#endif
     return false;
 }
 
@@ -74,9 +75,10 @@ void QtPanGestureRecognizer::finish(const QTouchEvent::TouchPoint& touchPoint, q
 {
     if (m_state == NoGesture)
         return;
-
+#if 0
     if (viewportController())
         viewportController()->panGestureEnded(touchPoint.pos(), eventTimestampMillis);
+#endif
     reset();
 }
 
@@ -84,12 +86,13 @@ void QtPanGestureRecognizer::cancel()
 {
     if (m_state == NoGesture)
         return;
-
+#if 0
     if (viewportController()) {
         viewportController()->panGestureEnded(m_lastPosition, m_lastEventTimestampMillis);
         viewportController()->panGestureCancelled();
     }
     reset();
+#endif
 }
 
 } // namespace WebKit

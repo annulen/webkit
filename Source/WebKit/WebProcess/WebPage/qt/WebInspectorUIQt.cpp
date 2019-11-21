@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "WebInspectorUI.h"
+#include "RemoteWebInspectorUI.h"
 
 #include <WebCore/NotImplemented.h>
 #include <wtf/text/WTFString.h>
@@ -38,7 +39,12 @@ bool WebInspectorUI::canSave()
 
 String WebInspectorUI::localizedStringsURL()
 {
-    return "qrc:///org/webkitgtk/inspector/Localizations/en.lproj/localizedStrings.js"_s;
+    return String();
+}
+
+String RemoteWebInspectorUI::localizedStringsURL()
+{
+    return String();
 }
 
 } // namespace WebKit

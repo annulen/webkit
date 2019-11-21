@@ -22,7 +22,7 @@
 #include "QtPageClient.h"
 
 #include "DefaultUndoController.h"
-#include "DrawingAreaProxy.h"
+#include "DrawingAreaProxyCoordinatedGraphics.h"
 #include "LayerTreeContext.h"
 #include "QtWebPageEventHandler.h"
 #include "ShareableBitmap.h"
@@ -63,29 +63,15 @@ void QtPageClient::initialize(QQuickWebView* webView, QtWebPageEventHandler* eve
     m_undoController = undoController;
 }
 
-std::unique_ptr<DrawingAreaProxy> QtPageClient::createDrawingAreaProxy()
+std::unique_ptr<DrawingAreaProxy> QtPageClient::createDrawingAreaProxy(WebProcessProxy& process)
 {
-    return QQuickWebViewPrivate::get(m_webView)->createDrawingAreaProxy();
+    WebPageProxy* pageProxy = QQuickWebViewPrivate::get(m_webView)->getPageProxy();
+    return makeUnique<DrawingAreaProxyCoordinatedGraphics>(*pageProxy, process);
 }
 
-void QtPageClient::setViewNeedsDisplay(const WebCore::IntRect& rect)
+void QtPageClient::setViewNeedsDisplay(const WebCore::Region& region)
 {
     QQuickWebViewPrivate::get(m_webView)->setNeedsDisplay();
-}
-
-void QtPageClient::didRenderFrame(const WebCore::IntSize& contentsSize, const WebCore::IntRect& coveredRect)
-{
-    // The viewport has to be notified first so that the viewport position
-    // is adjusted before the loadVisuallyCommitted() signal.
-    PageViewportController* pvc = QQuickWebViewPrivate::get(m_webView)->viewportController();
-    if (pvc)
-        pvc->didRenderFrame(contentsSize, coveredRect);
-    QQuickWebViewPrivate::get(m_webView)->didRenderFrame();
-}
-
-void QtPageClient::pageDidRequestScroll(const IntPoint& pos)
-{
-    QQuickWebViewPrivate::get(m_webView)->pageDidRequestScroll(pos);
 }
 
 void QtPageClient::processDidExit()
@@ -101,9 +87,11 @@ void QtPageClient::didRelaunchProcess()
 
 void QtPageClient::didChangeContentSize(const IntSize& newSize)
 {
-    PageViewportController* pvc = QQuickWebViewPrivate::get(m_webView)->viewportController();
+#if 0
+    SimpleViewportController* pvc = QQuickWebViewPrivate::get(m_webView)->viewportController();
     if (pvc)
         pvc->didChangeContentsSize(newSize);
+#endif
 }
 
 void QtPageClient::didChangeViewportProperties(const WebCore::ViewportAttributes& attr)
@@ -112,22 +100,15 @@ void QtPageClient::didChangeViewportProperties(const WebCore::ViewportAttributes
 }
 
 #if ENABLE(DRAG_SUPPORT)
-void QtPageClient::startDrag(const WebCore::DragData& dragData, Ref<ShareableBitmap>&& dragImage)
+void QtPageClient::startDrag(Ref<WebCore::SelectionData>&&,WebCore::DragOperation dragOperation, RefPtr<ShareableBitmap>&& dragImage)
 {
-    m_eventHandler->startDrag(dragData, WTFMove(dragImage));
+    //m_eventHandler->startDrag(dragData, WTFMove(dragImage));
 }
 #endif
 
-void QtPageClient::handleDownloadRequest(DownloadProxy* download)
+void QtPageClient::handleDownloadRequest(DownloadProxy& download)
 {
-    QQuickWebViewPrivate::get(m_webView)->handleDownloadRequest(download);
-}
-
-void QtPageClient::handleApplicationSchemeRequest(Ref<QtRefCountedNetworkRequestData>&& requestData)
-{
-    if (!m_webView || !m_webView->experimental())
-        return;
-    m_webView->experimental()->invokeApplicationSchemeHandler(WTFMove(requestData));
+    QQuickWebViewPrivate::get(m_webView)->handleDownloadRequest(&download);
 }
 
 void QtPageClient::handleAuthenticationRequiredRequest(const String& hostname, const String& realm, const String& prefilledUsername, String& username, String& password)
@@ -172,7 +153,7 @@ void QtPageClient::toolTipChanged(const String&, const String& newTooltip)
     // There is not yet any UI defined for the tooltips for mobile so we ignore the change.
 }
 
-void QtPageClient::registerEditCommand(Ref<WebEditCommandProxy>&& command, WebPageProxy::UndoOrRedo undoOrRedo)
+void QtPageClient::registerEditCommand(Ref<WebEditCommandProxy>&& command, WebKit::UndoOrRedo undoOrRedo)
 {
     m_undoController->registerEditCommand(WTFMove(command), undoOrRedo);
 }
@@ -182,12 +163,12 @@ void QtPageClient::clearAllEditCommands()
     m_undoController->clearAllEditCommands();
 }
 
-bool QtPageClient::canUndoRedo(WebPageProxy::UndoOrRedo undoOrRedo)
+bool QtPageClient::canUndoRedo(WebKit::UndoOrRedo undoOrRedo)
 {
     return m_undoController->canUndoRedo(undoOrRedo);
 }
 
-void QtPageClient::executeUndoRedo(WebPageProxy::UndoOrRedo undoOrRedo)
+void QtPageClient::executeUndoRedo(WebKit::UndoOrRedo undoOrRedo)
 {
     m_undoController->executeUndoRedo(undoOrRedo);
 }
@@ -217,30 +198,17 @@ RefPtr<WebPopupMenuProxy> QtPageClient::createPopupMenuProxy(WebPageProxy& webPa
     return WebPopupMenuProxyQt::create(webPageProxy, m_webView);
 }
 
-std::unique_ptr<WebContextMenuProxy> QtPageClient::createContextMenuProxy(WebPageProxy&, const ContextMenuContextData& context, const UserData& userData)
+Ref<WebContextMenuProxy> QtPageClient::createContextMenuProxy(WebPageProxy& page, ContextMenuContextData&& context, const UserData& userData)
 {
-    return std::make_unique<WebContextMenuProxyQt>(context, userData);
+    return WebContextMenuProxyQt::create(page,WTFMove(context),userData);
 }
 
 #if ENABLE(INPUT_TYPE_COLOR)
-RefPtr<WebColorPicker> QtPageClient::createColorPicker(WebPageProxy* webPageProxy, const WebCore::Color& initialColor, const WebCore::IntRect& elementRect)
+RefPtr<WebColorPicker> QtPageClient::createColorPicker(WebPageProxy* webPageProxy, const WebCore::Color& initialColor, const WebCore::IntRect& elementRect,Vector<WebCore::Color>&&)
 {
     return WebColorPickerQt::create(webPageProxy, m_webView, initialColor, elementRect);
 }
 #endif
-
-void QtPageClient::pageTransitionViewportReady()
-{
-    PageViewportController* pvc = QQuickWebViewPrivate::get(m_webView)->viewportController();
-    if (pvc)
-        pvc->pageTransitionViewportReady();
-}
-
-void QtPageClient::didFindZoomableArea(const IntPoint& target, const IntRect& area)
-{
-    ASSERT(m_eventHandler);
-    m_eventHandler->didFindZoomableArea(target, area);
-}
 
 void QtPageClient::updateTextInputState()
 {
@@ -316,16 +284,6 @@ void QtPageClient::beganExitFullScreen(const IntRect& initialFrame, const IntRec
     notImplemented();
 }
 
-void QtPageClient::displayView()
-{
-    // FIXME: Implement.
-}
-
-void QtPageClient::scrollView(const WebCore::IntRect& scrollRect, const WebCore::IntSize& scrollOffset)
-{
-    // FIXME: Implement.
-}
-
 WebCore::IntSize QtPageClient::viewSize()
 {
     return QQuickWebViewPrivate::get(m_webView)->viewSize();
@@ -377,15 +335,11 @@ void QtPageClient::updateAcceleratedCompositingMode(const LayerTreeContext&)
     // FIXME: Implement.
 }
 
-void QtPageClient::requestScroll(const FloatPoint& scrollPosition, const IntPoint& scrollOrigin, bool isProgrammaticScroll)
+void QtPageClient::requestScroll(const FloatPoint& scrollPosition, const IntPoint& scrollOrigin)
 {
 }
 
 void QtPageClient::didCommitLoadForMainFrame(const WTF::String& mimeType, bool useCustomContentProvider)
-{
-}
-
-void QtPageClient::willEnterAcceleratedCompositingMode()
 {
 }
 

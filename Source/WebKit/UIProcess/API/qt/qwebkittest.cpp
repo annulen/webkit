@@ -21,7 +21,6 @@
 #include "config.h"
 #include "qwebkittest_p.h"
 
-#include "PageViewportControllerClientQt.h"
 #include "qquickwebview_p_p.h"
 #include <QMutableListIterator>
 #include <QTouchEvent>
@@ -147,6 +146,7 @@ static inline QJsonObject toJsonObject(const QSizeF& sizeF)
 
 QJsonObject QWebKitTest::viewport() const
 {
+#if 0
     QJsonObject viewportData;
     if (const PageViewportController* const viewportHandler = m_webViewPrivate->viewportController()) {
         viewportData.insert(QStringLiteral("layoutSize"), toJsonObject(viewportHandler->contentsLayoutSize()));
@@ -161,20 +161,25 @@ QJsonObject QWebKitTest::viewport() const
         viewportData.insert(QStringLiteral("maximumScale"), 1.0);
     }
     return viewportData;
+#endif
 }
 
 QVariant QWebKitTest::devicePixelRatio() const
 {
+#if 0
     if (const PageViewportController* const viewport = m_webViewPrivate->viewportController())
         return viewport->deviceScaleFactor();
     return 1.0;
+#endif
 }
 
 QVariant QWebKitTest::contentsScale() const
 {
+#if 0
     if (const PageViewportController* const viewport = m_webViewPrivate->viewportController())
         return viewport->currentScale();
     return 1.0;
+#endif
 }
 
 #include "moc_qwebkittest_p.cpp"

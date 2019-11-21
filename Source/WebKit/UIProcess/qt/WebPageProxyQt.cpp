@@ -29,7 +29,6 @@
 
 #include "PageClient.h"
 #include "UserAgentQt.h"
-#include "WebKitVersion.h"
 #include "WebPageMessages.h"
 #include "WebProcessProxy.h"
 #include "WebsiteDataStore.h"
@@ -52,7 +51,7 @@ void WebPageProxy::platformInitialize()
 
 String WebPageProxy::standardUserAgent(const String& applicationNameForUserAgent)
 {
-    return UserAgentQt::standardUserAgent(applicationNameForUserAgent, WEBKIT_MAJOR_VERSION, WEBKIT_MINOR_VERSION);
+    return String();
 }
 
 void WebPageProxy::saveRecentSearches(const String&, const Vector<WebCore::RecentSearch>&)
@@ -60,38 +59,24 @@ void WebPageProxy::saveRecentSearches(const String&, const Vector<WebCore::Recen
     notImplemented();
 }
 
-void WebPageProxy::loadRecentSearches(const String&, Vector<WebCore::RecentSearch>&)
+void WebPageProxy::loadRecentSearches(const String&, CompletionHandler<void(Vector<WebCore::RecentSearch>&&)>&&)
 {
     notImplemented();
-}
-
-void WebsiteDataStore::platformRemoveRecentSearches(std::chrono::system_clock::time_point oldestTimeToRemove)
-{
-    notImplemented();
-}
-
-void WebPageProxy::editorStateChanged(const EditorState& editorState)
-{
-    m_editorState = editorState;
-
-    if (editorState.shouldIgnoreCompositionSelectionChange)
-        return;
-    m_pageClient.updateTextInputState();
 }
 
 void WebPageProxy::authenticationRequiredRequest(const String& hostname, const String& realm, const String& prefilledUsername, String& username, String& password)
 {
-    m_pageClient.handleAuthenticationRequiredRequest(hostname, realm, prefilledUsername, username, password);
+    //WIP
 }
 
 void WebPageProxy::proxyAuthenticationRequiredRequest(const String& hostname, uint16_t port, const String& prefilledUsername, String& username, String& password)
 {
-    m_pageClient.handleProxyAuthenticationRequiredRequest(hostname, port, prefilledUsername, username, password);
+    //WIP
 }
 
 void WebPageProxy::certificateVerificationRequest(const String& hostname, bool& ignoreErrors)
 {
-    m_pageClient.handleCertificateVerificationRequest(hostname, ignoreErrors);
+    //WIP
 }
 
 #if PLUGIN_ARCHITECTURE(X11)
@@ -113,17 +98,17 @@ void WebPageProxy::windowedPluginVisibilityDidChange(bool isVisible, uint64_t wi
 
 void WebPageProxy::changeSelectedIndex(int32_t selectedIndex)
 {
-    process().send(Messages::WebPage::SelectedIndex(selectedIndex), m_pageID);
+    //WIP
 }
 
 void WebPageProxy::closePopupMenu()
 {
-    process().send(Messages::WebPage::HidePopupMenu(), m_pageID);
+    //WIP
 }
 
 void WebPageProxy::willSetInputMethodState()
 {
-    m_pageClient.handleWillSetInputMethodState();
+    //WIP
 }
 
 void WebPageProxy::updateEditorState(const EditorState&)

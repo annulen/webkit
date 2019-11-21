@@ -31,22 +31,6 @@
 
 namespace WebKit {
 
-WebPageProxy* WebInspectorProxy::platformCreateInspectorPage()
-{
-    notImplemented();
-    return 0;
-}
-
-void WebInspectorProxy::platformOpen()
-{
-    notImplemented();
-}
-
-void WebInspectorProxy::platformDidClose()
-{
-    notImplemented();
-}
-
 void WebKit::WebInspectorProxy::platformInvalidate()
 {
     notImplemented();

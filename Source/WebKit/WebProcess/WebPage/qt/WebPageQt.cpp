@@ -254,4 +254,14 @@ void WebPage::hidePopupMenu()
     m_activePopupMenu = nullptr;
 }
 
+void WebPage::collapseSelectionInFrame(WebCore::FrameIdentifier)
+{
+
+}
+
+void WebPage::getCenterForZoomGesture(const WebCore::IntPoint& centerInViewCoordinates, CompletionHandler<void(WebCore::IntPoint&&)>&&)
+{
+
+}
+
 } // namespace WebKit

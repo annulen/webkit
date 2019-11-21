@@ -76,7 +76,9 @@ public:
     void handleInputMethodEvent(QInputMethodEvent*);
     void handleTouchEvent(QTouchEvent*);
 
+#if 0
     void setViewportController(PageViewportControllerClientQt*);
+#endif
 
     void activateTapHighlight(const QTouchEvent::TouchPoint&);
     void deactivateTapHighlight();
