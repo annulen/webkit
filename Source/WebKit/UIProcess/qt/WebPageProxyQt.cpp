@@ -126,4 +126,9 @@ void WebPageProxy::willSetInputMethodState()
     m_pageClient.handleWillSetInputMethodState();
 }
 
+void WebPageProxy::updateEditorState(const EditorState&)
+{
+    //WIP
+}
+
 } // namespace WebKit
