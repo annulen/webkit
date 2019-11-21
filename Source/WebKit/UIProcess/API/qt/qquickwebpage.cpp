@@ -69,7 +69,7 @@ void QQuickWebPagePrivate::paint(QPainter* painter, const WebCore::Color& backgr
 QSGNode* QQuickWebPage::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 {
     QQuickWebViewPrivate* webViewPrivate = QQuickWebViewPrivate::get(d->viewportItem);
-
+#if USE(COORDINATED_GRAPHICS)
     CoordinatedGraphicsScene* scene = webViewPrivate->coordinatedGraphicsScene();
     if (!scene)
         return oldNode;
@@ -90,7 +90,6 @@ QSGNode* QQuickWebPage::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     if (!node)
         node = new QtWebPageSGNode(*webViewPrivate->webPageProxy);
 
-#if USE(COORDINATED_GRAPHICS)
     node->setCoordinatedGraphicsScene(scene);
 
     node->setScale(d->contentsScale);
@@ -98,8 +97,10 @@ QSGNode* QQuickWebPage::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     QColor backgroundColor = webViewPrivate->transparentBackground() ? Qt::transparent : Qt::white;
     QRectF backgroundRect(QPointF(0, 0), d->contentsSize);
     node->setBackground(backgroundRect, backgroundColor);
-#endif
+
     return node;
+#endif
+    return nullptr;
 }
 
 void QQuickWebPage::setContentsSize(const QSizeF& size)
