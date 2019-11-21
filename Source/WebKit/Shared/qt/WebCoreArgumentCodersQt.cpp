@@ -26,9 +26,11 @@
 #include "config.h"
 #include "WebCoreArgumentCoders.h"
 
+#include <WebCore/FontAttributes.h>
+#include <WebCore/DictionaryPopupInfo.h>
+#include <WebCore/ResourceResponse.h>
 #include <WebCore/ResourceError.h>
 #include <WebCore/ResourceRequest.h>
-#include <WebCore/ResourceResponse.h>
 
 using namespace WebCore;
  
@@ -215,5 +217,26 @@ bool ArgumentCoder<Credential>::decodePlatformData(Decoder&, Credential&)
     return false;
 }
 
+void ArgumentCoder<FontAttributes>::encodePlatformData(Encoder&, const FontAttributes&)
+{
+    ASSERT_NOT_REACHED();
+}
+
+Optional<FontAttributes> ArgumentCoder<FontAttributes>::decodePlatformData(Decoder&, FontAttributes&)
+{
+    ASSERT_NOT_REACHED();
+    return WTF::nullopt;
+}
+
+void ArgumentCoder<DictionaryPopupInfo>::encodePlatformData(Encoder&, const DictionaryPopupInfo&)
+{
+    ASSERT_NOT_REACHED();
+}
+
+bool ArgumentCoder<DictionaryPopupInfo>::decodePlatformData(Decoder&, DictionaryPopupInfo&)
+{
+    ASSERT_NOT_REACHED();
+    return false;
+}
 
 } // namespace IPC
