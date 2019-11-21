@@ -23,7 +23,6 @@
 
 #include "QtDownloadManager.h"
 #include "QtWebIconDatabaseClient.h"
-#include "WebInspectorServer.h"
 #include "qquickwebview_p_p.h"
 #include <QDir>
 #include <QStandardPaths>
@@ -130,11 +129,11 @@ static void initializeContextInjectedBundleClient(WKContextRef context)
     WKContextSetInjectedBundleClient(context, &injectedBundleClient.base);
 }
 
-QtWebContext::QtWebContext(WKContextRef context)
-    : m_context(context)
-    , m_downloadManager(new QtDownloadManager(context))
-    , m_iconDatabase(new QtWebIconDatabaseClient(context))
-{
+QtWebContext::QtWebContext(WebProcessPool* context)
+    : m_context(adoptRef(context))
+    , m_downloadManager(new QtDownloadManager(toAPI(context)))
+    , m_iconDatabase(new QtWebIconDatabaseClient(toAPI(context)))
+{//Fix QtDownloadManager and QtWebIconDB to stop using WK* stuff
 }
 
 QtWebContext::~QtWebContext()
@@ -142,7 +141,7 @@ QtWebContext::~QtWebContext()
 }
 
 // Used directly only by WebKitTestRunner.
-QtWebContext* QtWebContext::create(WKContextRef context)
+QtWebContext* QtWebContext::create(WebProcessPool* context)
 {
     globalInitialization();
     return new QtWebContext(context);
@@ -151,21 +150,22 @@ QtWebContext* QtWebContext::create(WKContextRef context)
 QtWebContext* QtWebContext::defaultContext()
 {
     if (!s_defaultQtWebContext) {
-        WKRetainPtr<WKContextRef> wkContext = adoptWK(WKContextCreate());
+        auto configuration = API::ProcessPoolConfiguration::create();
+        WebProcessPool* context = &WebProcessPool::create(configuration).leakRef();
         // Make sure for WebKitTestRunner that the injected bundle client isn't initialized
         // and that the page cache isn't enabled (defaultContext() isn't used there).
-        initializeContextInjectedBundleClient(wkContext.get());
+        initializeContextInjectedBundleClient(toAPI(context));
         // A good all-around default.
-        WKContextSetCacheModel(wkContext.get(), kWKCacheModelDocumentBrowser);
+        WKContextSetCacheModel(toAPI(context), kWKCacheModelDocumentBrowser);
 
         // Those paths have to be set before the first web process is spawned.
 // QTFIXME
 //        WKContextSetDatabaseDirectory(wkContext.get(), adoptWK(WKStringCreateWithQString(preparedStoragePath(DatabaseStorage))).get());
 //        WKContextSetLocalStorageDirectory(wkContext.get(), adoptWK(WKStringCreateWithQString(preparedStoragePath(LocalStorage))).get());
-        WKContextSetCookieStorageDirectory(wkContext.get(), adoptWK(WKStringCreateWithQString(preparedStoragePath(CookieStorage))).get());
+//        WKContextSetCookieStorageDirectory(toAPI(context), adoptWK(WKStringCreateWithQString(preparedStoragePath(CookieStorage))).get());
 //        WKContextSetDiskCacheDirectory(wkContext.get(), adoptWK(WKStringCreateWithQString(preparedStoragePath(DiskCacheStorage))).get());
 
-        s_defaultQtWebContext = QtWebContext::create(wkContext.get());
+        s_defaultQtWebContext = QtWebContext::create(context);
     }
 
     return s_defaultQtWebContext;

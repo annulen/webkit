@@ -24,6 +24,7 @@
 #include <QScopedPointer>
 #include <QtGlobal>
 #include <WKRetainPtr.h>
+#include "WebProcessPool.h"
 
 namespace WebKit {
 
@@ -44,20 +45,20 @@ public:
         NetworkCacheStorage
     };
 
-    static QtWebContext* create(WKContextRef);
+    static QtWebContext* create(WebProcessPool*);
     static QtWebContext* defaultContext();
 
     static QString preparedStoragePath(StorageType);
 
-    WKContextRef context() { return m_context.get(); }
+    WebProcessPool* context() { return m_context.get(); }
 
     QtDownloadManager* downloadManager() { return m_downloadManager.data(); }
     QtWebIconDatabaseClient* iconDatabase() { return m_iconDatabase.data(); }
 
 private:
-    explicit QtWebContext(WKContextRef);
+    explicit QtWebContext(WebProcessPool*);
 
-    WKRetainPtr<WKContextRef> m_context;
+    RefPtr<WebProcessPool> m_context;
     QScopedPointer<QtDownloadManager> m_downloadManager;
     QScopedPointer<QtWebIconDatabaseClient> m_iconDatabase;
 };
