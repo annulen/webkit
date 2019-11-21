@@ -112,4 +112,9 @@ bool WebPreferences::platformGetDoubleUserValueForKey(const String&, double&)
     return false;
 }
 
+void WebPreferences::platformDeleteKey(const String&)
+{
+
+}
+
 } // namespace WebKit
