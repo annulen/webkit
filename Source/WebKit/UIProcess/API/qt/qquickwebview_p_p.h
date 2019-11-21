@@ -102,7 +102,7 @@ public:
     void _q_onReceivedResponseFromDownload(QWebDownloadItem*);
     void _q_onIconChangedForPageURL(const QString&);
 
-    void chooseFiles(Ref<WebKit::WebOpenPanelResultListenerProxy>, const QStringList& selectedFileNames, WebKit::QtWebPageUIClient::FileChooserType);
+    void chooseFiles(RefPtr<WebKit::WebOpenPanelResultListenerProxy>, const QStringList& selectedFileNames, WebKit::QtWebPageUIClient::FileChooserType);
     quint64 exceededDatabaseQuota(const QString& databaseName, const QString& displayName, WKSecurityOriginRef securityOrigin, quint64 currentQuota, quint64 currentOriginUsage, quint64 currentDatabaseUsage, quint64 expectedUsage);
     void runJavaScriptAlert(const QString&);
     bool runJavaScriptConfirm(const QString&);

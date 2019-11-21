@@ -810,7 +810,7 @@ bool QQuickWebViewPrivate::handleCertificateVerificationRequest(const QString& h
     return dialogRunner.wasAccepted();
 }
 
-void QQuickWebViewPrivate::chooseFiles(Ref<WebOpenPanelResultListenerProxy> listener, const QStringList& selectedFileNames, QtWebPageUIClient::FileChooserType type)
+void QQuickWebViewPrivate::chooseFiles(RefPtr<WebOpenPanelResultListenerProxy> listener, const QStringList& selectedFileNames, QtWebPageUIClient::FileChooserType type)
 {
     Q_Q(QQuickWebView);
 

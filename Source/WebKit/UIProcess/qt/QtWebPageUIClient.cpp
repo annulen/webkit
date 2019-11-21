@@ -28,7 +28,8 @@
 #include "qwebpermissionrequest_p.h"
 #include <WKArray.h>
 #include <WKHitTestResult.h>
-#include <WKOpenPanelParameters.h>
+#include <WebOpenPanelResultListenerProxy.h>
+#include <WKOpenPanelParametersRef.h>
 #include <WKRetainPtr.h>
 
 namespace WebKit {
@@ -73,7 +74,8 @@ QString QtWebPageUIClient::runJavaScriptPrompt(const QString& message, const QSt
 
 void QtWebPageUIClient::runOpenPanel(WKOpenPanelResultListenerRef listenerRef, const QStringList& selectedFileNames, FileChooserType type)
 {
-    m_webView->d_func()->chooseFiles(listenerRef, selectedFileNames, type);
+    auto listener = adoptRef(toImpl(listenerRef));
+    m_webView->d_func()->chooseFiles(listener, selectedFileNames, type);
 }
 
 void QtWebPageUIClient::mouseDidMoveOverElement(const QUrl& linkURL, const QString& linkTitle)
@@ -119,7 +121,7 @@ bool QtWebPageUIClient::runJavaScriptConfirm(WKPageRef, WKStringRef message, WKF
 static inline WKStringRef createNullWKString()
 {
     RefPtr<API::String> apiString = API::String::createNull();
-    return toAPI(apiString.release().leakRef());
+    return toAPI(apiString.leakRef());
 }
 
 WKStringRef QtWebPageUIClient::runJavaScriptPrompt(WKPageRef, WKStringRef message, WKStringRef defaultValue, WKFrameRef, const void* clientInfo)
