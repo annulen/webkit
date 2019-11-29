@@ -39,7 +39,7 @@ class StorageTrackerClient;
 struct SecurityOriginData;
 }
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 class StorageTracker {
     WTF_MAKE_NONCOPYABLE(StorageTracker);

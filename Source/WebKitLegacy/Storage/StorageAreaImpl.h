@@ -36,7 +36,7 @@ class SecurityOrigin;
 class StorageMap;
 }
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 class StorageAreaSync;
 

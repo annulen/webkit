@@ -265,7 +265,7 @@ void QWebPageAdapter::initializeWebCorePage()
     pageConfiguration.progressTrackerClient = new ProgressTrackerClientQt(this);
     pageConfiguration.databaseProvider = &WebDatabaseProvider::singleton();
     pageConfiguration.pluginInfoProvider = &WebKit::PluginInfoProviderQt::singleton();
-    pageConfiguration.storageNamespaceProvider = WebKit::WebStorageNamespaceProvider::create(
+    pageConfiguration.storageNamespaceProvider = WebKitLegacy::WebStorageNamespaceProvider::create(
         QWebSettings::globalSettings()->localStoragePath());
     pageConfiguration.userContentProvider = &userContentProvider();
     pageConfiguration.visitedLinkStore = &VisitedLinkStoreQt::singleton();

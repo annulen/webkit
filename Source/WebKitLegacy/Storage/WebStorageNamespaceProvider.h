@@ -31,7 +31,7 @@ namespace WebCore {
 struct SecurityOriginData;
 }
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 class WebStorageNamespaceProvider final : public WebCore::StorageNamespaceProvider {
 public:
@@ -56,4 +56,4 @@ private:
     const String m_localStorageDatabasePath;
 };
 
-} // namespace WebKit
+} // namespace WebKitLegacy

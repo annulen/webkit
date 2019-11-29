@@ -37,7 +37,7 @@
 
 using namespace WebCore;
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 // If the StorageArea undergoes rapid changes, don't sync each change to disk.
 // Instead, queue up a batch of items to sync and actually do the sync at the following interval.
@@ -532,4 +532,4 @@ void StorageAreaSync::scheduleSync()
     syncTimerFired();
 }
 
-} // namespace WebCore
+} // namespace WebKitLegacy

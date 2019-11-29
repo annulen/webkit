@@ -38,7 +38,7 @@
 
 using namespace WebCore;
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 StorageAreaImpl::~StorageAreaImpl()
 {

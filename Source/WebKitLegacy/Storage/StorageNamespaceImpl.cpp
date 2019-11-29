@@ -36,7 +36,7 @@
 
 using namespace WebCore;
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 static HashMap<String, StorageNamespaceImpl*>& localStorageNamespaceMap()
 {

@@ -46,7 +46,7 @@
 
 using namespace WebCore;
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 static StorageTracker* storageTracker = nullptr;
 

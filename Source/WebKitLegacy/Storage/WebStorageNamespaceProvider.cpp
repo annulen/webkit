@@ -31,7 +31,7 @@
 
 using namespace WebCore;
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 static HashSet<WebStorageNamespaceProvider*>& storageNamespaceProviders()
 {

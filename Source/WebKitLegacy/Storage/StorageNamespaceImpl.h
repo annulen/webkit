@@ -33,7 +33,7 @@
 #include <wtf/RefPtr.h>
 #include <wtf/text/WTFString.h>
 
-namespace WebKit {
+namespace WebKitLegacy {
 
 class StorageAreaImpl;
 
@@ -80,4 +80,4 @@ private:
     PAL::SessionID m_sessionID;
 };
 
-} // namespace WebCore
+} // namespace WebKitLegacy
