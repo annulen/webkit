@@ -5,11 +5,6 @@ set(WebKit_DatabaseProcess_OUTPUT_NAME QtWebStorageProcess)
 
 file(MAKE_DIRECTORY ${DERIVED_SOURCES_WEBKIT_DIR})
 
-if (SHARED_CORE)
-    set(WebKit_LIBRARY_TYPE SHARED)
-else ()
-    set(WebKit_LIBRARY_TYPE STATIC)
-endif ()
 
 add_definitions(-DBUILDING_WEBKIT)
 

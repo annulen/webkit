@@ -23,7 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <qglobal.h>
 
 namespace WebKit {
 Q_DECL_IMPORT int NetworkProcessMainQt(int argc, char** argv);
