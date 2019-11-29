@@ -70,4 +70,10 @@ Vector<ProxyServer> proxyServersForURL(const URL& url, const NetworkingContext* 
     return servers;
 }
 
+Vector<ProxyServer> proxyServersForURL(const URL&)
+{
+    // FIXME: Implement.
+    return Vector<ProxyServer>();
+}
+
 } // namespace WebCore

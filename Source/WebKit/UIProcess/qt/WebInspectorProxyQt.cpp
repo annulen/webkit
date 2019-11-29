@@ -68,6 +68,10 @@ bool WebInspectorProxy::platformIsFront()
     return false;
 }
 
+void WebInspectorProxy::platformDidCloseForCrash()
+{
+}
+
 void WebInspectorProxy::platformInspectedURLChanged(const String&)
 {
     notImplemented();
