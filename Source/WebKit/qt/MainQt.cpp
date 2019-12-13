@@ -25,7 +25,6 @@
  */
 
 #include <qglobal.h>
-
 #if defined(QT_NO_WIDGETS)
 #include <QGuiApplication>
 typedef QGuiApplication ApplicationType;
@@ -41,7 +40,7 @@ typedef QApplication ApplicationType;
 #endif
 
 namespace WebKit {
-Q_DECL_IMPORT int WebProcessMainQt(QGuiApplication*);
+Q_DECL_IMPORT int WebProcessMainQt(QGuiApplication*,int,char**);
 #if !defined(QT_NO_WIDGETS)
 Q_DECL_IMPORT void initializeWebKitWidgets();
 #endif
@@ -97,5 +96,5 @@ int main(int argc, char** argv)
         WebKit::initializeWebKitWidgets();
 #endif
 
-    return WebKit::WebProcessMainQt(appInstance);
+    return WebKit::WebProcessMainQt(appInstance,argc,argv);
 }

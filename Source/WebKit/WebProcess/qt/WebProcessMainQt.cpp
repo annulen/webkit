@@ -29,6 +29,7 @@
 #include "config.h"
 #include "WebProcess.h"
 
+#include "AuxiliaryProcessMain.h"
 #include "WebKit2Initialize.h"
 #include <QDebug>
 #include <QGuiApplication>
@@ -122,7 +123,15 @@ pid_t chrootMe()
 }
 #endif
 
-Q_DECL_EXPORT int WebProcessMainQt(QGuiApplication* app)
+class WebProcessMain final : public AuxiliaryProcessMainBase {
+public:
+    bool platformInitialize() override
+    {
+        return true;
+    }
+};
+
+Q_DECL_EXPORT int WebProcessMainQt(QGuiApplication* app,int argc,char** argv)
 {
 #if ENABLE(SUID_SANDBOX_LINUX)
     pid_t helper = chrootMe();
@@ -131,9 +140,6 @@ Q_DECL_EXPORT int WebProcessMainQt(QGuiApplication* app)
         return -1;
     }
 #endif
-    InitializeWebKit2();
-
-    // Create the connection.
     if (app->arguments().size() <= 1) {
         qDebug() << "Error: wrong number of arguments.";
         return 1;
@@ -166,18 +172,7 @@ Q_DECL_EXPORT int WebProcessMainQt(QGuiApplication* app)
 #endif
 #endif
 
-
-    WebKit::AuxiliaryProcessInitializationParameters parameters;
-    parameters.connectionIdentifier = identifier;
-
-    WebKit::WebProcess::singleton().initialize(parameters);
-
-    RunLoop::run();
-
-    // FIXME: Do more cleanup here.
-    delete app;
-
-    return 0;
+    return AuxiliaryProcessMain<WebProcess, WebProcessMain>(argc, argv);
 }
 
 }
