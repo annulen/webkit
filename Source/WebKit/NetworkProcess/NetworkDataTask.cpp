@@ -42,6 +42,9 @@
 #if USE(CURL)
 #include "NetworkDataTaskCurl.h"
 #endif
+#if PLATFORM(QT)
+#include "NetworkDataTaskQt.h"
+#endif
 
 namespace WebKit {
 using namespace WebCore;
@@ -57,6 +60,9 @@ Ref<NetworkDataTask> NetworkDataTask::create(NetworkSession& session, NetworkDat
 #endif
 #if USE(CURL)
     return NetworkDataTaskCurl::create(session, client, parameters.request, parameters.storedCredentialsPolicy, parameters.contentSniffingPolicy, parameters.contentEncodingSniffingPolicy, parameters.shouldClearReferrerOnHTTPSToHTTPRedirect, parameters.isMainFrameNavigation);
+#endif
+#if PLATFORM(QT)
+    return NetworkDataTaskQt::create(session, client, parameters.request, parameters.storedCredentialsPolicy, parameters.contentSniffingPolicy, parameters.contentEncodingSniffingPolicy, parameters.shouldClearReferrerOnHTTPSToHTTPRedirect, parameters.isMainFrameNavigation); 
 #endif
 }
 
