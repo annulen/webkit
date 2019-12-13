@@ -84,16 +84,16 @@ Rectangle {
         }
 
         function find(str, options) {
-            var findOptions = options | WebViewExperimental.FindHighlightAllOccurrences
+            /*var findOptions = options | WebViewExperimental.FindHighlightAllOccurrences
             findOptions |= WebViewExperimental.FindWrapsAroundDocument
-            webView.experimental.findText(str, findOptions)
+            webView.experimental.findText(str, findOptions)*/
         }
 
         Connections {
-            target: webView.experimental
+            /*target: webView.experimental
             onTextFound: {
                 failedOverlay.visible = matchCount == 0
-            }
+            }*/
         }
         Item {
             anchors.fill: parent
@@ -174,9 +174,9 @@ Rectangle {
                     anchors.fill: parent
                     onPressed: { if (parent.enabled) parent.color = "#cfcfcf" }
                     onReleased: { parent.color = "#efefef" }
-                    onClicked: {
+                    /*onClicked: {
                         findBar.find(findTextInput.text, WebViewExperimental.FindBackward)
-                    }
+                    }*/
                 }
             }
             Rectangle {
@@ -353,7 +353,7 @@ Rectangle {
                 height: parent.height
                 width: height
                 color: "#efefef"
-                opacity: { webView.experimental.preferredMinimumContentsWidth === 0 ? 0.1 : 0.6 }
+                //opacity: { webView.experimental.preferredMinimumContentsWidth === 0 ? 0.1 : 0.6 }
                 radius: 6
 
                 Image {
@@ -363,9 +363,9 @@ Rectangle {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: {
+                    /*onClicked: {
                         webView.experimental.preferredMinimumContentsWidth = webView.experimental.preferredMinimumContentsWidth === 0 ? 980 : 0
-                    }
+                    }*/
                 }
             }
 
@@ -532,7 +532,7 @@ Rectangle {
                 webView.loadHtml("Failed to load " + loadRequest.url, "", loadRequest.url)
         }
 
-        experimental.preferences.fullScreenEnabled: true
+        /*experimental.preferences.fullScreenEnabled: true
         experimental.preferences.webGLEnabled: true
         experimental.preferences.webAudioEnabled: true
         experimental.preferredMinimumContentsWidth: 980
@@ -564,6 +564,7 @@ Rectangle {
             Window.showNormal();
             navigationBar.visible = true;
         }
+        */
     }
 
     ScrollIndicator {
@@ -579,7 +580,7 @@ Rectangle {
             bottom: parent.bottom
         }
         visible: false
-        test : webView.experimental.test
-        preferredMinimumContentsWidth: webView.experimental.preferredMinimumContentsWidth
+        //test : webView.experimental.test
+        //preferredMinimumContentsWidth: webView.experimental.preferredMinimumContentsWidth
     }
 }

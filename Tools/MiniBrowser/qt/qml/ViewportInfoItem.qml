@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtWebKit 3.0
 
 Item {
-    property var test
+    //property var test
     property var preferredMinimumContentsWidth
 
     function formatScale(value) {
@@ -71,7 +71,7 @@ Item {
             property string fontFamily: "Nokia Pure"
             property color fontColor: "black"
 
-            Column {
+            /*Column {
                 anchors.fill: parent
                 spacing: 20
                 Column {
@@ -125,7 +125,7 @@ Item {
                         color: textBox.fontColor
                     }
                 }
-            }
+            }*/
         }
     }
 }
