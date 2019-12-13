@@ -372,28 +372,11 @@ void QQuickWebViewPrivate::initialize(WKPageConfigurationRef configurationRef)
     }
 
     {
-        WKPageLoaderClientV0 loadClient;
-        memset(&loadClient, 0, sizeof(WKPageLoaderClientV0));
-        loadClient.base.version = 0;
-        loadClient.base.clientInfo = this;
-        loadClient.didStartProvisionalLoadForFrame = didStartProvisionalLoadForFrame;
-        loadClient.didReceiveServerRedirectForProvisionalLoadForFrame = didReceiveServerRedirectForProvisionalLoadForFrame;
-        loadClient.didFailProvisionalLoadWithErrorForFrame = didFailLoad;
-        loadClient.didCommitLoadForFrame = didCommitLoadForFrame;
-        loadClient.didFinishLoadForFrame = didFinishLoadForFrame;
-        loadClient.didFailLoadWithErrorForFrame = didFailLoad;
-        loadClient.didSameDocumentNavigationForFrame = didSameDocumentNavigationForFrame;
-        loadClient.didReceiveTitleForFrame = didReceiveTitleForFrame;
-        loadClient.didStartProgress = didStartProgress;
-        loadClient.didChangeProgress = didChangeProgress;
-        loadClient.didFinishProgress = didFinishProgress;
-        loadClient.didChangeBackForwardList = didChangeBackForwardList;
-        // FIXME: These three functions should not be part of this client.
-        loadClient.processDidBecomeUnresponsive = processDidBecomeUnresponsive;
-        loadClient.processDidBecomeResponsive = processDidBecomeResponsive;
-        loadClient.processDidCrash = processDidCrash;
-        WKPageSetPageLoaderClient(toAPI(webPageProxy.get()), &loadClient.base);
-        //deprecated one change to WKPageSetPageNavigationClient
+        //PageLoader Client should not be used anymore
+        WKPageNavigationClientV0 navigationClient = { };
+        navigationClient.base.version = 0;
+        navigationClient.base.clientInfo = this;
+        WKPageSetPageNavigationClient(toAPI(webPageProxy.get()), &navigationClient.base);
     }
 
     pagePolicyClient.reset(new QtWebPagePolicyClient(toAPI(webPageProxy.get()), q_ptr));
