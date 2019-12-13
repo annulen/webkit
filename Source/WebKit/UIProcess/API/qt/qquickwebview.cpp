@@ -352,10 +352,9 @@ void QQuickWebViewPrivate::initialize(WKPageConfigurationRef configurationRef)
     }
 
     webPageProxy = context->context()->createWebPage(pageClient, pageConfiguration->copy());
-    //webPage = toAPI(webPageProxy.get());
-    //pageToView()->insert(webPage.get(), this);
+    pageToView()->insert(toAPI(webPageProxy.get()), this);
 
-    //pageEventHandler.reset(new QtWebPageEventHandler(webPage.get(), pageView.data(), q_ptr));
+    pageEventHandler.reset(new QtWebPageEventHandler(toAPI(webPageProxy.get()), pageView.data(), q_ptr));
     pageClient.initialize(q_ptr, pageEventHandler.data(), &undoController);
     webPageProxy->initializeWebPage();
 
