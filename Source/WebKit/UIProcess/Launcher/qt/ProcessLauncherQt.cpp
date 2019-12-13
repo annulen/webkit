@@ -110,11 +110,11 @@ void ProcessLauncher::launchProcess()
 {
     QString commandLine;
     if (m_launchOptions.processType == ProcessType::Web) {
-        commandLine = QLatin1String("%1 \"%2\" %3");
+        commandLine = QLatin1String("%1 \"%2\" %3 %4");
         QByteArray webProcessPrefix = qgetenv("QT_WEBKIT2_WP_CMD_PREFIX");
         commandLine = commandLine.arg(QLatin1String(webProcessPrefix.constData())).arg(QString(executablePathOfWebProcess()));
     } else if (m_launchOptions.processType == ProcessType::Network) {
-        commandLine = QLatin1String("%1 \"%2\" %3");
+        commandLine = QLatin1String("%1 \"%2\" %3 %4");
         QByteArray networkProcessPrefix = qgetenv("QT_WEBKIT2_NP_CMD_PREFIX");
         commandLine = commandLine.arg(QLatin1String(networkProcessPrefix.constData())).arg(QString(executablePathOfNetworkProcess()));
 #if ENABLE(PLUGIN_PROCESS)
@@ -179,6 +179,8 @@ void ProcessLauncher::launchProcess()
     int connector = sockets[1];
     commandLine = commandLine.arg(sockets[0]);
 #endif
+
+    commandLine = commandLine.arg(m_launchOptions.processIdentifier.toUInt64());
 
 #if ENABLE(PLUGIN_PROCESS)
     if (m_launchOptions.processType == ProcessType::Plugin32 || m_launchOptions.processType == ProcessType::Plugin64)

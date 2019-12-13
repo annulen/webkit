@@ -41,8 +41,8 @@ namespace WebKit {
 
 bool AuxiliaryProcessMainBase::parseCommandLine(int argc, char** argv)
 {
-    ASSERT(argc >= 2);
-    if (argc < 2)
+    ASSERT(argc >= 3);
+    if (argc < 3)
         return false;
 
 #if USE(MACH_PORTS)
@@ -71,8 +71,16 @@ bool AuxiliaryProcessMainBase::parseCommandLine(int argc, char** argv)
     identifier = static_cast<IPC::Connection::Identifier>(id);
 #endif
 #endif
-
     m_parameters.connectionIdentifier = identifier;
+    bool wasValidID = false;
+    qulonglong pid = QByteArray(argv[2]).toULongLong(&wasValidID,10);
+
+    if (!wasValidID) {
+        qDebug() << "Error: WebCore Process Identifier Wrong.";
+        return 1;
+    }
+
+    m_parameters.processIdentifier = makeObjectIdentifier<WebCore::ProcessIdentifierType>(pid);
     return true;
 }
 
