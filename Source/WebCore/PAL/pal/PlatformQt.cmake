@@ -28,3 +28,9 @@ if (USE_GCRYPT)
         ${LIBTASN1_INCLUDE_DIRS}
     )
 endif ()
+
+if (APPLE AND ENABLE_WEB_CRYPTO)
+    list(APPEND PAL_PUBLIC_HEADERS
+        spi/cocoa/CommonCryptoSPI.h
+    )
+endif ()
