@@ -476,4 +476,10 @@ if (APPLE)
     list(APPEND WebCore_SOURCES
         platform/cf/SharedBufferCF.cpp
     )
+
+    if (HAVE_FONTCONFIG)
+        list(APPEND WebCoreTestSupport_INCLUDE_DIRECTORIES
+            ${FONTCONFIG_INCLUDE_DIR}
+        )
+    endif ()
 endif ()
