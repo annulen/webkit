@@ -51,7 +51,7 @@ void WebPageProxy::platformInitialize()
 
 String WebPageProxy::standardUserAgent(const String& applicationNameForUserAgent)
 {
-    return String();
+    return UserAgentQt::standardUserAgent(applicationNameForUserAgent,2,11);
 }
 
 void WebPageProxy::saveRecentSearches(const String&, const Vector<WebCore::RecentSearch>&)
