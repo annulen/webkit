@@ -26,6 +26,16 @@
 #include "config.h"
 #include "NetworkDataTaskQt.h"
 
+#include <QNetworkRequest>
+#include <QByteArray>
+#include <QNetworkReply>
+#include <QCoreApplication>
+
+#include <WebCore/ResourceRequest.h>
+#include <WebCore/QtMIMETypeSniffer.h>
+#include <WebCore/MIMETypeRegistry.h>
+#include <WebCore/HTTPParsers.h>
+#include <WebCore/SharedBuffer.h>
 
 namespace WebKit {
 using namespace WebCore;
@@ -33,11 +43,104 @@ using namespace WebCore;
 NetworkDataTaskQt::NetworkDataTaskQt(NetworkSession& session, NetworkDataTaskClient& client, const ResourceRequest& requestWithCredentials, StoredCredentialsPolicy storedCredentialsPolicy, ContentSniffingPolicy shouldContentSniff, WebCore::ContentEncodingSniffingPolicy, bool shouldClearReferrerOnHTTPSToHTTPRedirect, bool dataTaskIsForMainFrameNavigation)
     : NetworkDataTask(session, client, requestWithCredentials, storedCredentialsPolicy, shouldClearReferrerOnHTTPSToHTTPRedirect, dataTaskIsForMainFrameNavigation)
 {
-    
+    auto request = requestWithCredentials;
+    if (request.url().protocolIsInHTTPFamily()) {
+        m_startTime = MonotonicTime::now();
+        auto url = request.url();
+        if (m_storedCredentialsPolicy == StoredCredentialsPolicy::Use) {
+            m_user = url.user();
+            m_password = url.pass();
+            request.removeCredentials();
+        }
+    }
+    createRequest(WTFMove(request));
 }
 
 NetworkDataTaskQt::~NetworkDataTaskQt()
 {
+}
+
+void NetworkDataTaskQt::createRequest(ResourceRequest&& request)
+{
+    m_currentRequest=WTFMove(request);
+    m_qRequest=m_currentRequest.toNetworkRequest(NULL);
+
+    if (m_currentRequest.httpMethod() == "GET")
+        m_method = QNetworkAccessManager::GetOperation;
+    else if (m_currentRequest.httpMethod() == "HEAD")
+        m_method = QNetworkAccessManager::HeadOperation;
+    else if (m_currentRequest.httpMethod() == "POST")
+        m_method = QNetworkAccessManager::PostOperation;
+    else if (m_currentRequest.httpMethod() == "PUT")
+        m_method = QNetworkAccessManager::PutOperation;
+    else if (m_currentRequest.httpMethod() == "DELETE" && !m_currentRequest.httpBody()) // A delete with a body is a custom operation.
+        m_method = QNetworkAccessManager::DeleteOperation;
+    else
+        m_method = QNetworkAccessManager::CustomOperation;
+    
+    m_manager = new QNetworkAccessManager();  
+    QObject::connect(m_manager, &QNetworkAccessManager::finished,
+        &NetworkDataTaskQt::debug);
+    start();
+}
+
+void NetworkDataTaskQt::start()
+{
+    QNetworkReply* reply = sendNetworkRequest(m_currentRequest);
+    
+    QObject::connect(reply,&QIODevice::readyRead,[this,reply](){
+        this->recieveMetaData(reply);
+    });
+    
+}
+
+void NetworkDataTaskQt::debug()
+{
+    qDebug()<<"Debug";
+}
+void NetworkDataTaskQt::recieveMetaData(QNetworkReply* reply)
+{
+    Vector<char> buffer(8128);
+    qint64 readSize = reply->read(buffer.data(),buffer.size());
+    if (readSize > 0)
+    {
+        buffer.shrink(readSize);
+        m_client->didReceiveData(SharedBuffer::create(WTFMove(buffer)));
+    }
+
+}
+
+QNetworkReply* NetworkDataTaskQt::sendNetworkRequest(const ResourceRequest& request)
+{
+    if (m_loadType == SynchronousLoad)
+        m_qRequest.setAttribute(QNetworkRequest::SynchronousRequestAttribute, true);
+
+    if (!m_manager)
+        return 0;
+
+    const QUrl url = m_qRequest.url();
+
+    m_qRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    if (m_method == QNetworkAccessManager::PostOperation
+        && (!url.toLocalFile().isEmpty() || url.scheme() == QLatin1String("data")))
+        m_method = QNetworkAccessManager::GetOperation;
+    
+    switch (m_method) {
+    case QNetworkAccessManager::GetOperation:
+        //clearContentHeaders();
+        {
+            m_qRequest.setHeader(QNetworkRequest::ContentTypeHeader, QVariant());
+            m_qRequest.setHeader(QNetworkRequest::ContentLengthHeader, QVariant());
+        }
+        return m_manager->get(m_qRequest);
+    case QNetworkAccessManager::PostOperation:
+    fprintf(stderr,"\n POST \n");
+    break;
+    case QNetworkAccessManager::UnknownOperation:
+        ASSERT_NOT_REACHED();
+        return 0;
+    }
+    return 0;
 }
 
 void NetworkDataTaskQt::resume()

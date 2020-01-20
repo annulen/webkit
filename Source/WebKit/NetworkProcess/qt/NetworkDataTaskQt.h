@@ -25,7 +25,21 @@
 
 #pragma once
 
+#include "config.h"
 #include "NetworkDataTask.h"
+
+#include <WebCore/ResourceRequest.h>
+#include <QObject>
+#include <QNetworkRequest>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+
+#include <WebCore/QtMIMETypeSniffer.h>
+
+QT_BEGIN_NAMESPACE
+class QNetworkRequest;
+class QNetworkReply;
+QT_END_NAMESPACE
 
 namespace WebKit {
 
@@ -35,18 +49,38 @@ public:
     {
         return adoptRef(*new NetworkDataTaskQt(session, client, request, storedCredentialsPolicy, shouldContentSniff, shouldContentEncodingSniff, shouldClearReferrerOnHTTPSToHTTPRedirect, dataTaskIsForMainFrameNavigation));
     }
-
+    enum LoadType {
+        AsynchronousLoad,
+        SynchronousLoad
+    };
+    static void debug();
     ~NetworkDataTaskQt();
 
 private:
     NetworkDataTaskQt(NetworkSession&, NetworkDataTaskClient&, const WebCore::ResourceRequest&, WebCore::StoredCredentialsPolicy, WebCore::ContentSniffingPolicy, WebCore::ContentEncodingSniffingPolicy, bool shouldClearReferrerOnHTTPSToHTTPRedirect, bool dataTaskIsForMainFrameNavigation);
 
+    void createRequest(WebCore::ResourceRequest&&);
+    void start();
+
+    QNetworkReply* sendNetworkRequest(const WebCore::ResourceRequest& request);
     void cancel() override;
     void resume() override;
     void invalidateAndCancel() override;
     NetworkDataTask::State state() const override;
 
+    void recieveMetaData(QNetworkReply*);
+
     State m_state{ State::Suspended };
+
+    WebCore::ResourceRequest m_currentRequest;
+    QNetworkRequest m_qRequest;
+    QNetworkAccessManager::Operation m_method;
+    QNetworkAccessManager* m_manager;
+    MonotonicTime m_startTime;
+    LoadType m_loadType;
+
+    QUrl m_redirectionTargetUrl;
+    QString m_encoding;
 };
 
 } // namespace WebKit
