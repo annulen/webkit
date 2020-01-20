@@ -25,11 +25,12 @@
 
 #include <QtCore/QSharedPointer>
 #include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickPaintedItem>
 
 class QQuickWebPagePrivate;
 class QQuickWebView;
 
-class QWEBKIT_EXPORT QQuickWebPage : public QQuickItem {
+class QWEBKIT_EXPORT QQuickWebPage : public QQuickPaintedItem {
     Q_OBJECT
 public:
     QQuickWebPage(QQuickWebView* view = 0);
@@ -44,7 +45,7 @@ public:
     QTransform transformToItem() const;
 
 protected:
-    QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) Q_DECL_OVERRIDE;
+    void paint(QPainter*) Q_DECL_OVERRIDE;
 
 private:
     QQuickWebPagePrivate* d;

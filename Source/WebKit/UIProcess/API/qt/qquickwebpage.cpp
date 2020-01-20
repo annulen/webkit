@@ -29,11 +29,13 @@
 #include "qwebkittest_p.h"
 #include <QQuickWindow>
 #include <WKPage.h>
+#include <WebCore/IntRect.h>
+#include "DrawingAreaProxyCoordinatedGraphics.h"
 
 using namespace WebKit;
 
 QQuickWebPage::QQuickWebPage(QQuickWebView* viewportItem)
-    : QQuickItem(viewportItem->contentItem())
+    : QQuickPaintedItem(viewportItem->contentItem())
     , d(new QQuickWebPagePrivate(this, viewportItem))
 {
     setFlag(ItemHasContents);
@@ -64,43 +66,18 @@ void QQuickWebPagePrivate::paint(QPainter* painter, const WebCore::Color& backgr
         scene->paintToGraphicsContext(painter, backgroundColor, drawsBackground);
 #endif
 }
-
-
-QSGNode* QQuickWebPage::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
+void QQuickWebPage::paint(QPainter* painter)
 {
     QQuickWebViewPrivate* webViewPrivate = QQuickWebViewPrivate::get(d->viewportItem);
-#if USE(COORDINATED_GRAPHICS)
-    CoordinatedGraphicsScene* scene = webViewPrivate->coordinatedGraphicsScene();
-    if (!scene)
-        return oldNode;
-
-    QtWebPageSGNode* node = static_cast<QtWebPageSGNode*>(oldNode);
-
-    const QWindow* window = this->window();
-    ASSERT(window);
-
     WebPageProxy* pageProxy = webViewPrivate->webPageProxy.get();
-    if (window && pageProxy->deviceScaleFactor() != window->devicePixelRatio()) {
-        pageProxy->setCustomDeviceScaleFactor(window->devicePixelRatio());
-        // This signal is queued since if we are running a threaded renderer. This might cause failures
-        // if tests are reading the new value between the property change and the signal emission.
-        emit d->viewportItem->experimental()->test()->devicePixelRatioChanged();
-    }
+    auto drawingArea = static_cast<DrawingAreaProxyCoordinatedGraphics*>(pageProxy->drawingArea());
+    if(!drawingArea)
+    return;
 
-    if (!node)
-        node = new QtWebPageSGNode(*webViewPrivate->webPageProxy);
+    WebCore::IntRect updateArea(this->boundingRect());
+    WebCore::Region unpainted;
 
-    node->setCoordinatedGraphicsScene(scene);
-
-    node->setScale(d->contentsScale);
-    node->setDevicePixelRatio(window->devicePixelRatio());
-    QColor backgroundColor = webViewPrivate->transparentBackground() ? Qt::transparent : Qt::white;
-    QRectF backgroundRect(QPointF(0, 0), d->contentsSize);
-    node->setBackground(backgroundRect, backgroundColor);
-
-    return node;
-#endif
-    return nullptr;
+    drawingArea->paint(painter,updateArea,unpainted);
 }
 
 void QQuickWebPage::setContentsSize(const QSizeF& size)
