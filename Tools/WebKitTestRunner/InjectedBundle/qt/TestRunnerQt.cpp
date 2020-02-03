@@ -39,51 +39,10 @@
 
 namespace WTR {
 
-class WatchdogTimerHelper : public QObject {
-    Q_OBJECT
-
-public:
-    static WatchdogTimerHelper* instance()
-    {
-        static WatchdogTimerHelper* theInstance = new WatchdogTimerHelper;
-        return theInstance;
-    }
-
-public Q_SLOTS:
-    void timerFired()
-    {
-        InjectedBundle::singleton().testRunner()->waitToDumpWatchdogTimerFired();
-    }
-
-private:
-    WatchdogTimerHelper() {}
-};
-
 void TestRunner::platformInitialize()
 {
-    WebKit::QtTestSupport::clearMemoryCaches();
-    activateFonts();
-
-    QObject::connect(&m_waitToDumpWatchdogTimer, SIGNAL(timeout()), WatchdogTimerHelper::instance(), SLOT(timerFired()));
 }
 
-void TestRunner::invalidateWaitToDumpWatchdogTimer()
-{
-    m_waitToDumpWatchdogTimer.stop();
-}
-
-void TestRunner::initializeWaitToDumpWatchdogTimerIfNeeded()
-{
-    int timerInterval;
-    if (qgetenv("QT_WEBKIT2_DEBUG") == "1")
-        return;
-
-    if (m_waitToDumpWatchdogTimer.isActive())
-        return;
-
-    timerInterval = m_timeout;
-    m_waitToDumpWatchdogTimer.start(timerInterval);
-}
 
 JSRetainPtr<JSStringRef> TestRunner::pathToLocalResource(JSStringRef url)
 {
@@ -109,6 +68,10 @@ JSRetainPtr<JSStringRef> TestRunner::inspectorTestStubURL()
     return JSStringCreateWithUTF8CString("qrc:/webkit/inspector/UserInterface/TestStub.html");
 }
 
+void TestRunner::installFakeHelvetica(JSStringRef configuration)
+{
+    WTR::installFakeHelvetica(toWK(configuration).get());
+}
+
 } // namespace WTR
 
-#include "TestRunnerQt.moc"
