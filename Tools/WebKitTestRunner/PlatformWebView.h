@@ -45,6 +45,7 @@ typedef RetainPtr<CGImageRef> PlatformImage;
 QT_BEGIN_NAMESPACE
 class QQuickView;
 class QEventLoop;
+class QImage;
 QT_END_NAMESPACE
 class QQuickWebView;
 typedef QQuickWebView* PlatformWKView;
@@ -76,6 +77,10 @@ typedef cairo_surface_t* PlatformImage;
 interface ID2D1Bitmap;
 
 typedef ID2D1Bitmap* PlatformImage;
+#endif
+
+#if PLATFORM(QT)
+typedef QImage PlatformImage;
 #endif
 
 namespace WTR {

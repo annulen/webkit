@@ -84,19 +84,15 @@ private:
     QQuickWebView* m_view;
 };
 
-PlatformWebView::PlatformWebView(WKContextRef contextRef, WKPageGroupRef pageGroupRef, WKPageRef /* relatedPage */, WKDictionaryRef options)
+PlatformWebView::PlatformWebView(WKPageConfigurationRef pageConfRef,const TestOptions& options)
     : m_windowIsKey(true)
     , m_options(options)
     , m_modalEventLoop(0)
 {
-    WKRetainPtr<WKStringRef> useFixedLayoutKey(AdoptWK, WKStringCreateWithUTF8CString("UseFixedLayout"));
-    m_usingFixedLayout = options ? WKBooleanGetValue(static_cast<WKBooleanRef>(WKDictionaryGetItemForKey(options, useFixedLayoutKey.get()))) : false;
-    QQuickWebViewExperimental::setFlickableViewportEnabled(m_usingFixedLayout);
 
-    m_view = new QQuickWebView(contextRef, pageGroupRef);
+    m_view = new QQuickWebView(pageConfRef);
     m_view->setAllowAnyHTTPSCertificateForLocalHost(true);
     m_view->componentComplete();
-
     m_window = new WrapperWindow(m_view);
 }
 
@@ -112,7 +108,7 @@ void PlatformWebView::setWindowIsKey(bool isKey)
     m_windowIsKey = isKey;
 }
 
-void PlatformWebView::resizeTo(unsigned width, unsigned height)
+void PlatformWebView::resizeTo(unsigned width, unsigned height,WebViewSizingMode)
 {
     // If we do not have a platform window we will never get the necessary
     // resize event, so simulate it in that case to make sure the quickview is
@@ -148,7 +144,7 @@ WKRect PlatformWebView::windowFrame()
     return wkFrame;
 }
 
-void PlatformWebView::setWindowFrame(WKRect wkRect)
+void PlatformWebView::setWindowFrame(WKRect wkRect,WebViewSizingMode)
 {
     m_window->setGeometry(wkRect.origin.x, wkRect.origin.y, wkRect.size.width, wkRect.size.height);
 }
@@ -175,9 +171,9 @@ void PlatformWebView::makeWebViewFirstResponder()
 {
 }
 
-WKRetainPtr<WKImageRef> PlatformWebView::windowSnapshotImage()
+PlatformImage PlatformWebView::windowSnapshotImage()
 {
-    return adoptWK(WKImageCreateFromQImage(m_window->grabWindow()));
+    return m_window->grabWindow();
 }
 
 bool PlatformWebView::windowSnapshotEnabled()
@@ -191,14 +187,19 @@ bool PlatformWebView::windowSnapshotEnabled()
     return result;
 }
 
-bool PlatformWebView::viewSupportsOptions(WKDictionaryRef options) const
+void PlatformWebView::addToWindow()
 {
-    WKRetainPtr<WKStringRef> useFixedLayoutKey(AdoptWK, WKStringCreateWithUTF8CString("UseFixedLayout"));
-
-    return m_usingFixedLayout == (options ? WKBooleanGetValue(static_cast<WKBooleanRef>(WKDictionaryGetItemForKey(options, useFixedLayoutKey.get()))) : false);
 }
 
 void PlatformWebView::didInitializeClients()
+{
+}
+
+void PlatformWebView::setNavigationGesturesEnabled(bool)
+{
+}
+
+void PlatformWebView::changeWindowScaleIfNeeded(float)
 {
 }
 
