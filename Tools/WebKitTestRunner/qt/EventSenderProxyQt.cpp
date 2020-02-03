@@ -462,7 +462,9 @@ void EventSenderProxy::replaySavedEvents()
     while (i < endOfQueue) {
         WTREventQueue& ev = eventQueue[i];
         if (ev.m_delay)
-            QTest::qWait(ev.m_delay);
+        {
+            qDebug()<<__PRETTY_FUNCTION__;
+        }
         i++;
         m_testController->mainWebView()->sendEvent(ev.m_event);
         delete ev.m_event;
@@ -471,6 +473,10 @@ void EventSenderProxy::replaySavedEvents()
 
     endOfQueue = 0;
     isReplayingEvents = false;
+}
+
+void EventSenderProxy::mouseScrollByWithWheelAndMomentumPhases(int x, int y, int phase, int momentum)
+{
 }
 
 } // namespace WTR
