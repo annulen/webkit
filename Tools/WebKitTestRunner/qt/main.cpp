@@ -36,9 +36,11 @@
 #include <unistd.h>
 #endif
 
-#include <QApplication>
 #include <QObject>
 #include <QTimer>
+#include <QCoreApplication>
+#include <QApplication>
+#include <QGuiApplication>
 
 class Launcher : public QObject {
     Q_OBJECT
@@ -59,7 +61,7 @@ public Q_SLOTS:
     void launch()
     {
         m_controller = new WTR::TestController(m_argc, const_cast<const char**>(m_argv));
-        QApplication::exit();
+        QCoreApplication::exit();
     }
 
 private:
@@ -118,14 +120,15 @@ int main(int argc, char** argv)
     }
 
     qputenv("QT_WEBKIT_THEME_NAME", "qstyle");
-
+#if 0
     WebKit::QtTestSupport::initializeTestFonts();
+#endif
     QCoreApplication::setAttribute(Qt::AA_Use96Dpi, true);
 
-    QApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
     Launcher launcher(argc, argv);
     QTimer::singleShot(0, &launcher, SLOT(launch()));
-    return app.exec();;
+    return app.exec();
 }
 
 #include "main.moc"
