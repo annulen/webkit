@@ -132,11 +132,37 @@ void TestController::platformDestroy()
     delete m_runLoop;
 }
 
-void TestController::platformRunUntil(bool& condition, double timeout)
+void TestController::platformConfigureViewForTest(const TestInvocation&)
+{
+    WKPageSetApplicationNameForUserAgent(mainWebView()->page(), WKStringCreateWithUTF8CString("WebKitTestRunnerQt"));
+}
+
+void TestController::platformResetPreferencesToConsistentValues()
+{
+}
+
+void TestController::setHidden(bool)
+{
+}
+
+void TestController::updatePlatformSpecificTestOptionsForTest(TestOptions&, const std::string& pathOrURL) const
+{
+}
+
+WKContextRef TestController::platformContext()
+{
+    return m_context.get();
+}
+
+void TestController::abortModal()
+{
+}
+
+void TestController::platformRunUntil(bool& condition, WTF::Seconds timeout)
 {
     UNUSED_PARAM(condition);
-    const bool shouldTimeout = !(qgetenv("QT_WEBKIT2_DEBUG") == "1" || timeout <= 0);
-    m_runLoop->runUntil(shouldTimeout ? timeout : 0);
+    const bool shouldTimeout = !(qgetenv("QT_WEBKIT2_DEBUG") == "1" || timeout.value() <= 0);
+    m_runLoop->runUntil(shouldTimeout ? timeout.value() : 0);
 }
 
 static bool isExistingLibrary(const QString& path)
