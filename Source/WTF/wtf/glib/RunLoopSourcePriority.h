@@ -82,7 +82,7 @@ enum RunLoopSourcePriority {
     DiskCacheWrite = 200,
 };
 
-#elif PLATFORM(WPE)
+#elif PLATFORM(WPE) || PLATFORM(QT)
 
 enum RunLoopSourcePriority {
     RunLoopDispatcher = 0,

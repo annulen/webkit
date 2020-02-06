@@ -80,6 +80,7 @@ endif ()
 
 if (USE_GLIB)
     list(APPEND WTF_SOURCES
+        glib/GLibUtilities.cpp
         glib/GRefPtr.cpp
     )
     list(APPEND WTF_SYSTEM_INCLUDE_DIRECTORIES
@@ -94,6 +95,7 @@ if (USE_GLIB)
         glib/GRefPtr.h
         glib/GTypedefs.h
         glib/GUniquePtr.h
+        glib/RunLoopSourcePriority.h
     )
 endif ()
 

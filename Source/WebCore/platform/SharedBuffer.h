@@ -43,7 +43,7 @@
 #include "GUniquePtrSoup.h"
 #endif
 
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
 #include <wtf/glib/GRefPtr.h>
 typedef struct _GBytes GBytes;
 #endif
@@ -94,7 +94,7 @@ public:
     static Ref<SharedBuffer> wrapSoupBuffer(SoupBuffer*);
 #endif
 
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
     static Ref<SharedBuffer> create(GBytes*);
 #endif
 
@@ -136,7 +136,7 @@ public:
 #if USE(SOUP)
         static Ref<DataSegment> create(GUniquePtr<SoupBuffer>&& data) { return adoptRef(*new DataSegment(WTFMove(data))); }
 #endif
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
         static Ref<DataSegment> create(GRefPtr<GBytes>&& data) { return adoptRef(*new DataSegment(WTFMove(data))); }
 #endif
 #if USE(GSTREAMER)
@@ -155,7 +155,7 @@ public:
         DataSegment(GUniquePtr<SoupBuffer>&& data)
             : m_immutableData(WTFMove(data)) { }
 #endif
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
         DataSegment(GRefPtr<GBytes>&& data)
             : m_immutableData(WTFMove(data)) { }
 #endif
@@ -173,7 +173,7 @@ public:
 #if USE(SOUP)
             GUniquePtr<SoupBuffer>,
 #endif
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
             GRefPtr<GBytes>,
 #endif
 #if USE(GSTREAMER)
@@ -213,7 +213,7 @@ private:
 #if USE(SOUP)
     explicit SharedBuffer(SoupBuffer*);
 #endif
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
     explicit SharedBuffer(GBytes*);
 #endif
 #if USE(GSTREAMER)

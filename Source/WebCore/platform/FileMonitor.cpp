@@ -28,7 +28,7 @@
 
 namespace WebCore {
 
-#if !PLATFORM(COCOA) && !USE(GLIB)
+#if !PLATFORM(COCOA) && !USE(GLIB) || PLATFORM(QT)
 
 FileMonitor::FileMonitor(const String&, Ref<WorkQueue>&&, WTF::Function<void(FileChangeType)>&&)
 {

@@ -32,7 +32,7 @@
 OBJC_CLASS WebLowPowerModeObserver;
 #endif
 
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
 #include <wtf/glib/GRefPtr.h>
 typedef struct _GDBusProxy GDBusProxy;
 #endif
@@ -55,7 +55,7 @@ private:
 
     RetainPtr<WebLowPowerModeObserver> m_observer;
     LowPowerModeChangeCallback m_callback;
-#elif USE(GLIB)
+#elif USE(GLIB) && !PLATFORM(QT)
     void updateWarningLevel();
     void warningLevelChanged();
     static void gPropertiesChangedCallback(LowPowerModeNotifier*, GVariant* changedProperties);

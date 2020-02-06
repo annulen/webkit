@@ -2719,7 +2719,7 @@ bool EventHandler::isInsideScrollbar(const IntPoint& windowPoint) const
     return false;
 }
 
-#if !USE(GLIB)
+#if !USE(GLIB) || PLATFORM(QT)
 
 bool EventHandler::shouldSwapScrollDirection(const HitTestResult&, const PlatformWheelEvent&) const
 {

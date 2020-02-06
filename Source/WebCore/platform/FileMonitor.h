@@ -34,7 +34,7 @@
 #include <wtf/OSObjectPtr.h>
 #endif
 
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
 #include <gio/gio.h>
 #include <wtf/glib/GRefPtr.h>
 #endif
@@ -53,7 +53,7 @@ private:
 #if USE(COCOA_EVENT_LOOP)
     OSObjectPtr<dispatch_source_t> m_platformMonitor;
 #endif
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
     static void fileChangedCallback(GFileMonitor*, GFile*, GFile*, GFileMonitorEvent, FileMonitor*);
     void didChange(FileChangeType);
     Ref<WorkQueue> m_handlerQueue;

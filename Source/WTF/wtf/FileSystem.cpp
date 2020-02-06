@@ -40,7 +40,7 @@
 #include <unistd.h>
 #endif
 
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
 #include <gio/gfiledescriptorbased.h>
 #include <gio/gio.h>
 #endif
@@ -303,7 +303,7 @@ bool MappedFileData::mapFileHandle(PlatformFileHandle handle, MappedFileMode mod
         return false;
 
     int fd;
-#if USE(GLIB)
+#if USE(GLIB) && !PLATFORM(QT)
     auto* inputStream = g_io_stream_get_input_stream(G_IO_STREAM(handle));
     fd = g_file_descriptor_based_get_fd(G_FILE_DESCRIPTOR_BASED(inputStream));
 #else
