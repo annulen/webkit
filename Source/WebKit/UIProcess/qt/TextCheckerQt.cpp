@@ -131,7 +131,7 @@ void TextChecker::ignoreWord(int64_t spellDocumentTag, const String& word)
     notImplemented();
 }
 
-void TextChecker::requestCheckingOfString(Ref<TextCheckerCompletion>&&,int32_t)
+void TextChecker::requestCheckingOfString(Ref<TextCheckerCompletion>&&, int32_t)
 {
     notImplemented();
 }

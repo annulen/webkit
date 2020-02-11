@@ -65,7 +65,7 @@ void NetworkProcess::clearCacheForAllOrigins(uint32_t)
 {
 }
 
-void NetworkProcess::clearDiskCache(WallTime,CompletionHandler<void()>&&)
+void NetworkProcess::clearDiskCache(WallTime, CompletionHandler<void()>&&)
 {
 }
 

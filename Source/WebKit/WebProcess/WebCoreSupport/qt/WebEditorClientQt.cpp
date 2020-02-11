@@ -25,8 +25,9 @@
 
 #include "config.h"
 #include "WebEditorClient.h"
-//WIP
-namespace WebKit{
+
+namespace WebKit {
+
 void WebEditorClient::handleKeyboardEvent(WebCore::KeyboardEvent&)
 {
 }
@@ -34,4 +35,5 @@ void WebEditorClient::handleKeyboardEvent(WebCore::KeyboardEvent&)
 void WebEditorClient::handleInputMethodKeydown(WebCore::KeyboardEvent&)
 {
 }
+
 }

@@ -28,7 +28,7 @@
 
 namespace WebCore {
 
-void startObservingCookieChanges(const NetworkStorageSession&, WTF::Function<void ()>&&)
+void startObservingCookieChanges(const NetworkStorageSession&, WTF::Function<void()>&&)
 {
     ASSERT_NOT_REACHED();
 }
@@ -39,3 +39,4 @@ void stopObservingCookieChanges(const NetworkStorageSession&)
 }
 
 }
+
