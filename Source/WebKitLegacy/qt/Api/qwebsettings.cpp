@@ -1183,6 +1183,7 @@ QString QWebSettings::offlineWebApplicationCachePath()
     WebCore::initializeWebCoreQt();
     return WebCore::ApplicationCacheStorage::singleton().cacheDirectory();
 #endif
+    return QString();
 }
 
 /*!
