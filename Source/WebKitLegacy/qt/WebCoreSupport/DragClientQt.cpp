@@ -33,6 +33,7 @@
 #include <WebCore/Page.h>
 #include <WebCore/Pasteboard.h>
 #include <WebCore/PlatformMouseEvent.h>
+#include <WebCore/SharedBuffer.h>
 
 #include <QDrag>
 #include <QMimeData>
