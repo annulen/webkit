@@ -198,6 +198,7 @@ private Q_SLOTS:
     void showModalDialog();
     void testStopScheduledPageRefresh();
     void findText();
+    void findTextScroll();
     void supportedContentType();
     // [Qt] tst_QWebPage::infiniteLoopJS() timeouts with DFG JIT
     // https://bugs.webkit.org/show_bug.cgi?id=79040
@@ -3070,6 +3071,14 @@ void tst_QWebPage::findText()
         QVERIFY(m_page->selectedText().isEmpty());
         QVERIFY(m_page->selectedHtml().isEmpty());
     }
+}
+
+void tst_QWebPage::findTextScroll()
+{
+    m_view->setHtml(QString("<html><head></head><body style=\"padding:250px;\"><div>foo bar</div></body></html>"));
+    m_page->setViewportSize(QSize(200, 200));
+    m_page->findText("bar");
+    QVERIFY(m_page->mainFrame()->scrollPosition().y() > 0);
 }
 
 void tst_QWebPage::supportedContentType()
