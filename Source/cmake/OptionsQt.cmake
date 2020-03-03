@@ -172,7 +172,10 @@ macro(QTWEBKIT_SEPARATE_DEBUG_INFO _target _target_debug)
     endif ()
 endmacro()
 
-set(CMAKE_MACOSX_RPATH ON)
+if (APPLE)
+    set(CMAKE_MACOSX_RPATH ON)
+    set(CMAKE_FIND_FRAMEWORK LAST)
+endif ()
 
 add_definitions(-DBUILDING_QT__=1)
 add_definitions(-DQT_NO_EXCEPTIONS)
