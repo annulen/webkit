@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-
+import os
 
 class QtWebKitConan(ConanFile):
     name = "qtwebkit"
@@ -62,24 +62,55 @@ class QtWebKitConan(ConanFile):
         if not tools.which("flex"):
             self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
+        
+
     def build(self):
-        cmake = CMake(self)
+        cmake = CMake(self,set_cmake_flags=True)
         cmake.generator = "Ninja"
-        cmake.verbose = True
+        cmake.verbose = False
         cmake.definitions["QT_CONAN_DIR"] = self.build_folder
+        cmake.definitions["CMAKE_BUILD_TYPE"]="Release"
 
-        if self.options.use_ccache:
-            cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
-            cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
+        os.environ["CC"]="cl"
+        os.environ["CXX"]="cl"
+        # if self.options.use_ccache:
+        #    cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
+        #    cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
+        #conan build ..\Tools\qt\conanfile.py --source-folder C:\qtwebkit
 
-        if self.options.qt5_dir:
-            cmake.definitions["Qt5_DIR"] = self.options.qt5_dir
+        if "Qt5_dir" in os.environ:
+            cmake.definitions["Qt5_DIR"] = os.environ["Qt5_dir"]
+        else:
+            self.output.error("Specify path to Qt5 directory by setting environment variable Qt5_dir")
+        
+        print(cmake.definitions["CONAN_CXX_FLAGS"])
+        
+        #Retrieve cmake args set by wrapper
+        if "Temp_D_Flags_For_Dev" in os.environ:
+            ddef=os.environ["Temp_D_Flags_For_Dev"]
+            ddef_list=ddef.split(';')
+            for ddef_it in ddef_list:
+                dtemp=ddef_it.split('#')
+                if len(dtemp)==2:
+                    cmake.definitions[dtemp[0]]=dtemp[1]
 
+        
+        if "Temp_File_FLags_For_Dev" in os.environ:
+            defs=" "+os.environ["Temp_File_FLags_For_Dev"]+" "
+            #print(cmake.definitions["CONAN_CXX_FLAGS"]+defs)
+            cmake.definitions["CONAN_CXX_FLAGS"]=defs+cmake.definitions["CONAN_CXX_FLAGS"]
+
+        if self.settings.os == "Windows":
+            print(tools.vcvars_command(self.settings))
+        
         print(self.source_folder)
         print()
         print(self.build_folder)
 
+        #self.run(r'cmake -DQT_CONAN_DIR=. -DCMAKE_BUILD_TYPE=Release -GNinja -DQt5_DIR=C:\Qt\5.13.1\msvc2017_64\lib\cmake\Qt5 ..')
         cmake.configure()
+        cmake.build()
+        
 
     def package(self):
         pass
