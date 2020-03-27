@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 from conans import ConanFile, CMake, tools
+import os
 
 
 class QtWebKitConan(ConanFile):
@@ -27,7 +28,7 @@ class QtWebKitConan(ConanFile):
     license = "LGPL-2.0-or-later, LGPL-2.1-or-later, BSD-2-Clause"
     url = "https://github.com/qtwebkit/qtwebkit"
     description = "Qt port of WebKit"
-    topics = ( "qt", "browser-engine", "webkit", "qt5", "qml", "qtwebkit" )
+    topics = ("qt", "browser-engine", "webkit", "qt5", "qml", "qtwebkit")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "virtualenv"
     exports_sources = "../../*"
@@ -68,7 +69,8 @@ class QtWebKitConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == 'Linux':
             if not tools.which('pkg-config'):
-                self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
+                self.build_requires(
+                    'pkg-config_installer/0.29.2@bincrafters/stable')
 
         # gperf python perl bison ruby flex
         if not tools.which("gperf"):
@@ -83,23 +85,41 @@ class QtWebKitConan(ConanFile):
             self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
     def build(self):
-        cmake = CMake(self)
+        cmake = CMake(self, set_cmake_flags=True)
         cmake.generator = "Ninja"
-        cmake.verbose = True
+        cmake.verbose = False
         cmake.definitions["QT_CONAN_DIR"] = self.build_folder
 
-        if self.options.use_ccache:
-            cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
-            cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
+        # if self.options.use_ccache:
+        #    cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
+        #    cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
 
-        if self.options.qt5_dir:
-            cmake.definitions["Qt5_DIR"] = self.options.qt5_dir
+        if "QTDIR" in os.environ:
+            cmake.definitions["Qt5_DIR"] = os.environ["QTDIR"] + \
+                r'\lib\cmake\Qt5'
+            print("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
+
+        if "CMAKEFLAGS" in os.environ:
+            cmake_flags = os.environ["CMAKEFLAGS"].split(' ')
+        else:
+            cmake_flags = None
+
+        if "NINJAFLAGS" in os.environ:
+            ninja_flags = os.environ["NINJAFLAGS"]
+        else:
+            ninja_flags = ""
+
+        if self.settings.os == "Windows":
+            print(tools.vcvars_command(self.settings))
 
         print(self.source_folder)
         print()
         print(self.build_folder)
 
-        cmake.configure()
+        cmake.configure(args=cmake_flags)
+        
+        self.run(tools.vcvars_command(self.settings))
+        self.run("ninja "+ninja_flags)
 
     def package(self):
         pass
