@@ -1,24 +1,5 @@
-# Copyright (C) 2020 Konstantin Tokarev <annulen@yandex.ru>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-
 from conans import ConanFile, CMake, tools
+import os
 
 
 class QtWebKitConan(ConanFile):
@@ -27,7 +8,7 @@ class QtWebKitConan(ConanFile):
     license = "LGPL-2.0-or-later, LGPL-2.1-or-later, BSD-2-Clause"
     url = "https://github.com/qtwebkit/qtwebkit"
     description = "Qt port of WebKit"
-    topics = ( "qt", "browser-engine", "webkit", "qt5", "qml", "qtwebkit" )
+    topics = ("qt", "browser-engine", "webkit", "qt5", "qml", "qtwebkit")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "virtualenv"
     exports_sources = "../../*"
@@ -68,7 +49,8 @@ class QtWebKitConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == 'Linux':
             if not tools.which('pkg-config'):
-                self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
+                self.build_requires(
+                    'pkg-config_installer/0.29.2@bincrafters/stable')
 
         # gperf python perl bison ruby flex
         if not tools.which("gperf"):
@@ -83,23 +65,44 @@ class QtWebKitConan(ConanFile):
             self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
     def build(self):
-        cmake = CMake(self)
+        cmake = CMake(self, set_cmake_flags=True)
         cmake.generator = "Ninja"
-        cmake.verbose = True
+        cmake.verbose = False
         cmake.definitions["QT_CONAN_DIR"] = self.build_folder
+        cmake.definitions["CMAKE_BUILD_TYPE"] = "Release"
 
-        if self.options.use_ccache:
-            cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
-            cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
+        # if self.options.use_ccache:
+        #    cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
+        #    cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
 
-        if self.options.qt5_dir:
-            cmake.definitions["Qt5_DIR"] = self.options.qt5_dir
+        if "QTDIR" in os.environ:
+            cmake.definitions["Qt5_DIR"] = os.environ["QTDIR"] + \
+                r'\lib\cmake\Qt5'
+            print("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
+
+        #Retrieve cmake args set by wrapper
+        if "DCMAKEFLAGS" in os.environ:
+            ddef = os.environ["DCMAKEFLAGS"]
+            ddef_list = ddef.split(';')
+            for ddef_it in ddef_list:
+                dtemp = ddef_it.split('#')
+                if len(dtemp) == 2:
+                    cmake.definitions[dtemp[0]] = dtemp[1]
+
+        if "CMAKEFLAGS" in os.environ:
+            defs = " " + os.environ["CMAKEFLAGS"] + " "
+            cmake.definitions["CONAN_CXX_FLAGS"] = defs + \
+                cmake.definitions["CONAN_CXX_FLAGS"]
+
+        if self.settings.os == "Windows":
+            print(tools.vcvars_command(self.settings))
 
         print(self.source_folder)
         print()
         print(self.build_folder)
 
         cmake.configure()
+        cmake.build()
 
     def package(self):
         pass
