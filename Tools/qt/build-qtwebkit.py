@@ -47,11 +47,13 @@ args = parser.parse_args()
 
 src_directory = str(pathlib.Path(__file__).resolve().parents[2])
 install_folder = src_directory + "\\" + args.build_folder
+conanfile_path = src_directory + r"\Tools\qt\conanfile.py"
+
 
 print("Path of build directory:" + install_folder)
 
 if args.install == True:
-    script = 'conan install conanfile.py -if "{0}"'.format(install_folder)
+    script = 'conan install {0} -if "{1}"'.format(conanfile_path, install_folder)
     os.system(script)
 
 parse_qt(args.qt)
@@ -69,7 +71,7 @@ if args.build == True:
 else:
     bflag = ""
 
-script = 'conan build conanfile.py {0} {1} -sf "{2}" -bf "{3}"'.format(cflag, bflag, src_directory, install_folder)
+script = 'conan build {0} {1} {2} -sf "{3}" -bf "{4}"'.format(conanfile_path, cflag, bflag, src_directory, install_folder)
 
 print("Executing:", script)
 os.system(script)

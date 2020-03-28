@@ -259,9 +259,6 @@ jobs:
             cmake_extra_args="$cmake_extra_args -DPC_WOFF2DEC_VERSION=1.0.2 \
                 -DCMAKE_PREFIX_PATH=$(brew --prefix jpeg-turbo);$(brew --prefix libpng);$(brew --prefix webp);$(brew --prefix woff2)"
         fi
-        if [ "${{ runner.os }}" = "Windows" ]; then
-            cmake_extra_args="$cmake_extra_args -DQT_CONAN_DIR=build"
-        fi
 
         echo "::set-env name=cmake_command::${{ steps.cmake_and_ninja.outputs.cmake_dir }}/cmake \
             -H. \
@@ -283,9 +280,8 @@ jobs:
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
       shell: cmd
       run: |
-        call "${{ matrix.config.environment_script }}"
-        call "build/activate.bat"
-        %cmake_command%
+        cd Tools\qt
+        py build-qtwebkit.py --configure --cmakeargs="%cmake_command%"
 
 #    - uses: actions/upload-artifact@v1
 #      with:
@@ -312,9 +308,7 @@ jobs:
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
       shell: cmd
       run: |
-        call "${{ matrix.config.environment_script }}"
-        call "build/activate.bat"
-        ninja -C build -j %HOST_N_CORES% -v || exit /b 1
+        py Tools\qt\build-qtwebkit.py --build --ninjaargs="-j %HOST_N_CORES% -v"
 
     - name: ccache stats
       if: always()

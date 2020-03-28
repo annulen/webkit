@@ -100,14 +100,14 @@ class QtWebKitConan(ConanFile):
             print("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
 
         if "CMAKEFLAGS" in os.environ:
-            cmake_flags = os.environ["CMAKEFLAGS"]
+            cmake_flags = os.environ["CMAKEFLAGS"].split(' ')
         else:
             cmake_flags = None
 
         if "NINJAFLAGS" in os.environ:
             ninja_flags = os.environ["NINJAFLAGS"]
         else:
-            ninja_flags = None
+            ninja_flags = ""
 
         if self.settings.os == "Windows":
             print(tools.vcvars_command(self.settings))
@@ -117,7 +117,9 @@ class QtWebKitConan(ConanFile):
         print(self.build_folder)
 
         cmake.configure(args=cmake_flags)
-        cmake.build(args=ninja_flags)
+        
+        self.run(tools.vcvars_command(self.settings))
+        self.run("ninja "+ninja_flags)
 
     def package(self):
         pass
