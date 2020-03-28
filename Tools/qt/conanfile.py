@@ -89,7 +89,6 @@ class QtWebKitConan(ConanFile):
         cmake.generator = "Ninja"
         cmake.verbose = False
         cmake.definitions["QT_CONAN_DIR"] = self.build_folder
-        cmake.definitions["CMAKE_BUILD_TYPE"] = "Release"
 
         # if self.options.use_ccache:
         #    cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
@@ -100,19 +99,15 @@ class QtWebKitConan(ConanFile):
                 r'\lib\cmake\Qt5'
             print("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
 
-        #Retrieve cmake args set by wrapper
-        if "DCMAKEFLAGS" in os.environ:
-            ddef = os.environ["DCMAKEFLAGS"]
-            ddef_list = ddef.split(';')
-            for ddef_it in ddef_list:
-                dtemp = ddef_it.split('#')
-                if len(dtemp) == 2:
-                    cmake.definitions[dtemp[0]] = dtemp[1]
-
         if "CMAKEFLAGS" in os.environ:
-            defs = " " + os.environ["CMAKEFLAGS"] + " "
-            cmake.definitions["CONAN_CXX_FLAGS"] = defs + \
-                cmake.definitions["CONAN_CXX_FLAGS"]
+            cmake_flags = os.environ["CMAKEFLAGS"]
+        else:
+            cmake_flags = None
+
+        if "NINJAFLAGS" in os.environ:
+            ninja_flags = os.environ["NINJAFLAGS"]
+        else:
+            ninja_flags = None
 
         if self.settings.os == "Windows":
             print(tools.vcvars_command(self.settings))
@@ -121,8 +116,8 @@ class QtWebKitConan(ConanFile):
         print()
         print(self.build_folder)
 
-        cmake.configure()
-        cmake.build()
+        cmake.configure(args=cmake_flags)
+        cmake.build(args=ninja_flags)
 
     def package(self):
         pass

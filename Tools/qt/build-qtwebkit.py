@@ -9,21 +9,23 @@ def parse_qt(qt):
 
 
 def parse_cmake(cmake):
-    ## Eg -Wno-dev -DFLag1=val -DFlag2=val2 -fsanitize=address
-    Dflags = ""
-    flags = ""
     if cmake == "":
         return
-    cl = cmake.split(' ')
-    for cc in cl:
-        if cc[1] == 'D':
-            tc = cc.split('=')
-            Dflags += tc[0][2:] + "#" + tc[1] + ";"
-        else:
-            flags += cc + " "
+    os.environ["CMAKEFLAGS"] = cmake
 
-    os.environ["DCMAKEFLAGS"] = Dflags
-    os.environ["CMAKEFLAGS"] = flags
+
+def parse_ninja(ninja):
+    if ninja == "":
+        return
+    os.environ["NINJAFLAGS"] = ninja
+
+
+def parse_compiler(compiler):
+    if compiler.lower() == "msvc":
+        if "CC" not in os.environ:
+            os.environ["CC"] = "cl"
+        if "CXX" not in os.environ:
+            os.environ["CXX"] = "cl"
 
 
 parser = argparse.ArgumentParser("QtWebkit building with Conan")
@@ -37,6 +39,8 @@ parser.add_argument(
     "--install", help="Pass this flag if you want to invoke install script", action="store_true")
 parser.add_argument(
     "--build_folder", help="name of build folder defaults to build", default="build", type=str)
+parser.add_argument("--compiler", help="Which compiler to choose", default="msvc", type=str)
+parser.add_argument("--configure", help="Execute configuration step will be passed during build", action="store_true")
 
 args = parser.parse_args()
 
@@ -51,7 +55,15 @@ if args.install == True:
 
 parse_qt(args.qt)
 parse_cmake(args.cmakeargs)
+parse_ninja(args.ninjaargs)
+parse_compiler(args.compiler)
 
-script = 'conan build conanfile.py -sf "{0}" -bf "{1}"'.format(
-    src_directory, install_folder)
+if args.configure == True:
+    cflag = "-c"
+else:
+    cflag = ""
+
+script = 'conan build conanfile.py {0} -sf "{1}" -bf "{2}"'.format(cflag, src_directory, install_folder)
+
+print("Executing:", script)
 os.system(script)
