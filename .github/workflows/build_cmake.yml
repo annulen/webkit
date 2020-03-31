@@ -231,9 +231,9 @@ jobs:
       if: runner.os == 'macOS'
       run: brew install libpng libjpeg-turbo webp woff2
 
-    - name: Install dependencies (Windows/Conan)
+    - name: Install dependencies (Conan)
       if: runner.os == 'Windows'
-      shell: cmd
+      shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
         pip3 install conan
         mkdir build
@@ -245,6 +245,7 @@ jobs:
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
         echo "::add-path::$GITHUB_WORKSPACE"
+        echo "::add-path::${{ steps.cmake_and_ninja.outputs.cmake_dir }}"
 
         echo "::set-env name=CC::${{ matrix.config.cc }}"
         echo "::set-env name=CXX::${{ matrix.config.cxx }}"
@@ -263,11 +264,8 @@ jobs:
             cmake_extra_args="$cmake_extra_args -DQT_CONAN_DIR=build"
         fi
 
-        echo "::set-env name=cmake_command::${{ steps.cmake_and_ninja.outputs.cmake_dir }}/cmake \
-            -H. \
-            -Bbuild \
+        echo "::set-env name=cmake_args::\
             -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
-            -GNinja \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DENABLE_PCH=OFF \
@@ -277,7 +275,7 @@ jobs:
       if: runner.os != 'Windows' || matrix.config.environment_script == ''
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
-        $cmake_command
+        cmake $cmake_args -H. -Bbuild -GNinja
 
     - name: Configure (MSVC)
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
@@ -285,7 +283,7 @@ jobs:
       run: |
         call "${{ matrix.config.environment_script }}"
         call "build/activate.bat"
-        %cmake_command%
+        cmake %cmake_args% -H. -Bbuild -GNinja || exit /b 1
 
 #    - uses: actions/upload-artifact@v1
 #      with:
