@@ -42,7 +42,8 @@ class QtWebKitConan(ConanFile):
         "zlib/1.2.11",
 
         "libpng/1.6.37",
-        "sqlite3/3.31.1"
+        "sqlite3/3.31.1",
+        "libwebp/1.1.0"
     )
     default_options = {
         "icu:shared": True,
@@ -55,7 +56,11 @@ class QtWebKitConan(ConanFile):
 
         "libxslt:shared": True,
 
-        "libjpeg-turbo:shared": False
+        "libjpeg-turbo:shared": False,
+        "zlib:shared": False,
+        "libpng:shared": False,
+        "sqlite3:shared": False,
+        "libwebp:shared": False
     }
 
     def build_requirements(self):
