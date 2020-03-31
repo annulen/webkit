@@ -4,6 +4,7 @@ import os
 import argparse
 import pathlib
 import platform
+import sys
 
 
 def parse_qt(qt):
@@ -39,6 +40,14 @@ def parse_compiler(compiler):
         os.environ["CXX"] = "g++"
 
 
+def run_command(command):
+    print("Executing:", command)
+    exit_code = os.system(command)
+    print("Exit code:", exit_code)
+    if exit_code:
+        sys.exit(1)
+
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--qt", help="Root directory of Qt Installation", type=str)
@@ -68,7 +77,7 @@ conanfile_path = os.path.join(src_directory, "Tools", "qt", "conanfile.py")
 print("Path of build directory:" + build_directory)
 
 script = 'conan install {0} -if "{1}" --build=missing'.format(conanfile_path, build_directory)
-os.system(script)
+run_command(script)
 
 parse_qt(args.qt)
 parse_cmake(args.cmakeargs)
@@ -86,6 +95,4 @@ else:
     bflag = ""
 
 script = 'conan build {0} {1} {2} -sf "{3}" -bf "{4}"'.format(conanfile_path, cflag, bflag, src_directory, build_directory)
-
-print("Executing:", script)
-os.system(script)
+run_command(script)
