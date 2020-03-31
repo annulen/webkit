@@ -1,36 +1,47 @@
+#!/usr/bin/env python3
+
 import os
 import argparse
 import pathlib
+import platform
 
 
 def parse_qt(qt):
-    if qt != None:
+    if qt:
         os.environ['QTDIR'] = qt
 
 
 def parse_cmake(cmake):
-    if cmake == "":
-        return
-    os.environ["CMAKEFLAGS"] = cmake
+    if cmake:
+        os.environ["CMAKEFLAGS"] = cmake
 
 
 def parse_ninja(ninja):
-    if ninja == "":
-        return
-    os.environ["NINJAFLAGS"] = ninja
+    if ninja:
+        os.environ["NINJAFLAGS"] = ninja
 
 
 def parse_compiler(compiler):
-    if compiler.lower() == "msvc":
-        if "CC" not in os.environ:
-            os.environ["CC"] = "cl"
-        if "CXX" not in os.environ:
-            os.environ["CXX"] = "cl"
+    if not compiler and not ("CC" in os.environ and "CXX" in os.environ):
+        if platform.system() == "Windows":
+            compiler = "msvc"
+        elif platform.system() == "Darwin":
+            compiler = "clang"
+
+    if compiler == "msvc":
+        os.environ["CC"] = "cl"
+        os.environ["CXX"] = "cl"
+    elif compiler == "clang":
+        os.environ["CC"] = "clang"
+        os.environ["CXX"] = "clang++"
+    elif compiler == "gcc":
+        os.environ["CC"] = "gcc"
+        os.environ["CXX"] = "g++"
 
 
-parser = argparse.ArgumentParser("QtWebkit building with Conan")
+parser = argparse.ArgumentParser()
 
-parser.add_argument("--qt", help="Root Directory of Qt Installation", type=str)
+parser.add_argument("--qt", help="Root directory of Qt Installation", type=str)
 parser.add_argument(
     "--cmakeargs", help="Space seperated values that should be passed as CMake arguments", default="", type=str)
 parser.add_argument("--ninjaargs", help="Ninja arguments",
@@ -38,23 +49,26 @@ parser.add_argument("--ninjaargs", help="Ninja arguments",
 parser.add_argument(
     "--install", help="Pass this flag if you want to invoke install script", action="store_true")
 parser.add_argument(
-    "--build_folder", help="name of build folder defaults to build", default="build", type=str)
-parser.add_argument("--compiler", help="Which compiler to choose", default="msvc", type=str)
+    "--build_directory", help="Name of build dirtectory (defaults to build)", default="build", type=str)
+parser.add_argument("--compiler", help="Specify compiler for build (msvc, gcc, clang)", type=str)
 parser.add_argument("--configure", help="Execute Only configuration step", action="store_true")
 parser.add_argument("--build", help="Execute Only Build step", action="store_true")
 
 args = parser.parse_args()
 
 src_directory = str(pathlib.Path(__file__).resolve().parents[2])
-install_folder = src_directory + "\\" + args.build_folder
-conanfile_path = src_directory + r"\Tools\qt\conanfile.py"
 
+if os.path.isabs(args.build_directory):
+    build_directory = args.build_directory
+else:
+    build_directory = os.path.join(src_directory, args.build_directory)
 
-print("Path of build directory:" + install_folder)
+conanfile_path = os.path.join(src_directory, "Tools", "qt", "conanfile.py")
 
-if args.install == True:
-    script = 'conan install {0} -if "{1}"'.format(conanfile_path, install_folder)
-    os.system(script)
+print("Path of build directory:" + build_directory)
+
+script = 'conan install {0} -if "{1}"'.format(conanfile_path, build_directory)
+os.system(script)
 
 parse_qt(args.qt)
 parse_cmake(args.cmakeargs)
@@ -71,7 +85,7 @@ if args.build == True:
 else:
     bflag = ""
 
-script = 'conan build {0} {1} {2} -sf "{3}" -bf "{4}"'.format(conanfile_path, cflag, bflag, src_directory, install_folder)
+script = 'conan build {0} {1} {2} -sf "{3}" -bf "{4}"'.format(conanfile_path, cflag, bflag, src_directory, build_directory)
 
 print("Executing:", script)
 os.system(script)

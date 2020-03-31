@@ -20,6 +20,7 @@
 
 from conans import ConanFile, CMake, tools
 import os
+import shlex
 
 
 class QtWebKitConan(ConanFile):
@@ -56,15 +57,6 @@ class QtWebKitConan(ConanFile):
 
         "libjpeg-turbo:shared": False
     }
-# For building with conan
-#    options = {
-#        "use_ccache": [True, False],
-#        "qt5_dir": "ANY"
-#    }
-#    build_requires = (
-#        "ninja/1.9.0",
-#        "cmake/3.16.4"
-#    )
 
     def build_requirements(self):
         if self.settings.os == 'Linux':
@@ -83,6 +75,10 @@ class QtWebKitConan(ConanFile):
             self.build_requires("bison_installer/3.3.2@bincrafters/stable")
         if not tools.which("flex"):
             self.build_requires("flex_installer/2.6.4@bincrafters/stable")
+        if not tools.which("ninja"):
+            self.build_requires("ninja/1.9.0")
+        if not tools.which("cmake"):
+            self.build_requires("cmake/3.16.4")
 
     def build(self):
         cmake = CMake(self, set_cmake_flags=True)
@@ -95,12 +91,11 @@ class QtWebKitConan(ConanFile):
         #    cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
 
         if "QTDIR" in os.environ:
-            cmake.definitions["Qt5_DIR"] = os.environ["QTDIR"] + \
-                r'\lib\cmake\Qt5'
+            cmake.definitions["Qt5_DIR"] = os.path.join(os.environ["QTDIR"], "lib", "cmake", "Qt5")
             print("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
 
         if "CMAKEFLAGS" in os.environ:
-            cmake_flags = os.environ["CMAKEFLAGS"].split(' ')
+            cmake_flags = shlex.split(os.environ["CMAKEFLAGS"])
         else:
             cmake_flags = None
 
@@ -109,17 +104,18 @@ class QtWebKitConan(ConanFile):
         else:
             ninja_flags = ""
 
-        if self.settings.os == "Windows":
-            print(tools.vcvars_command(self.settings))
-
         print(self.source_folder)
         print()
         print(self.build_folder)
 
         cmake.configure(args=cmake_flags)
-        
-        self.run(tools.vcvars_command(self.settings))
-        self.run("ninja "+ninja_flags)
+
+        if self.should_build:
+            if self.settings.os == "Windows":
+                print(tools.vcvars_command(self.settings))
+                self.run(tools.vcvars_command(self.settings))
+
+            self.run("ninja " + ninja_flags)
 
     def package(self):
         pass
