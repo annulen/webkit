@@ -67,7 +67,7 @@ conanfile_path = os.path.join(src_directory, "Tools", "qt", "conanfile.py")
 
 print("Path of build directory:" + build_directory)
 
-script = 'conan install {0} -if "{1}"'.format(conanfile_path, build_directory)
+script = 'conan install {0} -if "{1}" --build=missing'.format(conanfile_path, build_directory)
 os.system(script)
 
 parse_qt(args.qt)
