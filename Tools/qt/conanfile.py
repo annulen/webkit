@@ -35,14 +35,8 @@ class QtWebKitConan(ConanFile):
     exports_sources = "../../*"
     no_copy_source = True
     requires = (
-        "icu/65.1@qtproject/stable",
-        "libxml2/2.9.10@qtproject/stable",
-        "libxslt/1.1.34@qtproject/stable",
         "libjpeg-turbo/2.0.3@qtproject/stable",
-        "zlib/1.2.11",
-
         "libpng/1.6.37",
-        "sqlite3/3.31.1",
         "libwebp/1.1.0"
     )
     default_options = {
@@ -84,6 +78,15 @@ class QtWebKitConan(ConanFile):
             self.build_requires("ninja/1.9.0")
         if not tools.which("cmake"):
             self.build_requires("cmake/3.16.4")
+
+    def requirements(self):
+        # TODO: Handle case when custom ICU is needed (AppStore etc., MACOS_USE_SYSTEM_ICU=OFF in CMake)
+        if self.settings.os != 'Macos':
+            self.requires("icu/65.1@qtproject/stable")
+            self.requires("libxml2/2.9.10@qtproject/stable")
+            self.requires("libxslt/1.1.34@qtproject/stable")
+            self.requires("zlib/1.2.11")
+            self.requires("sqlite3/3.31.1")
 
     def build(self):
         cmake = CMake(self, set_cmake_flags=True)

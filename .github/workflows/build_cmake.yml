@@ -215,7 +215,7 @@ jobs:
 
     # For Conan
     - uses: actions/setup-python@v1
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' || runner.os == 'macOS'
       with:
         python-version: '3.7'
 
@@ -227,11 +227,15 @@ jobs:
         libtasn1-6-dev libgcrypt20-dev
         # excluded cmake and ninja-build which are normally required
 
-    - name: Install dependencies (macOS)
+    - name: Install dependencies (macOS/Conan)
       if: runner.os == 'macOS'
-      run: brew install libpng libjpeg-turbo webp woff2
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: |
+        pip3 install conan
+        conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+        conan remote add qtproject https://api.bintray.com/conan/qtproject/conan
 
-    - name: Install dependencies (Conan)
+    - name: Install dependencies (Windows/Conan)
       if: runner.os == 'Windows'
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
@@ -253,15 +257,9 @@ jobs:
         echo "::set-env name=CCACHE_BASEDIR::$GITHUB_WORKSPACE"
         echo "::set-env name=CCACHE_DIR::$GITHUB_WORKSPACE/.ccache"
 
-        if [ "${{ runner.os }}" != "Linux" ]; then
-            cmake_extra_args="-DQt5_DIR=${{ steps.qt.outputs.qt_dir }}/lib/cmake/Qt5"
-        fi
-        if [ "${{ runner.os }}" = "macOS" ]; then
-            cmake_extra_args="$cmake_extra_args -DPC_WOFF2DEC_VERSION=1.0.2 \
-                -DCMAKE_PREFIX_PATH=$(brew --prefix jpeg-turbo);$(brew --prefix libpng);$(brew --prefix webp);$(brew --prefix woff2)"
-        fi
         if [ "${{ runner.os }}" = "Windows" ]; then
-            cmake_extra_args="$cmake_extra_args -DQT_CONAN_DIR=build"
+            cmake_extra_args="-DQt5_DIR=${{ steps.qt.outputs.qt_dir }}/lib/cmake/Qt5 \
+                -DQT_CONAN_DIR=build"
         fi
 
         echo "::set-env name=cmake_args::\
@@ -271,8 +269,8 @@ jobs:
             -DENABLE_PCH=OFF \
             $cmake_extra_args"
 
-    - name: Configure (Unix-like)
-      if: runner.os != 'Windows' || matrix.config.environment_script == ''
+    - name: Configure (Linux)
+      if: runner.os == 'Linux'
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
         cmake $cmake_args -H. -Bbuild -GNinja
@@ -284,6 +282,11 @@ jobs:
         call "${{ matrix.config.environment_script }}"
         call "build/activate.bat"
         cmake %cmake_args% -H. -Bbuild -GNinja || exit /b 1
+
+    - name: Configure (macOS/Conan)
+      if: runner.os == 'macOS'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: Tools/qt/build-qtwebkit-conan.py --configure --cmakeargs="$cmake_args" --qt="${{ steps.qt.outputs.qt_dir }}"
 
 #    - uses: actions/upload-artifact@v1
 #      with:
@@ -301,8 +304,8 @@ jobs:
         ccache -p
         ccache -z
 
-    - name: Build (Unix-like)
-      if: runner.os != 'Windows' || matrix.config.environment_script == ''
+    - name: Build (Linux)
+      if: runner.os == 'Linux'
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: ninja -C build -j $HOST_N_CORES -v
 
@@ -313,6 +316,11 @@ jobs:
         call "${{ matrix.config.environment_script }}"
         call "build/activate.bat"
         ninja -C build -j %HOST_N_CORES% -v || exit /b 1
+
+    - name: Build (macOS/Conan)
+      if: runner.os == 'macOS'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: Tools/qt/build-qtwebkit-conan.py --build --ninjaargs="-j $HOST_N_CORES -v"
 
     - name: ccache stats
       if: always()
