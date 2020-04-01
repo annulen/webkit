@@ -31,7 +31,7 @@ class QtWebKitConan(ConanFile):
     description = "Qt port of WebKit"
     topics = ("qt", "browser-engine", "webkit", "qt5", "qml", "qtwebkit")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "virtualenv"
+    generators = "cmake", "virtualenv", "txt"
     exports_sources = "../../*"
     no_copy_source = True
     requires = (
@@ -93,6 +93,8 @@ class QtWebKitConan(ConanFile):
         cmake.generator = "Ninja"
         cmake.verbose = False
         cmake.definitions["QT_CONAN_DIR"] = self.build_folder
+        # QtWebKit installation requires conanfile.txt in build directory
+        self.write_imports()
 
         # if self.options.use_ccache:
         #    cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
@@ -118,12 +120,45 @@ class QtWebKitConan(ConanFile):
 
         cmake.configure(args=cmake_flags)
 
+        # Use custom replacement of cmake.build() to avoid Conan interference into ninja flags
         if self.should_build:
             if self.settings.os == "Windows":
                 print(tools.vcvars_command(self.settings))
                 self.run(tools.vcvars_command(self.settings))
-
             self.run("ninja " + ninja_flags)
+
+        cmake.install()
+
+    # QtWebKit installation requires conanfile.txt in build directory, so we generate it here
+    # Should be kept in sync with imports()
+    def write_imports(self):
+        conanfile = open(os.path.join(self.build_folder, "conanfile.txt"), "w")
+        conanfile.write("[imports]\n")
+
+        if self.settings.os == 'Windows':
+            conanfile.write("bin, icudt65.dll -> ./bin")
+            conanfile.write("bin, icuin65.dll -> ./bin")
+            conanfile.write("bin, icuuc65.dll -> ./bin")
+            # Visual Studio
+            conanfile.write("bin, libxml2.dll -> ./bin")
+            conanfile.write("bin, libxslt.dll -> ./bin")
+            # MinGW
+            conanfile.write("bin, libxml2-2.dll -> ./bin")
+            conanfile.write("bin, libxslt-1.dll -> ./bin")
+
+        conanfile.close()
+
+    def imports(self):
+        if self.settings.os == 'Windows':
+            self.copy("icudt65.dll", "./bin", "bin")
+            self.copy("icuin65.dll", "./bin", "bin")
+            self.copy("icuuc65.dll", "./bin", "bin")
+            # Visual Studio
+            self.copy("libxml2.dll", "./bin", "bin")
+            self.copy("libxslt.dll", "./bin", "bin")
+            # MinGW
+            self.copy("libxml2-2.dll", "./bin", "bin")
+            self.copy("libxml2-2.dll", "./bin", "bin")
 
     def package(self):
         pass

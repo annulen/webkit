@@ -48,7 +48,7 @@ def run_command(command):
         sys.exit(1)
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description='Build QtWebKit with Conan. For installation of build product into Qt, use --install option')
 
 parser.add_argument("--qt", help="Root directory of Qt Installation", type=str)
 parser.add_argument(
@@ -56,12 +56,11 @@ parser.add_argument(
 parser.add_argument("--ninjaargs", help="Ninja arguments",
                     default="", type=str)
 parser.add_argument(
-    "--install", help="Pass this flag if you want to invoke install script", action="store_true")
-parser.add_argument(
     "--build_directory", help="Name of build dirtectory (defaults to build)", default="build", type=str)
 parser.add_argument("--compiler", help="Specify compiler for build (msvc, gcc, clang)", type=str)
-parser.add_argument("--configure", help="Execute Only configuration step", action="store_true")
-parser.add_argument("--build", help="Execute Only Build step", action="store_true")
+parser.add_argument("--configure", help="Execute the configuration step. When specified, build won't run unless --build is specified", action="store_true")
+parser.add_argument("--build", help="Execute the build step. When specified, configure won't run unless --configure is specified", action="store_true")
+parser.add_argument("--install", help="Execute the install step. When specified, configure and build steps WILL run without changes", action="store_true")
 
 args = parser.parse_args()
 
@@ -87,15 +86,14 @@ parse_cmake(args.cmakeargs)
 parse_ninja(args.ninjaargs)
 parse_compiler(args.compiler)
 
-if args.configure == True:
-    cflag = "-c"
-else:
-    cflag = ""
+if not args.configure and not args.build:
+    # If we have neither --configure nor --build, we should do both configure and build (but install only if requested)
+    args.configure = True
+    args.build = True
 
-if args.build == True:
-    bflag = "-b"
-else:
-    bflag = ""
+configure_flag = "--configure" if args.configure else ""
+build_flag = "--build" if args.build else ""
+install_flag = "--install" if args.install else ""
 
-script = 'conan build {0} {1} {2} -sf "{3}" -bf "{4}"'.format(conanfile_path, cflag, bflag, src_directory, build_directory)
+script = 'conan build {0} {1} {2} -sf "{3}" -bf "{4}" "{5}"'.format(configure_flag, build_flag, install_flag, src_directory, build_directory, conanfile_path)
 run_command(script)

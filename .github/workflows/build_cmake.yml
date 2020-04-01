@@ -318,7 +318,7 @@ jobs:
     - name: Build (macOS/Conan)
       if: runner.os == 'macOS'
       shell: bash --noprofile --norc -eo pipefail -x {0}
-      run: Tools/qt/build-qtwebkit-conan.py --build --ninjaargs="-j $HOST_N_CORES -v"
+      run: Tools/qt/build-qtwebkit-conan.py --build --install --ninjaargs="-j $HOST_N_CORES -v"
 
     - name: ccache stats
       if: always()
