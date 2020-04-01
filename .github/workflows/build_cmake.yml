@@ -232,8 +232,6 @@ jobs:
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
         pip3 install conan
-        conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
-        conan remote add qtproject https://api.bintray.com/conan/qtproject/conan
 
     - name: Install dependencies (Windows/Conan)
       if: runner.os == 'Windows'
