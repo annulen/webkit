@@ -23,6 +23,7 @@ env:
   CCACHE_COMPRESSLEVEL: "6"
   CCACHE_MAXSIZE: "250M"
   CCACHE_SLOPPINESS: "pch_defines,time_macros"
+  CCACHE_HARDLINK: "true"
 
 jobs:
   build:
@@ -58,7 +59,6 @@ jobs:
       run: |
         REPO="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         BRANCH="${GITHUB_REF/#refs\/heads\//}"
-
         # Following code is based on logs of actions/checkout@v2, with sparseCheckout stuff inserted in the middle
         echo "Syncing repository: $GITHUB_REPOSITORY"
         echo "Working directory is '$(pwd)' GITHUB_WORKSPACE=$GITHUB_WORKSPACE BRANCH=$BRANCH"
@@ -73,14 +73,12 @@ jobs:
         echo "!LayoutTests" >> .git/info/sparse-checkout
         git -c protocol.version=2 fetch --no-tags --prune --progress --depth=10 origin +${GITHUB_SHA}:refs/remotes/origin/${BRANCH}
         git checkout --progress --force -B $BRANCH refs/remotes/origin/$BRANCH
-
     - name: Download Ninja and CMake
       id: cmake_and_ninja
       shell: cmake -P {0}
       run: |
         set(cmake_version "$ENV{CMAKE_VERSION}")
         set(ninja_version "$ENV{NINJA_VERSION}")
-
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(ninja_suffix "win.zip")
           set(cmake_suffix "win64-x64.zip")
@@ -94,33 +92,27 @@ jobs:
           set(cmake_suffix "Darwin-x86_64.tar.gz")
           set(cmake_dir "cmake-${cmake_version}-Darwin-x86_64/CMake.app/Contents/bin")
         endif()
-
         set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
         file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
-
         set(cmake_url "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-${cmake_suffix}")
         file(DOWNLOAD "${cmake_url}" ./cmake.zip SHOW_PROGRESS)
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./cmake.zip)
-
         # Save the path for other steps
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/${cmake_dir}" cmake_dir)
         message("::set-output name=cmake_dir::${cmake_dir}")
-
         if (NOT "${{ runner.os }}" STREQUAL "Windows")
           execute_process(
             COMMAND chmod +x ninja
             COMMAND chmod +x ${cmake_dir}/cmake
           )
         endif()
-
     - name: Download Qt
       id: qt
       if: runner.os != 'Linux'
       shell: cmake -P {0}
       run: |
         set(qt_version "$ENV{QT_VERSION}")
-
         string(REPLACE "." "" qt_version_dotless "${qt_version}")
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(url_os "windows_x86")
@@ -148,33 +140,26 @@ jobs:
           set(qt_dir_prefix "${qt_version}/clang_64")
           set(qt_package_suffix "-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64")
         endif()
-
         set(qt_base_url "https://download.qt.io/online/qtsdkrepository/${url_os}/desktop/qt5_${qt_version_dotless}")
         file(DOWNLOAD "${qt_base_url}/Updates.xml" ./Updates.xml SHOW_PROGRESS)
-
         file(READ ./Updates.xml updates_xml)
         string(REGEX MATCH "<Name>qt.qt5.*<Version>([0-9+-.]+)</Version>" updates_xml_output "${updates_xml}")
         set(qt_package_version ${CMAKE_MATCH_1})
-
         file(MAKE_DIRECTORY qt5)
-
         # Save the path for other steps
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
         message("::set-output name=qt_dir::${qt_dir}")
-
         function(downloadAndExtract url archive)
           message("Downloading ${url}")
           file(DOWNLOAD "${url}" ./${archive} SHOW_PROGRESS)
           execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ../${archive} WORKING_DIRECTORY qt5)
         endfunction()
-
         foreach(package qtbase qtdeclarative qtlocation qtmultimedia qtsensors qtwebchannel)
           downloadAndExtract(
             "${qt_base_url}/qt.qt5.${qt_version_dotless}.${qt_package_arch_suffix}/${qt_package_version}${package}${qt_package_suffix}.7z"
             ${package}.7z
           )
         endforeach()
-
         # uic depends on libicu56.so
         if ("${{ runner.os }}" STREQUAL "Linux")
           downloadAndExtract(
@@ -182,14 +167,12 @@ jobs:
             icu.7z
           )
         endif()
-
         file(READ "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" qtconfig)
         string(REPLACE "Enterprise" "OpenSource" qtconfig "${qtconfig}")
         string(REPLACE "licheck.exe" "" qtconfig "${qtconfig}")
         string(REPLACE "licheck64" "" qtconfig "${qtconfig}")
         string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
         file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
-
     - name: Download ccache
       id: ccache
       shell: cmake -P {0}
@@ -197,14 +180,12 @@ jobs:
         set(ccache_url "https://github.com/cristianadam/ccache/releases/download/v$ENV{CCACHE_VERSION}/${{ runner.os }}.tar.xz")
         file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
-
     - name: Prepare ccache timestamp
       id: ccache_cache_timestamp
       shell: cmake -P {0}
       run: |
         string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
         message("::set-output name=timestamp::${current_date}")
-
     - name: ccache cache files
       uses: actions/cache@v1.1.2
       with:
@@ -212,10 +193,9 @@ jobs:
         key: ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
         restore-keys: |
           ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-
-
     # For Conan
     - uses: actions/setup-python@v1
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' || runner.os == 'macOS'
       with:
         python-version: '3.7'
 
@@ -226,62 +206,48 @@ jobs:
         build-essential bison flex gperf libfontconfig1-dev libgl1-mesa-dev libglib2.0-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libhyphen-dev libicu-dev libjpeg-dev libpng-dev libqt5opengl5-dev libqt5sensors5-dev libqt5webchannel5-dev libsqlite3-dev libwebp-dev libwoff-dev libxcomposite-dev libxml2-dev libxrender-dev libxslt1-dev mesa-common-dev pkg-config python3 qtbase5-private-dev qtdeclarative5-private-dev qtpositioning5-dev ruby libqt5sql5-sqlite qtbase5-doc-html qttools5-dev-tools \
         libtasn1-6-dev libgcrypt20-dev
         # excluded cmake and ninja-build which are normally required
-
-    - name: Install dependencies (macOS)
+    - name: Install dependencies (macOS/Conan)
       if: runner.os == 'macOS'
-      run: brew install libpng libjpeg-turbo webp woff2
-
-    - name: Install dependencies (Windows/Conan)
-      if: runner.os == 'Windows'
-      shell: cmd
+      shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
         pip3 install conan
-        mkdir build
-        conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
-        conan remote add qtproject https://api.bintray.com/conan/qtproject/conan
-        conan install --no-imports --install-folder build Tools/qt/conanfile.py
-
+    - name: Install dependencies (Windows/Conan)
+      if: runner.os == 'Windows'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: |
+        pip3 install conan
     - name: CMake environment
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
         echo "::add-path::$GITHUB_WORKSPACE"
-
+        echo "::add-path::${{ steps.cmake_and_ninja.outputs.cmake_dir }}"
         echo "::set-env name=CC::${{ matrix.config.cc }}"
         echo "::set-env name=CXX::${{ matrix.config.cxx }}"
-
         echo "::set-env name=CCACHE_BASEDIR::$GITHUB_WORKSPACE"
         echo "::set-env name=CCACHE_DIR::$GITHUB_WORKSPACE/.ccache"
-
-        if [ "${{ runner.os }}" != "Linux" ]; then
+        if [ "${{ runner.os }}" = "Windows" ]; then
             cmake_extra_args="-DQt5_DIR=${{ steps.qt.outputs.qt_dir }}/lib/cmake/Qt5"
         fi
-        if [ "${{ runner.os }}" = "macOS" ]; then
-            cmake_extra_args="$cmake_extra_args -DPC_WOFF2DEC_VERSION=1.0.2 \
-                -DCMAKE_PREFIX_PATH=$(brew --prefix jpeg-turbo);$(brew --prefix libpng);$(brew --prefix webp);$(brew --prefix woff2)"
-        fi
-
-        echo "::set-env name=cmake_command::${{ steps.cmake_and_ninja.outputs.cmake_dir }}/cmake \
-            -H. \
-            -Bbuild \
+        echo "::set-env name=cmake_args::\
             -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
-            -GNinja \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DENABLE_PCH=OFF \
             $cmake_extra_args"
-
-    - name: Configure (Unix-like)
-      if: runner.os != 'Windows' || matrix.config.environment_script == ''
+    - name: Configure (Linux)
+      if: runner.os == 'Linux'
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
-        $cmake_command
-
+        cmake $cmake_args -H. -Bbuild -GNinja
     - name: Configure (MSVC)
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
       shell: cmd
       run: |
-        cd Tools\qt
-        py build-qtwebkit.py --configure --cmakeargs="%cmake_command%"
+        py Tools\qt\build-qtwebkit-conan.py --install --configure --cmakeargs="%cmake_args%"  || exit /b 1
+    - name: Configure (macOS/Conan)
+      if: runner.os == 'macOS'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: Tools/qt/build-qtwebkit-conan.py --configure --cmakeargs="$cmake_args" --qt="${{ steps.qt.outputs.qt_dir }}"
 
 #    - uses: actions/upload-artifact@v1
 #      with:
@@ -298,9 +264,8 @@ jobs:
       run: |
         ccache -p
         ccache -z
-
-    - name: Build (Unix-like)
-      if: runner.os != 'Windows' || matrix.config.environment_script == ''
+    - name: Build (Linux)
+      if: runner.os == 'Linux'
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: ninja -C build -j $HOST_N_CORES -v
 
@@ -308,7 +273,11 @@ jobs:
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
       shell: cmd
       run: |
-        py Tools\qt\build-qtwebkit.py --build --ninjaargs="-j %HOST_N_CORES% -v"
+        py Tools\qt\build-qtwebkit-conan.py --build --ninjargs="-j %HOST_N_CORES% -v" || exit /b 1
+    - name: Build (macOS/Conan)
+      if: runner.os == 'macOS'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: Tools/qt/build-qtwebkit-conan.py --build --install --ninjaargs="-j $HOST_N_CORES -v"
 
     - name: ccache stats
       if: always()
