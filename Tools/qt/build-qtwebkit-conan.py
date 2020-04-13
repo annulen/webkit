@@ -45,22 +45,36 @@ def parse_ninja(ninja):
         os.environ["NINJAFLAGS"] = ninja
 
 
-def parse_compiler(compiler):
-    if not compiler and not ("CC" in os.environ and "CXX" in os.environ):
-        if platform.system() == "Windows":
+def parse_compiler(compiler,profile):
+    if profile != "default":
+        return profile
+
+    system_platform = platform.system()
+
+    if not compiler:
+        if system_platform == "Windows":
             compiler = "msvc"
-        elif platform.system() == "Darwin":
+        elif system_platform == "Darwin":
             compiler = "clang"
 
     if compiler == "msvc":
+        run_command("conan profile new msvc --detect --force")
         os.environ["CC"] = "cl"
         os.environ["CXX"] = "cl"
+        return "msvc"
     elif compiler == "clang":
         os.environ["CC"] = "clang"
         os.environ["CXX"] = "clang++"
+        run_command("conan profile new clang --detect --force")
+        return "clang"
     elif compiler == "gcc":
         os.environ["CC"] = "gcc"
         os.environ["CXX"] = "g++"
+        run_command("conan profile new gcc --detect --force")
+        run_command("conan profile update settings.compiler.threads=posix gcc")
+        if system_platform == "Windows":
+            run_command("conan profile update settings.compiler.exception=seh gcc")
+        return "gcc"
 
 
 def run_command(command):
@@ -84,6 +98,7 @@ parser.add_argument("--compiler", help="Specify compiler for build (msvc, gcc, c
 parser.add_argument("--configure", help="Execute the configuration step. When specified, build won't run unless --build is specified", action="store_true")
 parser.add_argument("--build", help="Execute the build step. When specified, configure won't run unless --configure is specified", action="store_true")
 parser.add_argument("--install", help="Execute the install step. When specified, configure and build steps WILL run without changes", action="store_true")
+parser.add_argument("--profile", help="Custom conan profile.. By default for visual studio profile is msvc and gcc for GNU", default="default", type=str)
 
 args = parser.parse_args()
 
@@ -101,13 +116,14 @@ print("Path of build directory:" + build_directory)
 run_command("conan remote add -f bincrafters https://api.bintray.com/conan/bincrafters/public-conan")
 run_command("conan remote add -f qtproject https://api.bintray.com/conan/qtproject/conan")
 
-script = 'conan install {0} -if "{1}" --build=missing'.format(conanfile_path, build_directory)
+profile_flag = parse_compiler(args.compiler, args.profile)
+
+script = 'conan install {0} -if "{1}" --build=missing --profile={2}'.format(conanfile_path, build_directory, profile_flag)
 run_command(script)
 
 parse_qt(args.qt)
 parse_cmake(args.cmakeargs)
 parse_ninja(args.ninjaargs)
-parse_compiler(args.compiler)
 
 if not args.configure and not args.build:
     # If we have neither --configure nor --build, we should do both configure and build (but install only if requested)
