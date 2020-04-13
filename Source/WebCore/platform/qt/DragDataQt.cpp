@@ -55,8 +55,8 @@ bool DragData::containsFiles() const
 {
     if (!m_platformDragData)
         return false;
-    QList<QUrl> urls = m_platformDragData->urls();
-    foreach (const QUrl &url, urls) {
+    const QList<QUrl> urls = m_platformDragData->urls();
+    for (const auto& url : urls) {
         if (!url.toLocalFile().isEmpty())
             return true;
     }
@@ -72,8 +72,8 @@ void DragData::asFilenames(Vector<String>& result) const
 {
     if (!m_platformDragData)
         return;
-    QList<QUrl> urls = m_platformDragData->urls();
-    foreach (const QUrl &url, urls) {
+    const QList<QUrl> urls = m_platformDragData->urls();
+    for (const auto& url : urls) {
         QString file = url.toLocalFile();
         if (!file.isEmpty())
             result.append(file);

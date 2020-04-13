@@ -619,7 +619,8 @@ void QNetworkReplyHandler::sendResponseIfNeeded()
         response.setHTTPStatusText(m_replyWrapper->reply()->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toByteArray().constData());
 
         // Add remaining headers.
-        foreach (const QNetworkReply::RawHeaderPair& pair, m_replyWrapper->reply()->rawHeaderPairs())
+        const auto headerPairs = m_replyWrapper->reply()->rawHeaderPairs();
+        for (const auto& pair : headerPairs)
             response.setHTTPHeaderField(String(pair.first.constData(), pair.first.size()), String(pair.second.constData(), pair.second.size()));
     }
 

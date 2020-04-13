@@ -66,7 +66,7 @@ void QtMIMETypeSniffer::trySniffing()
     m_reply->disconnect(this);
     QCoreApplication::removePostedEvents(this, QEvent::MetaCall);
     m_isFinished = true;
-    emit finished();
+    Q_EMIT finished();
 }
 
 #include "moc_QtMIMETypeSniffer.cpp"

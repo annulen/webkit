@@ -176,6 +176,7 @@ add_definitions(-DQT_NO_EXCEPTIONS)
 add_definitions(-DQT_USE_QSTRINGBUILDER)
 add_definitions(-DQT_NO_CAST_TO_ASCII -DQT_ASCII_CAST_WARNINGS)
 add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000)
+add_definitions(-DQT_NO_KEYWORDS)
 
 # We use -fno-rtti with GCC and Clang, see OptionsCommon.cmake
 if (COMPILER_IS_GCC_OR_CLANG)

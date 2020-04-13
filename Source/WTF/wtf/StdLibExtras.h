@@ -29,6 +29,7 @@
 
 #include <chrono>
 #include <memory>
+#include <type_traits>
 #include <wtf/Assertions.h>
 #include <wtf/CheckedArithmetic.h>
 
@@ -370,6 +371,14 @@ namespace chrono_literals {
     }
 }
 }
+#endif
+
+#if __cplusplus < 201703L && (!defined(_MSC_FULL_VER) || _MSC_FULL_VER < 190023918) && !defined(__cpp_lib_as_const)
+template<typename T>
+constexpr typename add_const<T>::type& as_const(T& t) noexcept { return t; }
+
+template<typename T>
+void as_const(const T&&) = delete;
 #endif
 
 template<WTF::CheckMoveParameterTag, typename T>
