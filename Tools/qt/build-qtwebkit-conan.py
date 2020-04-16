@@ -45,36 +45,37 @@ def parse_ninja(ninja):
         os.environ["NINJAFLAGS"] = ninja
 
 
-def parse_compiler(compiler,profile):
-    if profile != "default":
-        return profile
+def set_profile(profile, cc, cxx):
+    if profile == "qtwebkit_msvc":
+        run_command("conan profile new {0} --detect --force".format(profile))
+        os.environ["CC"] = cc
+        os.environ["CXX"] = cxx
+    else:
+        os.environ["CC"] = cc
+        os.environ["CXX"] = cxx
+        run_command("conan profile new {0} --detect --force".format(profile))
+        if platform.system() == "Windows" and "gcc" in profile:
+            run_command("conan profile update settings.compiler.threads=posix {0}".format(profile))
+            run_command("conan profile update settings.compiler.exception=seh {0}".format(profile))
 
-    system_platform = platform.system()
 
+def parse_compiler(compiler):
+    preset_data = {
+        "msvc": ["qtwebkit_msvc", "cl", "cl"],
+        "clang": ["qtwebkit_clang", "clang", "clang++"],
+        "gcc": ["qtwebkit_gcc", "gcc", "g++"]
+    }
     if not compiler:
-        if system_platform == "Windows":
+        if platform.system() == "Windows":
             compiler = "msvc"
-        elif system_platform == "Darwin":
+        elif platform.system() == "Darwin":
             compiler = "clang"
 
-    if compiler == "msvc":
-        run_command("conan profile new msvc --detect --force")
-        os.environ["CC"] = "cl"
-        os.environ["CXX"] = "cl"
-        return "msvc"
-    elif compiler == "clang":
-        os.environ["CC"] = "clang"
-        os.environ["CXX"] = "clang++"
-        run_command("conan profile new clang --detect --force")
-        return "clang"
-    elif compiler == "gcc":
-        os.environ["CC"] = "gcc"
-        os.environ["CXX"] = "g++"
-        run_command("conan profile new gcc --detect --force")
-        run_command("conan profile update settings.compiler.threads=posix gcc")
-        if system_platform == "Windows":
-            run_command("conan profile update settings.compiler.exception=seh gcc")
-        return "gcc"
+    if compiler in preset_data:
+        set_profile(*preset_data[compiler])
+        return preset_data[compiler][0]
+
+    sys.exit("Error: Unknown Compiler " + compiler + " specified")
 
 
 def run_command(command):
@@ -98,7 +99,7 @@ parser.add_argument("--compiler", help="Specify compiler for build (msvc, gcc, c
 parser.add_argument("--configure", help="Execute the configuration step. When specified, build won't run unless --build is specified", action="store_true")
 parser.add_argument("--build", help="Execute the build step. When specified, configure won't run unless --configure is specified", action="store_true")
 parser.add_argument("--install", help="Execute the install step. When specified, configure and build steps WILL run without changes", action="store_true")
-parser.add_argument("--profile", help="Custom conan profile.. By default for visual studio profile is msvc and gcc for GNU", default="default", type=str)
+parser.add_argument("--profile", help="Name of conan profile provided by user. Note: compiler and profile options are mutually exclusive", default="default", type=str)
 
 args = parser.parse_args()
 
@@ -116,7 +117,10 @@ print("Path of build directory:" + build_directory)
 run_command("conan remote add -f bincrafters https://api.bintray.com/conan/bincrafters/public-conan")
 run_command("conan remote add -f qtproject https://api.bintray.com/conan/qtproject/conan")
 
-profile_flag = parse_compiler(args.compiler, args.profile)
+if args.profile != "default" and args.compiler != None:
+    sys.exit("Error: Both compiler and Conan profile specified")
+
+profile_flag = parse_compiler(args.compiler) if args.profile == "default" else args.profile
 
 script = 'conan install {0} -if "{1}" --build=missing --profile={2}'.format(conanfile_path, build_directory, profile_flag)
 run_command(script)
