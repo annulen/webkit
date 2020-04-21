@@ -31,7 +31,7 @@ class QtWebKitConan(ConanFile):
     url = "https://github.com/qtwebkit/qtwebkit"
     description = "Qt port of WebKit"
     topics = ("qt", "browser-engine", "webkit", "qt5", "qml", "qtwebkit")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "compiler", "build_type", "arch", "arch_build"
     generators = "cmake", "virtualenv", "txt"
     exports_sources = "../../*"
     no_copy_source = True

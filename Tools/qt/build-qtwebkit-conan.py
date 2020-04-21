@@ -45,8 +45,9 @@ def parse_ninja(ninja):
         os.environ["NINJAFLAGS"] = ninja
 
 
-def set_profile(profile, cc, cxx):
-    if profile == "qtwebkit_msvc":
+def set_profile(profile, cc, cxx, binary_type):
+    profile += binary_type #eg.qtwebkit_msvcx32
+    if "qtwebkit_msvc" in profile:
         run_command("conan profile new {0} --detect --force".format(profile))
         os.environ["CC"] = cc
         os.environ["CXX"] = cxx
@@ -58,8 +59,15 @@ def set_profile(profile, cc, cxx):
             run_command("conan profile update settings.compiler.threads=posix {0}".format(profile))
             run_command("conan profile update settings.compiler.exception=seh {0}".format(profile))
 
+    if binary_type == 'x32':
+        run_command("conan profile update settings.arch=x86 {0}".format(profile))
+        run_command("conan profile update settings.arch_build=x86 {0}".format(profile))
+        if platform.system() == "Windows" and "gcc" in profile:
+            run_command("conan profile update settings.compiler.exception=dwarf2 {0}".format(profile))
 
-def parse_compiler(compiler):
+    return profile
+
+def parse_compiler(compiler, binary_type):
     preset_data = {
         "msvc": ["qtwebkit_msvc", "cl", "cl"],
         "clang": ["qtwebkit_clang", "clang", "clang++"],
@@ -72,8 +80,7 @@ def parse_compiler(compiler):
             compiler = "clang"
 
     if compiler in preset_data:
-        set_profile(*preset_data[compiler])
-        return preset_data[compiler][0]
+        return set_profile(*preset_data[compiler], binary_type)
 
     sys.exit("Error: Unknown Compiler " + compiler + " specified")
 
@@ -100,6 +107,7 @@ parser.add_argument("--configure", help="Execute the configuration step. When sp
 parser.add_argument("--build", help="Execute the build step. When specified, configure won't run unless --configure is specified", action="store_true")
 parser.add_argument("--install", help="Execute the install step. When specified, configure and build steps WILL run without changes", action="store_true")
 parser.add_argument("--profile", help="Name of conan profile provided by user. Note: compiler and profile options are mutually exclusive", default="default", type=str)
+parser.add_argument("--binary_type", help="32 bit or 64 bit build, leave blank for autodetect", default="", choices=['x32', 'x64'])
 
 args = parser.parse_args()
 
@@ -120,7 +128,7 @@ run_command("conan remote add -f qtproject https://api.bintray.com/conan/qtproje
 if args.profile != "default" and args.compiler != None:
     sys.exit("Error: Both compiler and Conan profile specified")
 
-profile_flag = parse_compiler(args.compiler) if args.profile == "default" else args.profile
+profile_flag = parse_compiler(args.compiler, args.binary_type) if args.profile == "default" else args.profile
 
 script = 'conan install {0} -if "{1}" --build=missing --profile={2}'.format(conanfile_path, build_directory, profile_flag)
 run_command(script)
