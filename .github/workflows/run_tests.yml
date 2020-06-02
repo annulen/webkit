@@ -1,0 +1,112 @@
+name: Running build and tests inside docker
+on:
+  push:
+    branches:
+      - qtwebkit-5.212
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+            fetch-depth: 1
+      - name: prepare
+        id: prepare
+        run: |
+               ln -sf WebKitBuild-Docker WebKitBuild
+               sudo chown -R 1000:1000 /home/runner/work/qtwebkit/qtwebkit
+               echo '/tmp/core-pid_%p-_-process_%E' | sudo tee /proc/sys/kernel/core_pattern
+               ulimit -c unlimited
+      - name: prebuild-prepare
+        id: prebuildprep
+        uses: docker://slapinid/qbat2-deps:latest
+        with:
+          args: /bin/tar xvf /home/build/qtwebkit-libs.tar.bz2
+      - name: prebuild-checks
+        id: prebuildcheck
+        run: |
+               cat /proc/sys/kernel/core_pattern
+               ls -l . WebKitBuild-Docker
+               find ./WebKitBuild-Docker -type f -name 'qmake*'
+               ulimit -c unlimited
+      - name: building
+        id: build
+        uses: docker://slapinid/qbat2-deps:latest
+        with:
+          args: /usr/bin/env NUMBER_OF_PROCESSORS=2 /bin/bash /build-qtwebkit-release.sh
+      - name: checking build
+        id: checkbuild
+        uses: docker://slapinid/qbat2-deps:latest
+        with:
+          args: /usr/bin/find ./WebKitBuild-Docker
+      - name: running tests
+        id: tests
+        uses: docker://slapinid/qbat2-deps:latest
+        with:
+          args: /usr/bin/env WEBKIT_CORE_DUMPS_DIRECTORY=/tmp /bin/bash /run-tests.sh
+        continue-on-error: true
+      - name: archive
+        id: archivebuild
+        uses: docker://slapinid/qbat2-deps:latest
+        with:
+          args: /usr/bin/env WEBKIT_OUTPUTDIR=WebKitBuild-Docker python Tools/BuildSlaveSupport/built-product-archive --platform qt --release archive
+        continue-on-error: true
+      - name: archive-test-results
+        id: archivetest
+        uses: docker://slapinid/qbat2-deps:latest
+        with:
+          args: /usr/bin/env WEBKIT_OUTPUTDIR=WebKitBuild-Docker python Tools/BuildSlaveSupport/test-result-archive --platform qt --release archive
+        continue-on-error: true
+      - name: postbuild-checks
+        id: postbuildcheck
+        run: |
+               find . -type f -name release.zip
+               find . -type f -name layout-test-results.zip
+      - uses: actions/upload-artifact@v2
+        with:
+          name: release-archive
+          path: WebKitBuild-Docker/release.zip
+      - uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: layout-test-results.zip
+      - name: post-build
+        id: postbuild
+        run: |
+               sudo chown -R $(id -u):$(id -g) /home/runner/work/qtwebkit/qtwebkit
+               ls -l WebKitBuild-Docker
+      - name: check-core-files
+        id: checkcores
+        run: |
+               ulimit -c
+               cat /proc/sys/kernel/core_pattern
+               find /home/runner/work/qtwebkit/qtwebkit -type f -name 'core*'
+        continue-on-error: true
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: slapinid/qbat2-deps:latest
+      options: --ulimit core=-1
+    steps:
+      - name: download-qtwebkit
+        uses: actions/download-artifact@v2
+      - name: run-tests
+        run: |
+              unzip release.zip
+              ls -l . /
+              ulimit -c
+              cat /proc/sys/kernel/core_pattern
+              /usr/bin/env WEBKIT_CORE_DUMPS_DIRECTORY=/tmp /bin/bash /run-tests.sh
+              /usr/bin/env WEBKIT_OUTPUTDIR=WebKitBuild-Docker python Tools/BuildSlaveSupport/test-result-archive --platform qt --release archive
+              tar zcf core-archive.tar.gz /tmp/core*
+      - uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: layout-test-results.zip
+      - uses: actions/upload-artifact@v2
+        with:
+          name: test-results-coredump
+          path: core-archive.tar.gz
+
