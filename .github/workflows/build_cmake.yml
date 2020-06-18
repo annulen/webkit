@@ -10,6 +10,7 @@ on:
     branches:
       - qtwebkit-dev-wip
       - qtwebkit-5.212
+      - qtwebkit-stable
 
 env:
   QT_VERSION: 5.14.1
@@ -55,22 +56,24 @@ jobs:
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
         REPO="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-        BRANCH="${GITHUB_REF/#refs\/heads\//}"
+        BRANCH=qtwebkit-stable
+        #BRANCH="${GITHUB_REF/#refs\/heads\//}"
 
         # Following code is based on logs of actions/checkout@v2, with sparseCheckout stuff inserted in the middle
         echo "Syncing repository: $GITHUB_REPOSITORY"
         echo "Working directory is '$(pwd)' GITHUB_WORKSPACE=$GITHUB_WORKSPACE BRANCH=$BRANCH"
         git version
-        git init $GITHUB_WORKSPACE
-        git remote add origin https://github.com/$GITHUB_REPOSITORY
-        git config --local gc.auto 0
-        # Now interesting part
-        git config core.sparseCheckout true
-        # FIXME: hardcode! Cannot use .travis-sparse-checkout yet
-        echo "/*" >> .git/info/sparse-checkout
-        echo "!LayoutTests" >> .git/info/sparse-checkout
-        git -c protocol.version=2 fetch --no-tags --prune --progress --depth=10 origin +${GITHUB_SHA}:refs/remotes/origin/${BRANCH}
-        git checkout --progress --force -B $BRANCH refs/remotes/origin/$BRANCH
+        git config --global user.email "qtbot@github.com"
+        git config --global user.name "qtbot"
+        git -c protocol.version=2 clone --filter=blob:none --no-checkout https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE -b $BRANCH
+        cd $GITHUB_WORKSPACE
+        git sparse-checkout init
+        git sparse-checkout set '/*' '!LayoutTests'
+        git -c protocol.version=2 fetch --no-tags origin +${GITHUB_SHA}:refs/remotes/origin/$BRANCH
+        # qtwebkit-stable doesn't build on its own
+        git -c protocol.version=2 fetch --no-tags origin qtwebkit-5.212
+        git checkout qtwebkit-5.212
+        git merge ${GITHUB_SHA}
 
     - name: Download Ninja and CMake
       id: cmake_and_ninja
