@@ -1,0 +1,404 @@
+#!/usr/bin/env python3
+
+import argparse
+import platform
+import requests
+import semantic_version
+import shutil
+import subprocess
+import sys
+import urllib.request
+from lxml import etree, html
+from pathlib import Path
+import os
+import shlex
+
+
+BaseUrl = 'https://download.qt.io/online/qtsdkrepository/'
+
+OsMap = {
+  'macos': 'mac_x64',
+  'linux': 'linux_x64',
+  'windows': 'windows_x86'
+}
+
+
+def key_by_value(dict, value):
+  return next((left for left, right in dict.items() if right == value), None)
+
+
+def decode_version(v):
+  v = list(v)
+  major = v.pop(0)
+  patch = v.pop() if len(v) > 1 else 0
+  minor = ''.join(v)
+  return '{}.{}.{}'.format(major, minor, patch)
+
+
+def deduce_os():
+  os_type = platform.system().lower()
+  if os_type == 'darwin':
+    os_type = 'macos'
+  return os_type
+
+
+def discover_dirs(url):
+  reply = requests.get(url)
+  page = html.fromstring(reply.content)
+  items = page.xpath('//table//tr[position()>2]//a[not(starts-with(@href, "/"))]/@href')
+  return [item for item in items if item.endswith('/')]
+
+
+def discover_kits(args):
+  os_dict = {}
+  os_types = discover_dirs(BaseUrl)
+  for os_type in os_types:
+    human_os = key_by_value(OsMap, os_type[:-1])
+    current_os = human_os if human_os is not None else os_type[:-1]
+    os_dict[current_os] = None
+
+    if not (args.os == 'discover' and args.all or args.os != 'discover' and args.os in [os_type[:-1], human_os]):
+      continue
+
+    targets_dict = {}
+    targets = discover_dirs(BaseUrl + os_type)
+    targets = [target for target in targets if target != 'root/']
+    for target in targets:
+      targets_dict[target[:-1]] = None
+
+      if not (args.target == 'discover' and args.all or args.target != 'discover' and args.target == target[:-1]):
+        continue
+
+      versions_dict = {}
+      versions = discover_dirs(BaseUrl + os_type + target)
+      for version in versions:
+        if version.startswith('tools_') or version.endswith('_preview/') or version.endswith('_wasm/') or '_src' in version or not version.startswith('qt5_'):
+          continue
+
+        ver = decode_version(version[len('qt5_'):-1])
+        versions_dict[ver] = None
+
+        if not (args.version == 'discover' and args.all or args.version != 'discover' and args.version != 'latest' and args.version == ver):
+          continue
+
+        toolchains = discover_dirs(BaseUrl + os_type + target + version)
+        toolchains = [toolchain.split('.')[2:] for toolchain in toolchains]
+        toolchains = [toolchain[-1] for toolchain in toolchains if len(toolchain) > 0]
+        toolchains = set([toolchain[:-1] for toolchain in toolchains if not toolchain.startswith('qt') and not toolchain.startswith('debug')])
+
+        versions_dict[ver] = toolchains
+
+      targets_dict[target[:-1]] = versions_dict
+
+    os_dict[current_os] = targets_dict
+
+  return os_dict
+
+
+def build_url(args):
+  ver = args.version.replace('.', '')
+  return BaseUrl + '{}/{}/qt5_{}/'.format(OsMap[args.os], args.target, ver)
+
+
+def toolchain_build_url(args, tools):
+  return BaseUrl + '{}/{}/tools_{}/'.format(OsMap[args.os], args.target, tools)
+
+
+def ossl_info(url, name):
+  reply = requests.get(url + "Updates.xml")
+  update_xml = etree.fromstring(reply.content)
+
+  for package in update_xml.xpath('//PackageUpdate'):
+    name = package.xpath('Name/text()')[0]
+    if name.startswith('qt.') and name.endswith('_{}'.format(name[len(name)-3:])):
+      version = package.xpath('Version/text()')[0]
+      archives = package.xpath('DownloadableArchives/text()')[0].split(', ')
+      return (name, version, archives)
+
+  print('Update.xml does not contain proper entry for Qt kit', file=sys.stderr)
+  return None
+
+
+def mingw_info(url, mingw):
+  reply = requests.get(url + "Updates.xml")
+  update_xml = etree.fromstring(reply.content)
+
+  for package in update_xml.xpath('//PackageUpdate'):
+    name = package.xpath('Name/text()')[0]
+    if name.startswith('qt.') and name.endswith('.{}'.format(mingw)):
+      version = package.xpath('Version/text()')[0]
+      archives = package.xpath('DownloadableArchives/text()')[0].split(', ')
+      return (name, version, archives)
+
+  print('Update.xml does not contain proper entry for Qt kit', file=sys.stderr)
+  return None
+
+
+def get_info(url, version, toolchain):
+  reply = requests.get(url + "Updates.xml")
+  update_xml = etree.fromstring(reply.content)
+
+  ver = version.replace('.', '')
+
+  for package in update_xml.xpath('//PackageUpdate'):
+    name = package.xpath('Name/text()')[0]
+    if name.startswith('qt.') and name.endswith('.{}.{}'.format(ver, toolchain)):
+      version = package.xpath('Version/text()')[0]
+      archives = package.xpath('DownloadableArchives/text()')[0].split(', ')
+      return (name, version, archives)
+
+  print('Update.xml does not contain proper entry for Qt kit', file=sys.stderr)
+  return None
+
+
+def download_and_extract(archives_url, archives, output, req_modules):
+  for archive in archives:
+    module = archive.split('-')[0]
+    if len(req_modules) != 0 and (module not in req_modules):
+        continue
+    try:
+      print('Downloading module {}... '.format(module), end='', flush=True)
+      with urllib.request.urlopen(archives_url + archive) as response, open(archive, 'wb') as out_file:
+        shutil.copyfileobj(response, out_file)
+
+      print('\rExtracting module {}... '.format(module), end='', flush=True)
+      subprocess.run('7z x {0} -o{1}'.format(archive, output), shell=True, check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      print('\rInstalled module {} successfully'.format(module))
+    except subprocess.CalledProcessError as e:
+      print('Error: {}'.format(e))
+
+      os_type = deduce_os()
+      suggestion = ''
+      if os_type == 'linux':
+        suggestion = ' Run sudo apt install p7zip-full on Ubuntu'
+      elif os_type == 'macos':
+        suggestion = ' Run brew install p7zip on macOS'
+        
+      raise RuntimeError('Check that 7z command is in your PATH.{}'.format(suggestion))
+    except KeyboardInterrupt:
+      print('Interrupted')
+      raise KeyboardInterrupt
+    finally:
+      Path(archive).unlink()
+
+  print('Finished installation')
+
+
+def show_discover_context(args, parser):
+  if args.os != 'discover':
+    if args.os == 'auto':
+      args.os = deduce_os()
+
+    print('OS type: {}'.format(args.os))
+
+  if args.target != 'discover':
+    print('Target: {}'.format(args.target))
+
+  if args.version != 'discover':
+    if args.version == 'latest':
+      print('Discovering latest version... ', end='')
+      kits = discover_kits(args)
+      print('Done')
+      check_os_type(args, kits)
+      targets = kits[args.os]
+      check_targets(args, targets)
+      versions = targets[args.target]
+      args.version = str(sorted(map(semantic_version.Version, versions.keys()))[-1])
+    elif not semantic_version.validate(args.version):
+      print('Wrong version: {}. Should follow Semantic Versioning format: major.minor.patch\n'.format(args.version), file=sys.stderr)
+      parser.print_help()
+      sys.exit(1)
+
+    print('Qt version: {}'.format(args.version))
+
+  if args.toolchain != 'discover':
+    print('Toolchain: {}'.format(args.toolchain))
+
+
+def show_discovered_parameters(args, params, labels):
+  print('Discovering available ', end='')
+  
+  discoverables = []
+  for index, param in enumerate(params):
+    if param == 'discover':
+      discoverables.append(labels[index])
+
+  if not args.all:
+    discoverables = discoverables[:1]
+
+  if len(discoverables) == 1:
+    print('{}...'.format(discoverables[0]), end='', flush=True)
+  elif len(discoverables) == 2:
+    print('{}...'.format(' and '.join(discoverables)), end='', flush=True)
+  else:
+    print('{}, and {}...'.format(', '.join(discoverables[:-1]), discoverables[-1]), end='', flush=True)
+
+
+def show_os_types_only(kits):
+  print('  Choose from: {}'.format(', '.join(sorted(kits.keys()))))
+
+
+def show_targets_only(targets):
+  print('  Choose from: {}'.format(', '.join(sorted(targets.keys()))))
+
+
+def show_versions_only(versions):
+  print('  Choose from: {}'.format(', '.join(map(str, sorted(map(semantic_version.Version, versions.keys()))))))
+
+
+def show_toolchains_only(toolchains):
+  print('  Choose from: {}'.format(', '.join(sorted(toolchains))))
+
+
+def check_os_type(args, kits):
+  if not args.os in kits:
+    print('  Unknown OS type: {}'.format(args.os))
+    show_os_types_only(kits)
+    sys.exit(1)
+
+
+def check_targets(args, targets):
+  if not args.target in targets:
+    print('  Unknown target: {}'.format(args.target))
+    show_targets_only(targets)
+    sys.exit(1)
+
+
+def check_versions(args, versions):
+  if not args.version in versions:
+    print('  Unknown version: {}'.format(args.version))
+    show_versions_only(versions)
+    sys.exit(1)
+
+
+def check_toolchains(args, toolchains):
+  if not args.toolchain in toolchains:
+    print('  Unknown toolchain: {}'.format(args.toolchain))
+    show_toolchains_only(toolchains)
+    sys.exit(1)
+
+def show_os_types_and_all(kits, indent = 0):
+  for os_type, targets in kits.items():
+    print('  {}{}:'.format('  ' * indent, os_type))
+    show_targets_and_all(targets, indent + 1)
+
+
+def show_targets_and_all(targets, indent = 0):
+  for target, versions in sorted(targets.items()):
+    print('  {}Target {} supports toolchains:'.format('  ' * indent, target))
+    show_versions_and_all(versions, indent + 1)
+
+
+def show_versions_and_all(versions, indent = 0):
+  for version, toolchains in sorted(versions.items()):
+    print('  {}{}: {}'.format('  ' * indent, version, ', '.join(sorted(toolchains))))
+
+
+def show_discovery_results(args, kits):
+  print(' Done')
+
+  if args.os == 'discover':
+    if not args.all:
+      show_os_types_only(kits)
+    else:
+      show_os_types_and_all(kits)
+  elif args.target == 'discover':
+    check_os_type(args, kits)
+    targets = kits[args.os]
+    if not args.all:
+      show_targets_only(targets)
+    else:
+      show_targets_and_all(targets)
+  elif args.version == 'discover':
+    check_os_type(args, kits)
+    targets = kits[args.os]
+    check_targets(args, targets)
+    versions = targets[args.target]
+    if not args.all:
+      show_versions_only(versions)
+    else:
+      show_versions_and_all(versions)
+  elif args.toolchain == 'discover':
+    check_os_type(args, kits)
+    targets = kits[args.os]
+    check_targets(args, targets)
+    versions = targets[args.target]
+    check_versions(args, versions)
+    toolchains = versions[args.version]
+    show_toolchains_only(toolchains)
+  else:
+    check_os_type(args, kits)
+    targets = kits[args.os]
+    check_targets(args, targets)
+    versions = targets[args.target]
+    check_versions(args, versions)
+    toolchains = versions[args.version]
+    check_toolchains(args, toolchains)
+
+
+def verify_parameters(args):
+  print('Verifying arguments...', end='')
+  kits = discover_kits(args)
+  show_discovery_results(args, kits)
+
+
+def main():
+  parser = argparse.ArgumentParser(description='Qt downloader',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('os', nargs='?', default='discover', help='Operating system type: {}, auto, or discovered one. Omit this to discover available OS types'.format(', '.join(OsMap.keys())))
+  parser.add_argument('target', nargs='?', default='discover', help='Target platform. Omit this to discover available targets')
+  parser.add_argument('version', nargs='?', default='discover', help='Qt version conforming to Semantic Versioning format: major.minor.patch. Use \'latest\' to get most up to date version. Omit this to discover available versions.')
+  parser.add_argument('toolchain', nargs='?', default='discover', help='Toolchain to use. Omit this to discover available toolchains')
+  parser.add_argument('-a', '--all', action='store_true', help='Discover allowed values for all missing arguments')
+  parser.add_argument('--output', '-o', default=os.getcwd(), help='Output directory')
+  parser.add_argument('--qt_modules', default='', help='Download selected qt modules')
+  parser.add_argument('--mingw', '-m', default=None,
+                      help='Download Mingw from Qt.Expected Format - win{arch}_mingw{major}{minor} eg: win32_mingw730')
+  parser.add_argument('--openssl', choices=['openssl_x64', 'openssl_x86'],
+                      default=None, help='Download openSSl Distribution from Qt. ')
+
+  args = parser.parse_args()
+
+  show_discover_context(args, parser)
+
+  params = [args.os, args.target, args.version, args.toolchain]
+  labels = ['OS types', 'targets', 'Qt versions', 'toolchains']
+  if 'discover' in params:
+    show_discovered_parameters(args, params, labels)
+    kits = discover_kits(args)
+    show_discovery_results(args, kits)
+    sys.exit(0)
+  else:
+    verify_parameters(args)
+    url = build_url(args)
+
+    info = get_info(url, args.version, args.toolchain)
+    if info is None:
+      sys.exit(1)
+
+    if args.mingw:
+      mingw = toolchain_build_url(args, 'mingw')
+      mingw_name, mingw_version, mingw_archives = mingw_info(mingw, args.mingw)
+      download_and_extract(mingw + mingw_name + '/' + mingw_version, mingw_archives, args.output, [])
+
+    if args.openssl:
+      ossl = toolchain_build_url(args, args.openssl)
+      ossl_name, ossl_version, ossl_archives = ossl_info(ossl, args.openssl)
+      download_and_extract(ossl + ossl_name + '/' + ossl_version, ossl_archives, args.output, [])
+
+    name, version, archives = info
+    qt_modules = shlex.split(args.qt_modules)
+    download_and_extract(url + name + '/' + version, archives, args.output, qt_modules)
+
+
+if __name__ == '__main__':
+  try:
+    main()
+  except IOError as error:
+    print(error)
+  except RuntimeError as error:
+    print(error)
+  except KeyboardInterrupt:
+    print('Stopped by user')
+

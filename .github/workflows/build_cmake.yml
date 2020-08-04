@@ -6,6 +6,7 @@ on:
       - qtwebkit-dev-wip
       - wk2
       - qtwebkit-5.212
+
   pull_request:
     branches:
       - qtwebkit-dev-wip
@@ -24,6 +25,7 @@ env:
   CCACHE_MAXSIZE: "250M"
   CCACHE_SLOPPINESS: "pch_defines,time_macros"
   CCACHE_HARDLINK: "true"
+  QT_MODULES: "qtbase qtdeclarative qtlocation qtmultimedia qtsensors qtwebchannel"
 
 jobs:
   build:
@@ -56,7 +58,6 @@ jobs:
       run: |
         REPO="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         BRANCH="${GITHUB_REF/#refs\/heads\//}"
-
         # Following code is based on logs of actions/checkout@v2, with sparseCheckout stuff inserted in the middle
         echo "Syncing repository: $GITHUB_REPOSITORY"
         echo "Working directory is '$(pwd)' GITHUB_WORKSPACE=$GITHUB_WORKSPACE BRANCH=$BRANCH"
@@ -78,7 +79,6 @@ jobs:
       run: |
         set(cmake_version "$ENV{CMAKE_VERSION}")
         set(ninja_version "$ENV{NINJA_VERSION}")
-
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(ninja_suffix "win.zip")
           set(cmake_suffix "win64-x64.zip")
@@ -92,19 +92,15 @@ jobs:
           set(cmake_suffix "Darwin-x86_64.tar.gz")
           set(cmake_dir "cmake-${cmake_version}-Darwin-x86_64/CMake.app/Contents/bin")
         endif()
-
         set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
         file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
-
         set(cmake_url "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-${cmake_suffix}")
         file(DOWNLOAD "${cmake_url}" ./cmake.zip SHOW_PROGRESS)
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./cmake.zip)
-
         # Save the path for other steps
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/${cmake_dir}" cmake_dir)
         message("::set-output name=cmake_dir::${cmake_dir}")
-
         if (NOT "${{ runner.os }}" STREQUAL "Windows")
           execute_process(
             COMMAND chmod +x ninja
@@ -112,81 +108,37 @@ jobs:
           )
         endif()
 
-    - name: Download Qt
-      id: qt
-      if: runner.os != 'Linux'
-      shell: cmake -P {0}
+    - name: Download Qt Windows
+      id: qt_win
+      if: runner.os == 'Windows'
+      env:
+        TOOLCHAIN: "win64_msvc2017_64"
+        DIR: "msvc2017_64"
+      shell: bash --noprofile --norc -eo pipefail -x {0} 
       run: |
-        set(qt_version "$ENV{QT_VERSION}")
+        py -m pip install qt-downloader-requirements.txt
+        QT_INSTALL_DIR="/c/Qt"
+        Tools/qt/qt-downloader windows desktop ${QT_VERSION} ${TOOLCHAIN} --output=${QT_INSTALL_DIR} --qt_modules="${QT_MODULES}"
+        export QTDIR="${QT_INSTALL_DIR}/${QT_VERSION}/${DIR}"
+        ls $QTDIR
+        Tools/qt/license_writer.sh
+        QTWINDIR="C:\\Qt\\${QT_VERSION}\\${DIR}"
+        echo "::set-output name=qt_dir::${QTWINDIR}"
 
-        string(REPLACE "." "" qt_version_dotless "${qt_version}")
-        if ("${{ runner.os }}" STREQUAL "Windows")
-          set(url_os "windows_x86")
-          if ("x${{ matrix.config.environment_script }}" STREQUAL "x")
-            set(qt_package_arch_suffix "win64_mingw73")
-            set(qt_dir_prefix "${qt_version}/mingw73_64")
-            set(qt_package_suffix "-Windows-Windows_10-Mingw73-Windows-Windows_10-X86_64")
-          elseif ("${{ matrix.config.environment_script }}" MATCHES "vcvars64.bat")
-            set(qt_package_arch_suffix "win64_msvc2017_64")
-            set(qt_dir_prefix "${qt_version}/msvc2017_64")
-            set(qt_package_suffix "-Windows-Windows_10-MSVC2017-Windows-Windows_10-X86_64")
-          elseif ("${{ matrix.config.environment_script }}" MATCHES "vcvars32.bat")
-            set(qt_package_arch_suffix "win32_msvc2017")
-            set(qt_dir_prefix "${qt_version}/msvc2017")
-            set(qt_package_suffix "-Windows-Windows_10-MSVC2017-Windows-Windows_10-X86")
-          endif()
-        elseif ("${{ runner.os }}" STREQUAL "Linux")
-          set(url_os "linux_x64")
-          set(qt_package_arch_suffix "gcc_64")
-          set(qt_dir_prefix "${qt_version}/gcc_64")
-          set(qt_package_suffix "-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64")
-        elseif ("${{ runner.os }}" STREQUAL "macOS")
-          set(url_os "mac_x64")
-          set(qt_package_arch_suffix "clang_64")
-          set(qt_dir_prefix "${qt_version}/clang_64")
-          set(qt_package_suffix "-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64")
-        endif()
-
-        set(qt_base_url "https://download.qt.io/online/qtsdkrepository/${url_os}/desktop/qt5_${qt_version_dotless}")
-        file(DOWNLOAD "${qt_base_url}/Updates.xml" ./Updates.xml SHOW_PROGRESS)
-
-        file(READ ./Updates.xml updates_xml)
-        string(REGEX MATCH "<Name>qt.qt5.*<Version>([0-9+-.]+)</Version>" updates_xml_output "${updates_xml}")
-        set(qt_package_version ${CMAKE_MATCH_1})
-
-        file(MAKE_DIRECTORY qt5)
-
-        # Save the path for other steps
-        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
-        message("::set-output name=qt_dir::${qt_dir}")
-
-        function(downloadAndExtract url archive)
-          message("Downloading ${url}")
-          file(DOWNLOAD "${url}" ./${archive} SHOW_PROGRESS)
-          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ../${archive} WORKING_DIRECTORY qt5)
-        endfunction()
-
-        foreach(package qtbase qtdeclarative qtlocation qtmultimedia qtsensors qtwebchannel)
-          downloadAndExtract(
-            "${qt_base_url}/qt.qt5.${qt_version_dotless}.${qt_package_arch_suffix}/${qt_package_version}${package}${qt_package_suffix}.7z"
-            ${package}.7z
-          )
-        endforeach()
-
-        # uic depends on libicu56.so
-        if ("${{ runner.os }}" STREQUAL "Linux")
-          downloadAndExtract(
-            "${qt_base_url}/qt.qt5.${qt_version_dotless}.${qt_package_arch_suffix}/${qt_package_version}icu-linux-Rhel7.2-x64.7z"
-            icu.7z
-          )
-        endif()
-
-        file(READ "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" qtconfig)
-        string(REPLACE "Enterprise" "OpenSource" qtconfig "${qtconfig}")
-        string(REPLACE "licheck.exe" "" qtconfig "${qtconfig}")
-        string(REPLACE "licheck64" "" qtconfig "${qtconfig}")
-        string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
-        file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
+    - name: Download Qt Mac
+      id: qt_mac
+      if: runner.os == 'macOS'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      env: 
+        TOOLCHAIN: "clang_64"
+      run: |
+        pip3 install qt-downloader-requirements.txt
+        QT_INSTALL_DIR="${PWD}/Qt"
+        Tools/qt/qt-downloader macos desktop ${QT_VERSION} ${TOOLCHAIN} --output=${QT_INSTALL_DIR} --qt_modules="${QT_MODULES}"
+        export QTDIR="${QT_INSTALL_DIR}/${QT_VERSION}/${TOOLCHAIN}"
+        ls $QTDIR
+        Tools/qt/license_writer.sh
+        echo "::set-output name=qt_dir::${QTDIR}"
 
     - name: Download ccache
       id: ccache
@@ -210,7 +162,6 @@ jobs:
         key: ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
         restore-keys: |
           ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-
-
     # For Conan
     - uses: actions/setup-python@v1
       if: runner.os == 'Windows' || runner.os == 'macOS'
@@ -236,10 +187,8 @@ jobs:
       run: |
         echo "::add-path::$GITHUB_WORKSPACE"
         echo "::add-path::${{ steps.cmake_and_ninja.outputs.cmake_dir }}"
-
         echo "::set-env name=CCACHE_BASEDIR::$GITHUB_WORKSPACE"
         echo "::set-env name=CCACHE_DIR::$GITHUB_WORKSPACE/.ccache"
-
         echo "::set-env name=cmake_args::\
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
@@ -253,12 +202,12 @@ jobs:
     - name: Configure (MSVC)
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
       shell: cmd
-      run: py Tools\qt\build-qtwebkit-conan.py --configure --cmakeargs="%cmake_args%" --qt="${{ steps.qt.outputs.qt_dir }}" || exit /b 1
+      run: py Tools\qt\build-qtwebkit-conan.py --configure --cmakeargs="%cmake_args%" --qt="${{ steps.qt_win.outputs.qt_dir }}" || exit /b 1
 
     - name: Configure (macOS/Conan)
       if: runner.os == 'macOS'
       shell: bash --noprofile --norc -eo pipefail -x {0}
-      run: Tools/qt/build-qtwebkit-conan.py --configure --cmakeargs="$cmake_args" --qt="${{ steps.qt.outputs.qt_dir }}"
+      run: Tools/qt/build-qtwebkit-conan.py --configure --cmakeargs="$cmake_args" --qt="${{ steps.qt_mac.outputs.qt_dir }}"
 
 #    - uses: actions/upload-artifact@v1
 #      with:
