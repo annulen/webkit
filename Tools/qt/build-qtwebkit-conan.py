@@ -117,6 +117,7 @@ parser.add_argument("--install", help="Execute the install step. When specified,
 parser.add_argument("--profile", help="Name of conan profile provided by user. Note: compiler and profile options are mutually exclusive", type=str)
 parser.add_argument("--arch", help="32 bit or 64 bit build, leave blank for autodetect", default="default", choices=['x86', 'x64'])
 parser.add_argument("--build_type", help="Name of CMake build configuration to use", default="Release", choices=['', 'Release', 'Debug'])
+parser.add_argument("--install_prefix", help="Set installation prefix to the given path (defaults to Qt directory)", default=None)
 
 args = parser.parse_args()
 
@@ -158,6 +159,11 @@ if args.ninjaargs:
 
 if args.build_type:
     os.environ["CMAKE_BUILD_TYPE"] = args.build_type
+
+if args.install_prefix:
+    os.environ["CMAKE_INSTALL_PREFIX"] = args.install_prefix
+elif "QTDIR" in os.environ:
+    os.environ["CMAKE_INSTALL_PREFIX"] = os.environ["QTDIR"]
 
 if not args.configure and not args.build:
     # If we have neither --configure nor --build, we should do both configure and build (but install only if requested)
