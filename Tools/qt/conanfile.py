@@ -40,6 +40,13 @@ class QtWebKitConan(ConanFile):
         "libpng/1.6.37",
         "libwebp/1.1.0"
     )
+    options = {
+        "qt": "ANY",
+        "cmakeargs": "ANY",
+        "ninjaargs": "ANY",
+        "builder_type": "ANY",
+        "install_prefix": "ANY"
+    }
     default_options = {
         "icu:shared": True,
         "icu:data_packaging": "library",
@@ -94,39 +101,38 @@ class QtWebKitConan(ConanFile):
         cmake.generator = "Ninja"
         cmake.verbose = False
         cmake.definitions["QT_CONAN_DIR"] = self.build_folder
-        # QtWebKit installation requires conanfile.txt in build directory
-        self.write_imports()
+        cmake.definitions["QT_CONAN_FILE"] = __file__
 
         # if self.options.use_ccache:
         #    cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
         #    cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
 
-        if "QTDIR" in os.environ:
+        if self.options.qt:
             cmake.definitions["Qt5_DIR"] = os.path.join(
-                os.environ["QTDIR"], "lib", "cmake", "Qt5")
+                str(self.options.qt), "lib", "cmake", "Qt5")
             print("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
 
-        if "CMAKE_BUILD_TYPE" in os.environ:
-            cmake.build_type = os.environ["CMAKE_BUILD_TYPE"]
+        if self.options.builder_type:
+            cmake.build_type = str(self.options.builder_type)
 
-        if "CMAKEFLAGS" in os.environ:
-            cmake_flags = shlex.split(os.environ["CMAKEFLAGS"])
+        if self.options.cmakeargs:
+            cmake_flags = shlex.split(str(self.options.cmakeargs))
         else:
             cmake_flags = None
 
-        if "NINJAFLAGS" in os.environ:
+        if self.options.ninjaargs:
             parser = argparse.ArgumentParser()
             parser.add_argument('-j', default=None, type=int)
             jarg, ninja_flags = parser.parse_known_args(
-                shlex.split(os.environ["NINJAFLAGS"]))
+                shlex.split(str(self.options.ninjaargs)))
             if jarg.j:
                 os.environ['CONAN_CPU_COUNT'] = str(jarg.j)
             ninja_flags.insert(0, '--')
         else:
             ninja_flags = None
 
-        if "CMAKE_INSTALL_PREFIX" in os.environ:
-            cmake.definitions["CMAKE_INSTALL_PREFIX"] = os.environ["CMAKE_INSTALL_PREFIX"]
+        if self.options.install_prefix:
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = str(self.options.install_prefix)
 
         print(self.source_folder)
         print()
@@ -135,25 +141,6 @@ class QtWebKitConan(ConanFile):
         cmake.configure(args=cmake_flags)
         cmake.build(args=ninja_flags)
         cmake.install()
-
-    # QtWebKit installation requires conanfile.txt in build directory, so we generate it here
-    # Should be kept in sync with imports()
-    def write_imports(self):
-        conanfile = open(os.path.join(self.build_folder, "conanfile.txt"), "w")
-        conanfile.write("[imports]\n")
-
-        if self.settings.os == 'Windows':
-            conanfile.write("bin, icudt65.dll -> ./bin\n")
-            conanfile.write("bin, icuin65.dll -> ./bin\n")
-            conanfile.write("bin, icuuc65.dll -> ./bin\n")
-            # Visual Studio
-            conanfile.write("bin, libxml2.dll -> ./bin\n")
-            conanfile.write("bin, libxslt.dll -> ./bin\n")
-            # MinGW
-            conanfile.write("bin, libxml2-2.dll -> ./bin\n")
-            conanfile.write("bin, libxslt-1.dll -> ./bin\n")
-
-        conanfile.close()
 
     def imports(self):
         if self.settings.os == 'Windows':

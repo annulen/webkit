@@ -6,6 +6,7 @@ on:
       - qtwebkit-dev-wip
       - wk2
       - qtwebkit-5.212
+      - no_env_vars_5.212
 
   pull_request:
     branches:
@@ -202,12 +203,12 @@ jobs:
     - name: Configure (MSVC)
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
       shell: cmd
-      run: py Tools\qt\build-qtwebkit-conan.py --configure --cmakeargs="%cmake_args%" --qt="${{ steps.qt_win.outputs.qt_dir }}" || exit /b 1
+      run: py Tools\qt\build-qtwebkit-conan.py --configure --cmakeargs="%cmake_args%" --qt="${{ steps.qt_win.outputs.qt_dir }}" --ninjaargs="-j %HOST_N_CORES% -v" || exit /b 1
 
     - name: Configure (macOS/Conan)
       if: runner.os == 'macOS'
       shell: bash --noprofile --norc -eo pipefail -x {0}
-      run: Tools/qt/build-qtwebkit-conan.py --configure --cmakeargs="$cmake_args" --qt="${{ steps.qt_mac.outputs.qt_dir }}"
+      run: Tools/qt/build-qtwebkit-conan.py --configure --cmakeargs="$cmake_args" --qt="${{ steps.qt_mac.outputs.qt_dir }}" --ninjaargs="-j $HOST_N_CORES -v"
 
 #    - uses: actions/upload-artifact@v1
 #      with:
@@ -239,12 +240,12 @@ jobs:
     - name: Build (MSVC/Conan)
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
       shell: cmd
-      run: py Tools\qt\build-qtwebkit-conan.py --build --install --ninjaargs="-j %HOST_N_CORES% -v" || exit /b 1
+      run: py Tools\qt\build-qtwebkit-conan.py --build --install || exit /b 1
 
     - name: Build (macOS/Conan)
       if: runner.os == 'macOS'
       shell: bash --noprofile --norc -eo pipefail -x {0}
-      run: Tools/qt/build-qtwebkit-conan.py --build --install --ninjaargs="-j $HOST_N_CORES -v"
+      run: Tools/qt/build-qtwebkit-conan.py --build --install
 
     - name: ccache stats
       if: always()

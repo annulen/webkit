@@ -13,6 +13,9 @@ set(PROJECT_VERSION_STRING "${PROJECT_VERSION}")
 
 set(QT_CONAN_DIR "" CACHE PATH "Directory containing conanbuildinfo.cmake and conanfile.txt")
 if (QT_CONAN_DIR)
+    if (NOT QT_CONAN_FILE)
+        set(QT_CONAN_FILE "${QT_CONAN_DIR}/conanfile.txt")
+    endif ()
     message(STATUS "Using conan directory: ${QT_CONAN_DIR}")
     find_program(CONAN_COMMAND NAMES conan PATHS $ENV{PIP3_PATH})
     if (NOT CONAN_COMMAND)
@@ -31,7 +34,7 @@ if (QT_CONAN_DIR)
 
         message(STATUS \"Importing dependencies from conan to \${_conan_imports_dest}\")
         execute_process(
-            COMMAND \"${CONAN_COMMAND}\" imports --import-folder \${_conan_imports_dest} \"${QT_CONAN_DIR}/conanfile.txt\"
+            COMMAND \"${CONAN_COMMAND}\" imports --import-folder \${_conan_imports_dest} \"${QT_CONAN_FILE}\"
             WORKING_DIRECTORY \"${QT_CONAN_DIR}\"
             RESULT_VARIABLE _conan_imports_result
         )
@@ -451,6 +454,8 @@ endif ()
 find_package(Threads REQUIRED)
 
 if (USE_LIBJPEG)
+    # Additional names of libjpeg to search (fixed in CMake 3.12.0)
+    set(JPEG_NAMES jpeg-static libjpeg-static)
     find_package(JPEG)
     if (NOT JPEG_FOUND)
         message(FATAL_ERROR "libjpeg not found. Please make sure that CMake can find its header files and libraries, or build with -DUSE_LIBJPEG=OFF with possible degradation of user experience")
@@ -681,6 +686,14 @@ if (COMPILER_IS_GCC_OR_CLANG AND UNIX)
     endif ()
 endif ()
 
+# Improvised backport of r222112 - not needed with current WebKit
+# -Wexpansion-to-defined produces false positives with GCC but not Clang
+# https://bugs.webkit.org/show_bug.cgi?id=167643#c13
+if (CMAKE_COMPILER_IS_GNUCXX AND (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0.0"))
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-expansion-to-defined")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-expansion-to-defined")
+endif ()
+
 if (WIN32 AND COMPILER_IS_GCC_OR_CLANG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-keep-inline-dllexport")
 endif ()
@@ -814,6 +827,15 @@ if (USE_LIBHYPHEN)
     find_package(Hyphen REQUIRED)
     if (NOT HYPHEN_FOUND)
        message(FATAL_ERROR "libhyphen is needed for USE_LIBHYPHEN.")
+    endif ()
+endif ()
+
+if (USE_WOFF2)
+    find_package(WOFF2Dec 1.0.1)
+    if (WOFF2DEC_FOUND)
+        message(STATUS "Using system WOFF2Dec library.")
+    else ()
+        message(STATUS "WOFF2Dec not found, using the bundled library.")
     endif ()
 endif ()
 
