@@ -40,6 +40,12 @@ class QtWebKitConan(ConanFile):
         "libpng/1.6.37",
         "libwebp/1.1.0"
     )
+    options = {
+        "qt": "ANY",
+        "cmakeargs": "ANY",
+        "build_type": "ANY",
+        "install_prefix": "ANY"
+    }
     default_options = {
         "icu:shared": True,
         "icu:data_packaging": "library",
@@ -100,16 +106,16 @@ class QtWebKitConan(ConanFile):
         #    cmake.definitions["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
         #    cmake.definitions["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
 
-        if "QTDIR" in os.environ:
+        if self.options.qt:
             cmake.definitions["Qt5_DIR"] = os.path.join(
-                os.environ["QTDIR"], "lib", "cmake", "Qt5")
+                str(self.options.qt), "lib", "cmake", "Qt5")
             print("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
 
-        if "CMAKE_BUILD_TYPE" in os.environ:
-            cmake.build_type = os.environ["CMAKE_BUILD_TYPE"]
+        if self.options.build_type:
+            cmake.build_type = str(self.options.build_type)
 
-        if "CMAKEFLAGS" in os.environ:
-            cmake_flags = shlex.split(os.environ["CMAKEFLAGS"])
+        if self.options.cmakeargs:
+            cmake_flags = shlex.split(str(self.options.cmakeargs))
         else:
             cmake_flags = None
 
@@ -124,8 +130,8 @@ class QtWebKitConan(ConanFile):
         else:
             ninja_flags = None
 
-        if "CMAKE_INSTALL_PREFIX" in os.environ:
-            cmake.definitions["CMAKE_INSTALL_PREFIX"] = os.environ["CMAKE_INSTALL_PREFIX"]
+        if self.options.install_prefix:
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = str(self.options.install_prefix)
 
         print(self.source_folder)
         print()

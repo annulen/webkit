@@ -146,29 +146,24 @@ if not args.profile:
 else:
     profile_name = args.profile
 
-run_command('conan install {0} -if "{1}" --build=missing --profile={2}'.format(conanfile_path, build_directory, profile_name))
+build_vars = f'-o qt="{args.qt}" -o cmakeargs="{args.cmakeargs}" \
+-o build_type="{args.build_type}" '
 
-if args.qt:
-    os.environ['QTDIR'] = args.qt
-
-if args.cmakeargs:
-    os.environ["CMAKEFLAGS"] = args.cmakeargs
+if args.install_prefix:
+    build_vars += ' -o install_prefix="{}"'.format(args.install_prefix)
+elif args.qt:
+    build_vars += ' -o install_prefix="{}"'.format(args.qt)
 
 if args.ninjaargs:
     os.environ["NINJAFLAGS"] = args.ninjaargs
-
-if args.build_type:
-    os.environ["CMAKE_BUILD_TYPE"] = args.build_type
-
-if args.install_prefix:
-    os.environ["CMAKE_INSTALL_PREFIX"] = args.install_prefix
-elif "QTDIR" in os.environ:
-    os.environ["CMAKE_INSTALL_PREFIX"] = os.environ["QTDIR"]
 
 if not args.configure and not args.build:
     # If we have neither --configure nor --build, we should do both configure and build (but install only if requested)
     args.configure = True
     args.build = True
+
+if args.configure:
+    run_command('conan install {0} -if "{1}" --build=missing --profile={2} {3}'.format(conanfile_path, build_directory, profile_name, build_vars))
 
 configure_flag = "--configure" if args.configure else ""
 build_flag = "--build" if args.build else ""
