@@ -246,6 +246,21 @@ jobs:
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: Tools/qt/build-qtwebkit-conan.py --build --install --ninjaargs="-j $HOST_N_CORES -v"
 
+    # - name: Verify (Linux)
+    #   if: runner.os == 'Linux'
+    #   shell: bash --noprofile --norc -eo pipefail -x {0}
+    #   run: pip3 install jinja2 && Tools/qt/checker.py --version 5.212.0 --os linux --template=Tools/qt/
+
+    - name: Verify (Mac)
+      if: runner.os == 'macOS'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: pip3 install jinja2 && Tools/qt/installed-files-checker.py --version=5.212.0 --os=macos --qt="${{ steps.qt_mac.outputs.qt_dir }}" --build=build --template=Tools/qt/QtBinaryChecklist.txt
+
+    - name: Verify (Windows)
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: py -m pip install jinja2 && py Tools\qt\installed-files-checker.py --version=5.212.0 --os=windows --qt="${{ steps.qt_win.outputs.qt_dir }}" --build=build --template=Tools\qt\QtBinaryChecklist.txt
+
     - name: ccache stats
       if: always()
       shell: bash --noprofile --norc -eo pipefail -x {0}
