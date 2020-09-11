@@ -95,141 +95,166 @@ qml/QtWebKit/experimental/qmldir
 
 
 {% if os=="linux" %}
-{% if release %}
-lib/libQt5WebKit.so
-lib/libQt5WebKit.so.{{major}}
-lib/libQt5WebKit.so.{{version}}
-lib/libQt5WebKitWidgets.so
-lib/libQt5WebKitWidgets.so.{{major}}
-lib/libQt5WebKitWidgets.so.{{version}}
-libexec/QtWebPluginProcess
-{% endif %}
+    {% if release %}
+        lib/libQt5WebKit.so
+        lib/libQt5WebKit.so.{{major}}
+        lib/libQt5WebKit.so.{{version}}
+        lib/libQt5WebKitWidgets.so
+        lib/libQt5WebKitWidgets.so.{{major}}
+        lib/libQt5WebKitWidgets.so.{{version}}
+        libexec/QtWebPluginProcess
+    {% endif %}
 
-{% if debug %}
-lib/libQt5WebKit.so.{{version}}.debug
-lib/libQt5WebKitWidgets.so.{{version}}.debug
-{% endif %}
+    {% if force_debug_info %}
+        lib/libQt5WebKit.so.{{version}}.debug
+        lib/libQt5WebKitWidgets.so.{{version}}.debug
+    {% endif %}
 
 {% elif os=="macos" %}
-lib/QtWebKit.framework/Headers
-lib/QtWebKit.framework/QtWebKit
-lib/QtWebKit.framework/Resources
-lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qhttpheader_p.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebdatabase_p.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebelement_p.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebhistory_p.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebplugindatabase_p.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebscriptworld_p.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebsecurityorigin_p.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebDatabase
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebElement
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebElementCollection
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebFullScreenRequest
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebFullScreenVideoHandler
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebHapticFeedbackPlayer
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebHistory
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebHistoryInterface
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebHistoryItem
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebKitPlatformPlugin
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebNotificationData
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebNotificationPresenter
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebPluginFactory
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSecurityOrigin
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSelectData
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSelectMethod
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSettings
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSpellChecker
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebTouchModifier
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QtWebKit
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QtWebKitDepends
-lib/QtWebKit.framework/Versions/{{major}}/Headers/QtWebKitVersion
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qtwebkitversion.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebdatabase.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebelement.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebfullscreenrequest.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebhistory.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebhistoryinterface.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebkitglobal.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebkitplatformplugin.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebpluginfactory.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebsecurityorigin.h
-lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebsettings.h
-lib/QtWebKit.framework/Versions/{{major}}/QtWebKit
-lib/QtWebKit.framework/Versions/{{major}}/Resources/Info.plist
-lib/QtWebKit.framework/Versions/Current
-lib/QtWebKitWidgets.framework/Headers
-lib/QtWebKitWidgets.framework/QtWebKitWidgets
-lib/QtWebKitWidgets.framework/Resources
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/{{version}}/QtWebKitWidgets/private/qwebframe_p.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/{{version}}/QtWebKitWidgets/private/qwebinspector_p.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/{{version}}/QtWebKitWidgets/private/qwebpage_p.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/{{version}}/QtWebKitWidgets/private/qwebviewaccessible_p.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QGraphicsWebView
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebFrame
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebHitTestResult
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebInspector
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebPage
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebView
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QtWebKitWidgets
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QtWebKitWidgetsDepends
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QtWebKitWidgetsVersion
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qgraphicswebview.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qtwebkitwidgetsversion.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qwebframe.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qwebinspector.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qwebpage.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qwebview.h
-lib/QtWebKitWidgets.framework/Versions/{{major}}/QtWebKitWidgets
-lib/QtWebKitWidgets.framework/Versions/{{major}}/Resources/Info.plist
-lib/QtWebKitWidgets.framework/Versions/Current
+    lib/QtWebKit.framework/Headers
+    lib/QtWebKit.framework/QtWebKit
+    lib/QtWebKit.framework/Resources
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qhttpheader_p.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebdatabase_p.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebelement_p.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebhistory_p.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebplugindatabase_p.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebscriptworld_p.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/{{version}}/QtWebKit/private/qwebsecurityorigin_p.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebDatabase
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebElement
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebElementCollection
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebFullScreenRequest
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebFullScreenVideoHandler
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebHapticFeedbackPlayer
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebHistory
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebHistoryInterface
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebHistoryItem
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebKitPlatformPlugin
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebNotificationData
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebNotificationPresenter
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebPluginFactory
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSecurityOrigin
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSelectData
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSelectMethod
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSettings
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebSpellChecker
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QWebTouchModifier
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QtWebKit
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QtWebKitDepends
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/QtWebKitVersion
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qtwebkitversion.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebdatabase.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebelement.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebfullscreenrequest.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebhistory.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebhistoryinterface.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebkitglobal.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebkitplatformplugin.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebpluginfactory.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebsecurityorigin.h
+    lib/QtWebKit.framework/Versions/{{major}}/Headers/qwebsettings.h
+    lib/QtWebKit.framework/Versions/{{major}}/QtWebKit
+    lib/QtWebKit.framework/Versions/{{major}}/Resources/Info.plist
+    lib/QtWebKit.framework/Versions/Current
+    lib/QtWebKitWidgets.framework/Headers
+    lib/QtWebKitWidgets.framework/QtWebKitWidgets
+    lib/QtWebKitWidgets.framework/Resources
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/{{version}}/QtWebKitWidgets/private/qwebframe_p.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/{{version}}/QtWebKitWidgets/private/qwebinspector_p.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/{{version}}/QtWebKitWidgets/private/qwebpage_p.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/{{version}}/QtWebKitWidgets/private/qwebviewaccessible_p.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QGraphicsWebView
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebFrame
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebHitTestResult
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebInspector
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebPage
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QWebView
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QtWebKitWidgets
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QtWebKitWidgetsDepends
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/QtWebKitWidgetsVersion
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qgraphicswebview.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qtwebkitwidgetsversion.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qwebframe.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qwebinspector.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qwebpage.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Headers/qwebview.h
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/QtWebKitWidgets
+    lib/QtWebKitWidgets.framework/Versions/{{major}}/Resources/Info.plist
+    lib/QtWebKitWidgets.framework/Versions/Current
 
 {% elif os=="windows" %}
+    bin/QtWebNetworkProcess.exe
+    bin/QtWebProcess.exe
+    bin/QtWebStorageProcess.exe
+    bin/icudt{{icu_version}}.dll
+    bin/icuin{{icu_version}}.dll
+    bin/icuuc{{icu_version}}.dll
 
-bin/QtWebNetworkProcess.exe
-bin/QtWebProcess.exe
-bin/QtWebStorageProcess.exe
-bin/icudt65.dll
-bin/icuin65.dll
-bin/icuuc65.dll
-bin/libxml2.dll
-bin/libxslt.dll
+    {% if toolchain=="msvc" %}
+        bin/libxml2.dll
+        bin/libxslt.dll
+    {% elif toolchain=="mingw" %}
+        bin/libxslt-1.dll
+        bin/libxml2-2.dll
+    {% endif %}
 
-{% if release %}
-bin/Qt5WebKit.dll
-bin/Qt5WebKitWidgets.dll
-lib/Qt5WebKit.lib
-lib/Qt5WebKitWidgets.lib
-qml/QtWebKit/experimental/qmlwebkitexperimentalplugin.dll
-qml/QtWebKit/qmlwebkitplugin.dll
-{% endif %}
+    {% if release %}
+        bin/Qt5WebKit.dll
+        bin/Qt5WebKitWidgets.dll
 
-{% if debug %}
-bin/Qt5WebKitWidgetsd.dll
-bin/Qt5WebKitd.dll
-bin/Qt5WebKit.pdb
-bin/Qt5WebKitd.pdb
-bin/Qt5WebKitWidgets.pdb
-bin/Qt5WebKitWidgetsd.pdb
-lib/Qt5WebKitd.lib
-lib/Qt5WebKitWidgetsd.lib
-lib/cmake/Qt5WebKit/WebKitTargets-debug.cmake
-lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsTargets-debug.cmake
-qml/QtWebKit/experimental/qmlwebkitexperimentalplugind.dll
-qml/QtWebKit/qmlwebkitplugind.dll
-{% endif %}
+        {% if force_debug_info and toolchain=="msvc" %}
+            bin/Qt5WebKit.pdb
+            bin/Qt5WebKitWidgets.pdb
+        {% endif %}
+
+        {% if toolchain=="msvc" %}
+            lib/Qt5WebKit.lib
+            lib/Qt5WebKitWidgets.lib
+        {% elif toolchain=="mingw" %}
+            lib/libQt5WebKitWidgets.a
+            lib/libQt5WebKit.a
+        {% endif %}
+
+        qml/QtWebKit/experimental/qmlwebkitexperimentalplugin.dll
+        qml/QtWebKit/qmlwebkitplugin.dll
+    {% endif %}
+
+    {% if debug %}
+
+        {% if toolchain=="msvc" %}
+            bin/Qt5WebKitWidgetsd.dll
+            bin/Qt5WebKitd.dll
+        {% endif %}
+
+        {% if force_debug_info and toolchain=="msvc" %}
+            bin/Qt5WebKitd.pdb
+            bin/Qt5WebKitWidgetsd.pdb
+        {% endif %}
+
+        {% if toolchain=="msvc" %}
+            lib/Qt5WebKitd.lib
+            lib/Qt5WebKitWidgetsd.lib
+            lib/cmake/Qt5WebKit/WebKitTargets-debug.cmake
+            lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsTargets-debug.cmake
+            qml/QtWebKit/experimental/qmlwebkitexperimentalplugind.dll
+            qml/QtWebKit/qmlwebkitplugind.dll
+        {% endif %}
+
+    {% endif %}
 
 {% endif %}
 
 
 {% if os=="linux" or os=="macos" %}
-libexec/QtWebNetworkProcess
-libexec/QtWebProcess
-libexec/QtWebStorageProcess
-qml/QtWebKit/experimental/libqmlwebkitexperimentalplugin.so
-qml/QtWebKit/libqmlwebkitplugin.so
+    libexec/QtWebNetworkProcess
+    libexec/QtWebProcess
+    libexec/QtWebStorageProcess
+    qml/QtWebKit/experimental/libqmlwebkitexperimentalplugin.so
+    qml/QtWebKit/libqmlwebkitplugin.so
 {% endif %}
 
 {% if os=="linux" or os=="windows" %}
-lib/pkgconfig/Qt5WebKit.pc
-lib/pkgconfig/Qt5WebKitWidgets.pc
+    lib/pkgconfig/Qt5WebKit.pc
+    lib/pkgconfig/Qt5WebKitWidgets.pc
 {% endif %}
