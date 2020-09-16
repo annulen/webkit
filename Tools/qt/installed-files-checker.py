@@ -31,7 +31,7 @@ import os
 parser = argparse.ArgumentParser(description='Checker for Qtwebkit Binaries')
 parser.add_argument("--version", help=r"Version history of the form {major_version}.{minor_version}.{ver_patch}", required=True)
 parser.add_argument("--qt", help="Root of Qt installation")
-parser.add_argument("--build", help="Root of build directory")
+parser.add_argument("--prefix", help="Qt Prefix directory")
 parser.add_argument("--os", help="Operating system", required=True, choices=[ "linux", "macos", "windows" ])
 parser.add_argument("--template", help='Relative path to template file', default="template/QtBinaryChecklist.txt")
 parser.add_argument("--release", help='Release build', action='store_true')
@@ -89,14 +89,13 @@ def verify_linux(check_list):
 def verify_windows_mac(check_list):
     error_list = []
 
-    build = os.path.join(os.getcwd(), args.build) if args.build else None
     for line in check_list:
         if line.rstrip():
             line = line.lstrip()
             chk_path = None
             if line.startswith('bin'):
-                if build:
-                    chk_path = os.path.join(build, line)
+                if args.prefix:
+                    chk_path = os.path.join(args.prefix, line)
             else:
                 chk_path = os.path.join(args.qt, line)
 

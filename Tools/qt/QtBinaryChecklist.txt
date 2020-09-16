@@ -79,11 +79,9 @@ include/QtWebKitWidgets/qwebpage.h
 include/QtWebKitWidgets/qwebview.h
 lib/cmake/Qt5WebKit/Qt5WebKitConfig.cmake
 lib/cmake/Qt5WebKit/Qt5WebKitConfigVersion.cmake
-lib/cmake/Qt5WebKit/WebKitTargets-release.cmake
 lib/cmake/Qt5WebKit/WebKitTargets.cmake
 lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsConfig.cmake
 lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsConfigVersion.cmake
-lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsTargets-release.cmake
 lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsTargets.cmake
 mkspecs/modules/qt_lib_webkit.pri
 mkspecs/modules/qt_lib_webkit_private.pri
@@ -93,6 +91,10 @@ qml/QtWebKit/plugins.qmltypes
 qml/QtWebKit/qmldir
 qml/QtWebKit/experimental/qmldir
 
+{% if release %}
+    lib/cmake/Qt5WebKit/WebKitTargets-release.cmake
+    lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsTargets-release.cmake
+{% endif %}
 
 {% if os=="linux" %}
     {% if release %}
@@ -221,6 +223,8 @@ qml/QtWebKit/experimental/qmldir
     {% endif %}
 
     {% if debug %}
+        lib/cmake/Qt5WebKit/WebKitTargets-debug.cmake
+        lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsTargets-debug.cmake
 
         {% if toolchain=="msvc" %}
             bin/Qt5WebKitWidgetsd.dll
@@ -235,8 +239,6 @@ qml/QtWebKit/experimental/qmldir
         {% if toolchain=="msvc" %}
             lib/Qt5WebKitd.lib
             lib/Qt5WebKitWidgetsd.lib
-            lib/cmake/Qt5WebKit/WebKitTargets-debug.cmake
-            lib/cmake/Qt5WebKitWidgets/Qt5WebKitWidgetsTargets-debug.cmake
             qml/QtWebKit/experimental/qmlwebkitexperimentalplugind.dll
             qml/QtWebKit/qmlwebkitplugind.dll
         {% endif %}
