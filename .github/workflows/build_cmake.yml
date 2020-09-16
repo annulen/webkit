@@ -14,8 +14,6 @@ on:
 
 env:
   QT_VERSION: 5.14.1
-  CMAKE_VERSION: 3.17.0-rc3
-  NINJA_VERSION: 1.10.0
   CCACHE_VERSION: 3.7.7
   CACHE_PARTITION: 5.212
   HOST_N_CORES: 2
@@ -72,41 +70,6 @@ jobs:
         echo "!LayoutTests" >> .git/info/sparse-checkout
         git -c protocol.version=2 fetch --no-tags --prune --progress --depth=10 origin +${GITHUB_SHA}:refs/remotes/origin/${BRANCH}
         git checkout --progress --force -B $BRANCH refs/remotes/origin/$BRANCH
-
-    - name: Download Ninja and CMake
-      id: cmake_and_ninja
-      shell: cmake -P {0}
-      run: |
-        set(cmake_version "$ENV{CMAKE_VERSION}")
-        set(ninja_version "$ENV{NINJA_VERSION}")
-        if ("${{ runner.os }}" STREQUAL "Windows")
-          set(ninja_suffix "win.zip")
-          set(cmake_suffix "win64-x64.zip")
-          set(cmake_dir "cmake-${cmake_version}-win64-x64/bin")
-        elseif ("${{ runner.os }}" STREQUAL "Linux")
-          set(ninja_suffix "linux.zip")
-          set(cmake_suffix "Linux-x86_64.tar.gz")
-          set(cmake_dir "cmake-${cmake_version}-Linux-x86_64/bin")
-        elseif ("${{ runner.os }}" STREQUAL "macOS")
-          set(ninja_suffix "mac.zip")
-          set(cmake_suffix "Darwin-x86_64.tar.gz")
-          set(cmake_dir "cmake-${cmake_version}-Darwin-x86_64/CMake.app/Contents/bin")
-        endif()
-        set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
-        file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
-        set(cmake_url "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-${cmake_suffix}")
-        file(DOWNLOAD "${cmake_url}" ./cmake.zip SHOW_PROGRESS)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./cmake.zip)
-        # Save the path for other steps
-        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/${cmake_dir}" cmake_dir)
-        message("::set-output name=cmake_dir::${cmake_dir}")
-        if (NOT "${{ runner.os }}" STREQUAL "Windows")
-          execute_process(
-            COMMAND chmod +x ninja
-            COMMAND chmod +x ${cmake_dir}/cmake
-          )
-        endif()
 
     - name: Download Qt Windows
       id: qt_win
@@ -178,15 +141,19 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update && sudo apt-get install \
-        build-essential bison flex gperf libfontconfig1-dev libgl1-mesa-dev libglib2.0-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libhyphen-dev libicu-dev libjpeg-dev libpng-dev libqt5opengl5-dev libqt5sensors5-dev libqt5webchannel5-dev libsqlite3-dev libwebp-dev libwoff-dev libxcomposite-dev libxml2-dev libxrender-dev libxslt1-dev mesa-common-dev pkg-config python3 qtbase5-private-dev qtdeclarative5-private-dev qtpositioning5-dev ruby libqt5sql5-sqlite qtbase5-doc-html qttools5-dev-tools \
+        ninja-build build-essential bison flex gperf libfontconfig1-dev libgl1-mesa-dev libglib2.0-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libhyphen-dev libicu-dev libjpeg-dev libpng-dev libqt5opengl5-dev libqt5sensors5-dev libqt5webchannel5-dev libsqlite3-dev libwebp-dev libwoff-dev libxcomposite-dev libxml2-dev libxrender-dev libxslt1-dev mesa-common-dev pkg-config python3 qtbase5-private-dev qtdeclarative5-private-dev qtpositioning5-dev ruby libqt5sql5-sqlite qtbase5-doc-html qttools5-dev-tools \
         libtasn1-6-dev libgcrypt20-dev
-        # excluded cmake and ninja-build which are normally required
+
+    - name: CMake version
+      id: cmake_version
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: |
+        cmake --version
 
     - name: CMake environment
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
         echo "::add-path::$GITHUB_WORKSPACE"
-        echo "::add-path::${{ steps.cmake_and_ninja.outputs.cmake_dir }}"
         echo "::set-env name=CCACHE_BASEDIR::$GITHUB_WORKSPACE"
         echo "::set-env name=CCACHE_DIR::$GITHUB_WORKSPACE/.ccache"
         echo "::set-env name=cmake_args::\

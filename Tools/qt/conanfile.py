@@ -82,9 +82,9 @@ class QtWebKitConan(ConanFile):
         if not tools.which("flex"):
             self.build_requires("flex_installer/2.6.4@bincrafters/stable")
         if not tools.which("ninja"):
-            self.build_requires("ninja/1.9.0")
+            self.build_requires("ninja/[>=1.9.0]")
         if not tools.which("cmake"):
-            self.build_requires("cmake/3.16.4")
+            self.build_requires("cmake/[>=3.18.2]")
 
     def requirements(self):
         # TODO: Handle case when custom ICU is needed (AppStore etc., MACOS_USE_SYSTEM_ICU=OFF in CMake)
