@@ -186,9 +186,6 @@ qml/QtWebKit/experimental/qmldir
     lib/QtWebKitWidgets.framework/Versions/Current
 
 {% elif os=="windows" %}
-    bin/QtWebNetworkProcess.exe
-    bin/QtWebProcess.exe
-    bin/QtWebStorageProcess.exe
     bin/icudt{{icu_version}}.dll
     bin/icuin{{icu_version}}.dll
     bin/icuuc{{icu_version}}.dll

@@ -29,20 +29,24 @@ import argparse
 import os
 
 parser = argparse.ArgumentParser(description='Checker for Qtwebkit Binaries')
-parser.add_argument("--version", help=r"Version history of the form {major_version}.{minor_version}.{ver_patch}", required=True)
-parser.add_argument("--qt", help="Root of Qt installation")
-parser.add_argument("--prefix", help="Qt Prefix directory")
-parser.add_argument("--os", help="Operating system", required=True, choices=[ "linux", "macos", "windows" ])
-parser.add_argument("--template", help='Relative path to template file', default="template/QtBinaryChecklist.txt")
+parser.add_argument(
+    "--version", help=r"Version history of the form {major_version}.{minor_version}.{ver_patch}", required=True)
+parser.add_argument("--install_prefix", help="QtWebkit Install Prefix")
+parser.add_argument("--os", help="Operating system",
+                    required=True, choices=["linux", "macos", "windows"])
+parser.add_argument("--template", help='Relative path to template file',
+                    default="template/QtBinaryChecklist.txt")
 parser.add_argument("--release", help='Release build', action='store_true')
 parser.add_argument("--debug", help='Debug build', action='store_true')
-parser.add_argument("--qt_install_header", help='Qt headers install path')
+parser.add_argument("--qt_install_headers", help='Qt headers install path')
 parser.add_argument("--qt_install_libs", help='Qt libraries install path')
 parser.add_argument("--qt_install_archdata", help='Qt archdata install path')
 parser.add_argument("--qt_install_libexecs", help='Qt libexecs install path')
-parser.add_argument("--force_debug_info", help='Enable debug symbols for release builds', action='store_true')
+parser.add_argument("--force_debug_info",
+                    help='Enable debug symbols for release builds', action='store_true')
 parser.add_argument("--icu_version", help='ICU version')
-parser.add_argument("--toolchain", help='Toolchain used e.g. msvc, mingw for windows')
+parser.add_argument(
+    "--toolchain", help='Toolchain used e.g. msvc, mingw for windows')
 
 args = parser.parse_args()
 
@@ -62,53 +66,53 @@ template = env.get_template(template_name)  # load template file
 major, minor, patch = args.version.split('.')
 
 check_list = template.render(os=args.os,
-    major=major, version=args.version, release=args.release, debug=args.debug,
-    icu_version=args.icu_version, force_debug_info=args.force_debug_info, toolchain=args.toolchain).split('\n')
+                             major=major, version=args.version, release=args.release, debug=args.debug,
+                             icu_version=args.icu_version, force_debug_info=args.force_debug_info, toolchain=args.toolchain).split('\n')
 
 
-def verify_linux(check_list):
+def custom_args_verify(check_list):
     error_list = []
 
     for line in check_list:
         if line.rstrip():
             line = line.lstrip()
             if line.startswith('include/'):
-                chk_path = os.path.join(args.qt_install_header, line[len('include/'):])
+                chk_path = os.path.join(
+                    args.qt_install_headers, line[len('include/'):])
             elif line.startswith('lib/'):
-                chk_path = os.path.join(args.qt_install_libs, line[len('lib/'):])
+                chk_path = os.path.join(
+                    args.qt_install_libs, line[len('lib/'):])
             elif line.startswith('mkspecs/') or line.startswith('qml/'):
                 chk_path = os.path.join(args.qt_install_archdata, line)
             elif line.startswith('libexec/'):
-                chk_path = os.path.join(args.qt_install_libexecs, line[len('libexec/'):])
+                chk_path = os.path.join(
+                    args.qt_install_libexecs, line[len('libexec/'):])
 
             if not os.path.exists(chk_path):
                 error_list.append(chk_path)
 
     return error_list
 
-def verify_windows_mac(check_list):
+
+def default_verify(check_list):
     error_list = []
 
     for line in check_list:
         if line.rstrip():
             line = line.lstrip()
-            chk_path = None
-            if line.startswith('bin'):
-                if args.prefix:
-                    chk_path = os.path.join(args.prefix, line)
-            else:
-                chk_path = os.path.join(args.qt, line)
-
-            if chk_path and (not os.path.exists(chk_path)):
+            chk_path = os.path.join(args.install_prefix, line)
+            if not os.path.exists(chk_path):
                 error_list.append(chk_path)
 
     return error_list
 
 
-if args.os == 'linux':
-    res = verify_linux(check_list)
-elif args.os == 'windows' or args.os == 'macos':
-    res = verify_windows_mac(check_list)
+if not args.qt_install_headers and not args.install_prefix:
+    print("Specify either the install prefix or custom locations")
+    exit(1)
+
+res = custom_args_verify(
+    check_list) if args.qt_install_headers else default_verify(check_list)
 
 if len(res) != 0:
     print("Errors found files below are missing:")
