@@ -90,9 +90,9 @@ class QtWebKitConan(ConanFile):
             self.requires("libxml2/2.9.10@qtproject/stable")
             self.requires("libxslt/1.1.34@qtproject/stable")
             self.requires("zlib/1.2.11")
-            self.requires("sqlite3/3.31.1")
 
         if self.settings.os == 'Windows' or self.settings.os == 'Macos':
+            self.requires("sqlite3/3.30.1")
             self.requires("libjpeg-turbo/2.0.3@qtproject/stable")
             self.requires("libpng/1.6.37")
             self.requires("libwebp/1.1.0")
