@@ -13,7 +13,7 @@ on:
       - qtwebkit-5.212
 
 env:
-  QT_VERSION: 5.14.1
+  QT_VERSION: 5.15.1
   CCACHE_VERSION: 3.7.7
   CACHE_PARTITION: 5.212
   HOST_N_CORES: 2
@@ -75,8 +75,8 @@ jobs:
       id: qt_win
       if: runner.os == 'Windows'
       env:
-        TOOLCHAIN: "win64_msvc2017_64"
-        DIR: "msvc2017_64"
+        TOOLCHAIN: "win64_msvc2019_64"
+        DIR: "msvc2019_64"
       shell: bash --noprofile --norc -eo pipefail -x {0} 
       run: |
         py -m pip install -r Tools/qt/qt-downloader-requirements.txt
