@@ -186,7 +186,7 @@ class QtPort(Port):
                 if os.environ.get('LD_LIBRARY_PATH'):
                     clean_env['LD_LIBRARY_PATH'] += ':%s' % os.environ.get('LD_LIBRARY_PATH')
             else:
-                _log.warning("Can't find Gallium llvmpipe driver. Try to run update-webkitgtk-libs")
+                _log.warning("Can't find Gallium llvmpipe driver. Try to run update-qtwebkit-libs")
         return clean_env
 
     # FIXME: We should find a way to share this implmentation with Gtk,
@@ -205,7 +205,7 @@ class QtPort(Port):
         if not 'WEBKIT_TESTFONTS' in os.environ:
             _log.error('\nThe WEBKIT_TESTFONTS environment variable is not defined or not set properly.')
             _log.error('You must set it before running the tests.')
-            _log.error('Use git to grab the actual fonts from https://github.com/carewolf/qtwebkit-testfonts.git')
+            _log.error('Use git to grab the actual fonts from https://github.com/qtwebkit/test-fonts.git')
             return False
         return result
 
