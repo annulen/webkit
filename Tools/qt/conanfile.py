@@ -23,6 +23,7 @@ import os
 import shlex
 import argparse
 
+from conan_dependencies_version import get_dependencies, check_version
 
 class QtWebKitConan(ConanFile):
     name = "qtwebkit"
@@ -39,10 +40,12 @@ class QtWebKitConan(ConanFile):
         "qt": "ANY",
         "cmakeargs": "ANY",
         "build_type": "ANY",
-        "install_prefix": "ANY"
+        "install_prefix": "ANY",
+        "qt_version": "ANY"
     }
     default_options = {
         "install_prefix": None,
+        "qt_version": None,
 
         "icu:shared": True,
         "icu:data_packaging": "library",
@@ -92,18 +95,20 @@ class QtWebKitConan(ConanFile):
             self.requires("zlib/1.2.11")
 
         if self.settings.os == 'Windows' or self.settings.os == 'Macos':
-            # FIXME: Pass Qt version, handle more versions
-            qt_version = "5.15.1"
-            if qt_version == "5.14.1":
-                self.requires("sqlite3/3.30.1")
-                self.requires("libjpeg-turbo/2.0.3@qtproject/stable")
-                self.requires("libpng/1.6.37")
-            if qt_version == "5.15.1":
+            if not self.options.qt_version:
                 self.requires("sqlite3/3.32.3")
-                self.requires("libjpeg-turbo/2.0.5@qtproject/stable")
                 self.requires("libpng/1.6.37")
+                self.requires("libjpeg-turbo/2.0.5@qtproject/stable")
+            else:
+                qt_version = str(self.options.qt_version)
+                if not check_version(qt_version):
+                    self.output.error("Using a non supported Qt version use Qt >= 5.12.6")
 
-            self.requires("libwebp/1.1.0")
+                dep = get_dependencies(qt_version)
+                self.requires("sqlite3/" + dep["sqlite"])
+                self.requires("libjpeg-turbo/" + dep["libjpeg-turbo"] + "@qtproject/stable")
+                self.requires("libpng/" + dep["libpng"])
+                self.requires("libwebp/1.1.0")
 
     def build(self):
         cmake = CMake(self, set_cmake_flags=True)
