@@ -39,6 +39,12 @@ def run_command(command):
         sys.exit(1)
 
 
+def run_comman_output(command):
+    print("Executing:", command)
+    output = os.popen(command)
+    return output.read()
+
+
 class ConanProfile:
     def __init__(self, profile_name):
         self.name = profile_name
@@ -101,6 +107,16 @@ def create_profile(compiler, arch):
     return profile.name
 
 
+def get_qt_version(qt_path):
+    qmake_path = os.path.join(qt_path, "bin", "qmake")
+    qt_version = run_comman_output(f"{qmake_path} -query QT_VERSION").rstrip()
+
+    if not qt_version.startswith('5.'):
+        sys.exit("Can't find a working qmake in the specified Qt Root")
+
+    return qt_version
+
+
 parser = argparse.ArgumentParser(description='Build QtWebKit with Conan. For installation of build product into Qt, use --install option')
 
 parser.add_argument("--qt", help="Root directory of Qt Installation", type=str, metavar="QTDIR")
@@ -118,6 +134,8 @@ parser.add_argument("--profile", help="Name of conan profile provided by user. N
 parser.add_argument("--arch", help="32 bit or 64 bit build, leave blank for autodetect", default="default", choices=['x86', 'x86_64'])
 parser.add_argument("--build_type", help="Name of CMake build configuration to use", default="Release", choices=['', 'Release', 'Debug'])
 parser.add_argument("--install_prefix", help="Set installation prefix to the given path (defaults to Qt directory)", default=None)
+parser.add_argument("--ignore-qt-bundled-deps",
+                    help="Don't try to match versions of dependencies bundled with Qt and use latest versions of them", action="store_true")
 
 args = parser.parse_args()
 
@@ -146,8 +164,10 @@ if not args.profile:
 else:
     profile_name = args.profile
 
+qt_version = None if args.ignore_qt_bundled_deps else get_qt_version(args.qt)
+
 build_vars = f'-o qt="{args.qt}" -o cmakeargs="{args.cmakeargs}" \
--o build_type="{args.build_type}" '
+-o build_type="{args.build_type}" -o qt_version="{qt_version}"'
 
 if args.install_prefix:
     build_vars += ' -o install_prefix="{}"'.format(args.install_prefix)
