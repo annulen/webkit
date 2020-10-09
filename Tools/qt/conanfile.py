@@ -119,7 +119,7 @@ class QtWebKitConan(ConanFile):
         if self.options.qt:
             cmake.definitions["Qt5_DIR"] = os.path.join(
                 str(self.options.qt), "lib", "cmake", "Qt5")
-            print("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
+            self.output.info("Qt5 directory:" + cmake.definitions["Qt5_DIR"])
 
         if self.options.build_type:
             cmake.build_type = str(self.options.build_type)
@@ -144,10 +144,6 @@ class QtWebKitConan(ConanFile):
             cmake.definitions["CMAKE_INSTALL_PREFIX"] = str(self.options.install_prefix)
         else:
             del cmake.definitions["CMAKE_INSTALL_PREFIX"]
-
-        print(self.source_folder)
-        print()
-        print(self.build_folder)
 
         cmake.configure(args=cmake_flags)
         cmake.build(args=ninja_flags)
