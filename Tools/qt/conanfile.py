@@ -93,22 +93,29 @@ class QtWebKitConan(ConanFile):
             self.requires("libxml2/2.9.10@qtproject/stable")
             self.requires("libxslt/1.1.34@qtproject/stable")
             self.requires("zlib/1.2.11")
+            self.requires("libwebp/1.1.0")
 
+        # Qt binaries for Windows and macOS are built with bundled libraries, try to use same versions to avoid conflicts
         if self.settings.os == 'Windows' or self.settings.os == 'Macos':
-            if not self.options.qt_version:
-                self.requires("sqlite3/3.32.3")
-                self.requires("libpng/1.6.37")
-                self.requires("libjpeg-turbo/2.0.5@qtproject/stable")
-            else:
+            qt_version_ok = False
+            qt_version = ""
+            if self.options.qt_version:
                 qt_version = str(self.options.qt_version)
-                if not check_version(qt_version):
-                    self.output.error("Using a non supported Qt version use Qt >= 5.12.6")
+                if check_version(qt_version):
+                    self.output.info(f"Using adjusted dependency versions for Qt {qt_version}")
+                    qt_version_ok = True
+                else:
+                    self.output.warn(f"Cannot use matching dependencies for {qt_version}. Runtime errors caused by libraries bundled with Qt may happen. Use Qt >= 5.12.6 to be on a safe side")
 
+            if qt_version_ok:
                 dep = get_dependencies(qt_version)
                 self.requires("sqlite3/" + dep["sqlite"])
                 self.requires("libjpeg-turbo/" + dep["libjpeg-turbo"] + "@qtproject/stable")
                 self.requires("libpng/" + dep["libpng"])
-                self.requires("libwebp/1.1.0")
+            else:
+                self.requires("sqlite3/3.32.3")
+                self.requires("libpng/1.6.37")
+                self.requires("libjpeg-turbo/2.0.5@qtproject/stable")
 
     def build(self):
         cmake = CMake(self, set_cmake_flags=True)
