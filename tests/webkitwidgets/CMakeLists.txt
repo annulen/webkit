@@ -50,6 +50,9 @@ set(QtWK1ApiTests
 set(tst_hybridPixmap_SOURCES hybridPixmap/widget.cpp)
 qt5_wrap_ui(tst_hybridPixmap_SOURCES hybridPixmap/widget.ui)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY})
+
 foreach (testName ${QtWK1ApiTests})
     list(APPEND tst_${testName}_SOURCES ${testName}/tst_${testName}.cpp)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${testName}/tst_${testName}.qrc")
