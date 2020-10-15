@@ -35,6 +35,7 @@ set(QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY
 
 set(QtWK1ApiTests
     hybridPixmap
+    libjpeg
     qgraphicswebview
     qobjectbridge
     qwebelement
