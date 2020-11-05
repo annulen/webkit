@@ -46,6 +46,7 @@ set(QtWK1ApiTests
     qwebpage
     qwebsecurityorigin
     qwebview
+    sqlite
 )
 
 set(tst_hybridPixmap_SOURCES hybridPixmap/widget.cpp)
