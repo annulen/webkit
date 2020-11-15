@@ -30,13 +30,11 @@ set(QtWK1ApiTests_LIBRARIES
 
 # Inspired by EFL WK2 tests
 set(QtWK1ApiTests_RUNTIME_OUTPUT_DIRECTORY
-    ${CMAKE_BINARY_DIR}/tests
+    ${CMAKE_BINARY_DIR}/tests/bin/webkitwidgets
 )
 
 set(QtWK1ApiTests
     hybridPixmap
-    icu
-    libjpeg
     qgraphicswebview
     qobjectbridge
     qwebelement
@@ -47,7 +45,6 @@ set(QtWK1ApiTests
     qwebpage
     qwebsecurityorigin
     qwebview
-    sqlite
 )
 
 set(tst_hybridPixmap_SOURCES hybridPixmap/widget.cpp)
