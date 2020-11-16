@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/">
+    <file alias="image_solid_bg.png">resources/image_solid_bg.png</file>
+    <file alias="image_transparent_bg.png">resources/image_transparent_bg.png</file>
+</qresource>
+</RCC>
