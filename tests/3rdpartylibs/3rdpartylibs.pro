@@ -6,3 +6,4 @@ SUBDIRS += \
     jpeg \
     png \
     sqlite \
+    xml \

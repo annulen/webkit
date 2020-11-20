@@ -23,6 +23,7 @@ set(3rdPartyLibTests
     jpeg
     png
     sqlite
+    xml
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${3rdPartyLibTests_RUNTIME_OUTPUT_DIRECTORY})
