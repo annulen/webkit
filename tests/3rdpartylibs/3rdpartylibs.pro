@@ -7,3 +7,4 @@ SUBDIRS += \
     png \
     sqlite \
     xml \
+    xslt
