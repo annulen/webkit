@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@font-face {
+    font-family: "webfont";
+    src: url("ahem.woff2") format("woff2");
+}
+#parent{
+    background-color: yellow;
+}
+#container {
+	width: 100px;
+	height: 38px;
+	position: relative;
+    overflow: hidden;
+    
+}
+#test {
+    font: 41px "webfont";
+    position: absolute;
+    width: 41px;
+    height: 41px;
+    left: -1px;
+    top: -1px;
+}
+</style>
+</head>
+<body>
+This test makes sure WOFF2 renders as expected. The test passes if you see a horizontal black rectangle below.</div>
+<div id="container"><div id="test">Hello</div>
+</body>
+</html>
