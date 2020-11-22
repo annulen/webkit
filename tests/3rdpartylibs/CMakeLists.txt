@@ -23,6 +23,7 @@ set(3rdPartyLibTests
     jpeg
     png
     sqlite
+    woff2
     xml
     xslt
 )

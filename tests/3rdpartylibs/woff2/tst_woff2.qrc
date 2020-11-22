@@ -1,0 +1,8 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/">
+    <file alias="woff2.html">resources/woff2.html</file>
+    <file alias="ahem.woff2">resources/ahem.woff2</file>
+    <file alias="woff2-expected.html">resources/woff2-expected.html</file>
+    <file alias="Ahem.ttf">resources/Ahem.ttf</file>
+</qresource>
+</RCC>
