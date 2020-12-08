@@ -11,10 +11,14 @@ import urllib.request
 from lxml import etree, html
 from pathlib import Path
 import os
-import shlex
 
 
 BaseUrl = 'https://download.qt.io/online/qtsdkrepository/'
+VersionBaseUrl = 'https://download.qt.io/official_releases/qt/'
+
+AllowedOsPrefixes = ['mac', 'linux', 'windows']
+
+ProhibitedTargets = ['root', 'addons', 'conan_profiles']
 
 OsMap = {
   'macos': 'mac_x64',
@@ -25,6 +29,11 @@ OsMap = {
 
 def key_by_value(dict, value):
   return next((left for left, right in dict.items() if right == value), None)
+
+
+def allowed_os_type(os_type):
+  os_prefix = os_type.split('_')[0]
+  return os_prefix in AllowedOsPrefixes
 
 
 def decode_version(v):
@@ -53,6 +62,8 @@ def discover_kits(args):
   os_dict = {}
   os_types = discover_dirs(BaseUrl)
   for os_type in os_types:
+    if not allowed_os_type(os_type):
+      continue
     human_os = key_by_value(OsMap, os_type[:-1])
     current_os = human_os if human_os is not None else os_type[:-1]
     os_dict[current_os] = None
@@ -62,7 +73,7 @@ def discover_kits(args):
 
     targets_dict = {}
     targets = discover_dirs(BaseUrl + os_type)
-    targets = [target for target in targets if target != 'root/']
+    targets = [target for target in targets if target[:-1] not in ProhibitedTargets]
     for target in targets:
       targets_dict[target[:-1]] = None
 
@@ -70,23 +81,21 @@ def discover_kits(args):
         continue
 
       versions_dict = {}
-      versions = discover_dirs(BaseUrl + os_type + target)
-      for version in versions:
-        if version.startswith('tools_') or version.endswith('_preview/') or version.endswith('_wasm/') or '_src' in version or not version.startswith('qt5_'):
-          continue
+      major_minor_version_dirs = discover_dirs(VersionBaseUrl)
+      for major_minor_version_dir in major_minor_version_dirs:
+        full_version_dirs = discover_dirs(VersionBaseUrl + major_minor_version_dir)
+        for version in full_version_dirs:
+          version = version[:-1]
+          versions_dict[version] = None
+          if not (args.version == 'discover' and args.all or args.version != 'discover' and args.version != 'latest' and args.version == version):
+            continue
+          major, minor, patch = version.split('.')
+          toolchains = discover_dirs('{0}qt{1}_{1}{2}{3}/'.format(BaseUrl + os_type + target, major, minor, patch))
+          toolchains = [toolchain.split('.')[2:] for toolchain in toolchains]
+          toolchains = [toolchain[-1] for toolchain in toolchains if len(toolchain) > 0]
+          toolchains = set([toolchain[:-1] for toolchain in toolchains if not toolchain.startswith('qt') and not toolchain.startswith('debug')])
 
-        ver = decode_version(version[len('qt5_'):-1])
-        versions_dict[ver] = None
-
-        if not (args.version == 'discover' and args.all or args.version != 'discover' and args.version != 'latest' and args.version == ver):
-          continue
-
-        toolchains = discover_dirs(BaseUrl + os_type + target + version)
-        toolchains = [toolchain.split('.')[2:] for toolchain in toolchains]
-        toolchains = [toolchain[-1] for toolchain in toolchains if len(toolchain) > 0]
-        toolchains = set([toolchain[:-1] for toolchain in toolchains if not toolchain.startswith('qt') and not toolchain.startswith('debug')])
-
-        versions_dict[ver] = toolchains
+          versions_dict[version] = toolchains
 
       targets_dict[target[:-1]] = versions_dict
 
@@ -95,46 +104,60 @@ def discover_kits(args):
   return os_dict
 
 
-def build_url(args):
+def discover_openssl_tool(args, name):
+  tools_dirs = discover_dirs(BaseUrl + '{}/{}/'.format(OsMap[args.os], args.target))
+  for tool_dir in tools_dirs:
+    tool_dir = tool_dir[:-1]
+    if not tool_dir.startswith('tools_'):
+      continue
+
+    tool_parts = tool_dir.split('_')
+    if tool_parts[1].startswith(name) and tool_parts[2] != 'src':
+      if args.os == 'windows':
+        if args.toolchain.startswith('win32'):
+          if tool_parts[2] == 'x86':
+            return tool_parts[2]
+        elif args.toolchain.startswith('win64'):
+          if tool_parts[2] == 'x64':
+            return tool_parts[2]
+      elif args.os == 'linux':
+        if tool_parts[2] == 'x64':
+          return tool_parts[2]
+
+  return None
+
+
+def discover_mingw_tool(args, name):
+  discovered_dirs = []
+
+  tools_dirs = discover_dirs(BaseUrl + '{}/{}/tools_{}'.format(OsMap[args.os], args.target, name))
+  for tool_dir in tools_dirs:
+    tool_dir = tool_dir[:-1]
+    if not tool_dir.startswith('qt.tools.'):
+      continue
+
+    tool_parts = tool_dir.split('.')
+    if args.os == 'windows':
+      if tool_parts[-1] == args.toolchain + '0':
+        return tool_dir
+
+  return None
+
+
+def build_main_url(args):
   ver = args.version.replace('.', '')
   return BaseUrl + '{}/{}/qt5_{}/'.format(OsMap[args.os], args.target, ver)
 
 
-def toolchain_build_url(args, tools):
-  return BaseUrl + '{}/{}/tools_{}/'.format(OsMap[args.os], args.target, tools)
+def build_tool_openssl_url(args, name, distr):
+  return BaseUrl + '{}/{}/tools_{}_{}/'.format(OsMap[args.os], args.target, name, distr)
 
 
-def ossl_info(url, name):
-  reply = requests.get(url + "Updates.xml")
-  update_xml = etree.fromstring(reply.content)
+def build_tool_url(args, name):
+  return BaseUrl + '{}/{}/tools_{}/'.format(OsMap[args.os], args.target, name)
 
-  for package in update_xml.xpath('//PackageUpdate'):
-    name = package.xpath('Name/text()')[0]
-    if name.startswith('qt.') and name.endswith('_{}'.format(name[len(name)-3:])):
-      version = package.xpath('Version/text()')[0]
-      archives = package.xpath('DownloadableArchives/text()')[0].split(', ')
-      return (name, version, archives)
-
-  print('Update.xml does not contain proper entry for Qt kit', file=sys.stderr)
-  return None
-
-
-def mingw_info(url, mingw):
-  reply = requests.get(url + "Updates.xml")
-  update_xml = etree.fromstring(reply.content)
-
-  for package in update_xml.xpath('//PackageUpdate'):
-    name = package.xpath('Name/text()')[0]
-    if name.startswith('qt.') and name.endswith('.{}'.format(mingw)):
-      version = package.xpath('Version/text()')[0]
-      archives = package.xpath('DownloadableArchives/text()')[0].split(', ')
-      return (name, version, archives)
-
-  print('Update.xml does not contain proper entry for Qt kit', file=sys.stderr)
-  return None
-
-
-def get_info(url, version, toolchain):
+ 
+def get_main_info(url, version, toolchain):
   reply = requests.get(url + "Updates.xml")
   update_xml = etree.fromstring(reply.content)
 
@@ -151,22 +174,54 @@ def get_info(url, version, toolchain):
   return None
 
 
-def download_and_extract(archives_url, archives, output, req_modules):
+def get_ossl_info(url, tool_name, distr):
+  reply = requests.get(url + "Updates.xml")
+  update_xml = etree.fromstring(reply.content)
+
+  for package in update_xml.xpath('//PackageUpdate'):
+    name = package.xpath('Name/text()')[0]
+    if name.startswith('qt.tools.{}.'.format(tool_name)) and name.endswith(distr[1:]):
+      version = package.xpath('Version/text()')[0]
+      archives = package.xpath('DownloadableArchives/text()')[0].split(', ')
+      return (name, version, archives)
+
+  print('Update.xml does not contain proper entry for OpenSSL', file=sys.stderr)
+  return None
+
+
+def get_mingw_info(url, distr):
+  reply = requests.get(url + "Updates.xml")
+  update_xml = etree.fromstring(reply.content)
+
+  for package in update_xml.xpath('//PackageUpdate'):
+    name = package.xpath('Name/text()')[0]
+    if name == distr:
+      version = package.xpath('Version/text()')[0]
+      archives = package.xpath('DownloadableArchives/text()')[0].split(', ')
+      return (name, version, archives)
+
+  print('Update.xml does not contain proper entry for MinGW', file=sys.stderr)
+  return None
+
+ 
+def download_and_extract(title, archives_url, archives, modules, output):
+  print('Start installation of {}'.format(title))
+
   for archive in archives:
     module = archive.split('-')[0]
-    if len(req_modules) != 0 and (module not in req_modules):
-        continue
+    if modules is not None and len(modules) != 0 and (module not in modules):
+      continue
     try:
-      print('Downloading module {}... '.format(module), end='', flush=True)
+      print('  Downloading module {}... '.format(module), end='', flush=True)
       with urllib.request.urlopen(archives_url + archive) as response, open(archive, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
 
-      print('\rExtracting module {}... '.format(module), end='', flush=True)
+      print('\r  Extracting module {}... '.format(module), end='', flush=True)
       subprocess.run('7z x {0} -o{1}'.format(archive, output), shell=True, check=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      print('\rInstalled module {} successfully'.format(module))
+      print('\r  Installed module {} successfully'.format(module))
     except subprocess.CalledProcessError as e:
-      print('Error: {}'.format(e))
+      print('  Error: {}'.format(e))
 
       os_type = deduce_os()
       suggestion = ''
@@ -182,7 +237,7 @@ def download_and_extract(archives_url, archives, output, req_modules):
     finally:
       Path(archive).unlink()
 
-  print('Finished installation')
+  print('Finished installation of {}'.format(title))
 
 
 def show_discover_context(args, parser):
@@ -342,22 +397,31 @@ def verify_parameters(args):
   kits = discover_kits(args)
   show_discovery_results(args, kits)
 
+  if args.openssl:
+    ossl_distribution = discover_openssl_tool(args, 'openssl')
+    if ossl_distribution is None:
+      print('Unable to locate appropriate distribution of OpenSSL', file=sys.stderr)
+      sys.exit(1)
 
+  if args.mingw:
+    mingw_distribution = discover_mingw_tool(args, 'mingw')
+    if mingw_distribution is None:
+      print('Unable to locate appropriate distribution of MinGW', file=sys.stderr)
+      sys.exit(1)
+    
+    
 def main():
   parser = argparse.ArgumentParser(description='Qt downloader',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument('os', nargs='?', default='discover', help='Operating system type: {}, auto, or discovered one. Omit this to discover available OS types'.format(', '.join(OsMap.keys())))
+  parser.add_argument('os', nargs='?', default='discover', help='Operating system type: {} or auto. Omit this to discover available OS types'.format(', '.join(OsMap.keys())))
   parser.add_argument('target', nargs='?', default='discover', help='Target platform. Omit this to discover available targets')
   parser.add_argument('version', nargs='?', default='discover', help='Qt version conforming to Semantic Versioning format: major.minor.patch. Use \'latest\' to get most up to date version. Omit this to discover available versions.')
   parser.add_argument('toolchain', nargs='?', default='discover', help='Toolchain to use. Omit this to discover available toolchains')
-  parser.add_argument('-a', '--all', action='store_true', help='Discover allowed values for all missing arguments')
-  parser.add_argument('--output', '-o', default=os.getcwd(), help='Output directory')
-  parser.add_argument('--qt_modules', default='', help='Download selected qt modules')
-  parser.add_argument('--mingw', '-m', default=None,
-                      help='Download Mingw from Qt.Expected Format - win{arch}_mingw{major}{minor} eg: win32_mingw730')
-  parser.add_argument('--openssl', choices=['openssl_x64', 'openssl_x86'],
-                      default=None, help='Download openSSl Distribution from Qt. ')
-
+  parser.add_argument('--all', '-a', action='store_true', help='Discover allowed values for all missing arguments')
+  parser.add_argument('--modules', '-m', nargs='*', default=[], help='Download only selected modules')
+  parser.add_argument('--output', '-o', default='.', help='Output directory')
+  parser.add_argument('--openssl', action='store_true', help='Download OpenSSL distribution shipped with Qt')
+  parser.add_argument('--mingw', action='store_true', help='Download MinGW distribution shipped with Qt. Relevant for Windows only')
   args = parser.parse_args()
 
   show_discover_context(args, parser)
@@ -371,25 +435,30 @@ def main():
     sys.exit(0)
   else:
     verify_parameters(args)
-    url = build_url(args)
+    url = build_main_url(args)
 
-    info = get_info(url, args.version, args.toolchain)
+    info = get_main_info(url, args.version, args.toolchain)
     if info is None:
       sys.exit(1)
 
-    if args.mingw:
-      mingw = toolchain_build_url(args, 'mingw')
-      mingw_name, mingw_version, mingw_archives = mingw_info(mingw, args.mingw)
-      download_and_extract(mingw + mingw_name + '/' + mingw_version, mingw_archives, args.output, [])
+    name, version, archives = info
+    download_and_extract('Qt', url + name + '/' + version, archives, args.modules, args.output)
 
     if args.openssl:
-      ossl = toolchain_build_url(args, args.openssl)
-      ossl_name, ossl_version, ossl_archives = ossl_info(ossl, args.openssl)
-      download_and_extract(ossl + ossl_name + '/' + ossl_version, ossl_archives, args.output, [])
+      ossl_distribution = discover_openssl_tool(args, 'openssl')
+      ossl_url = build_tool_openssl_url(args, 'openssl', ossl_distribution)
+      ossl_info = get_ossl_info(ossl_url, 'openssl', ossl_distribution)
+      if ossl_info:
+        ossl_name, ossl_version, ossl_archives = ossl_info
+        download_and_extract('OpenSSL', ossl_url + ossl_name + '/' + ossl_version, ossl_archives, None, args.output)
 
-    name, version, archives = info
-    qt_modules = shlex.split(args.qt_modules)
-    download_and_extract(url + name + '/' + version, archives, args.output, qt_modules)
+    if args.mingw:
+      mingw_distribution = discover_mingw_tool(args, 'mingw')
+      mingw_url = build_tool_url(args, 'mingw')
+      mingw_info = get_mingw_info(mingw_url, mingw_distribution)
+      if mingw_info:
+        mingw_name, mingw_version, mingw_archives = mingw_info
+        download_and_extract('MinGW', mingw_url + mingw_name + '/' + mingw_version, mingw_archives, None, args.output)
 
 
 if __name__ == '__main__':
@@ -401,4 +470,3 @@ if __name__ == '__main__':
     print(error)
   except KeyboardInterrupt:
     print('Stopped by user')
-
