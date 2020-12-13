@@ -153,13 +153,12 @@ jobs:
     - name: CMake environment
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: |
-        echo "::add-path::$GITHUB_WORKSPACE"
-        echo "::set-env name=CCACHE_BASEDIR::$GITHUB_WORKSPACE"
-        echo "::set-env name=CCACHE_DIR::$GITHUB_WORKSPACE/.ccache"
-        echo "::set-env name=cmake_args::\
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DENABLE_PCH=OFF"
+        echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
+        echo "CCACHE_BASEDIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+        echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache" >> $GITHUB_ENV
+        echo "cmake_args=-DCMAKE_C_COMPILER_LAUNCHER=ccache " \
+        "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache " \
+        "-DENABLE_PCH=OFF" >> $GITHUB_ENV
 
     - name: Configure (Linux)
       if: runner.os == 'Linux'
