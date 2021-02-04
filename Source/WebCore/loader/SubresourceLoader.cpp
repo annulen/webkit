@@ -321,7 +321,7 @@ void SubresourceLoader::didReceiveDataOrBuffer(const char* data, int length, Pas
     if (!m_loadingMultipartContent) {
         if (auto* resourceData = this->resourceData())
             m_resource->addDataBuffer(*resourceData);
-        else
+        else if(m_resource)
             m_resource->addData(buffer ? buffer->data() : data, buffer ? buffer->size() : length);
     }
 }
