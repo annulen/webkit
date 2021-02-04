@@ -447,7 +447,10 @@ void QWebFrame::load(const QNetworkRequest &req, QNetworkAccessManager::Operatio
 */
 void QWebFrame::setHtml(const QString &html, const QUrl &baseUrl)
 {
-    d->setHtml(html, baseUrl);
+    if(baseUrl.isEmpty() && html.isEmpty())
+        d->setHtml(html, QUrl(QStringLiteral("about:blank")));
+    else
+        d->setHtml(html, baseUrl);
 }
 
 /*!
