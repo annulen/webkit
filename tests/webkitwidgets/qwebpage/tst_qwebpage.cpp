@@ -1656,10 +1656,13 @@ void tst_QWebPage::backActionUpdate()
     QSignalSpy loadSpy(page, SIGNAL(loadFinished(bool)));
     QUrl url = QUrl("qrc:///resources/framedindex.html");
     page->mainFrame()->load(url);
+
+    waitForSignal(page, SIGNAL(loadFinished(bool)));
     QTRY_COMPARE(loadSpy.count(), 1);
-    QEXPECT_FAIL("", "https://github.com/qtwebkit/qtwebkit/issues/913", Continue);
-    QVERIFY(!action->isEnabled());
+
     QTest::mouseClick(&view, Qt::LeftButton, 0, QPoint(10, 10));
+
+    waitForSignal(page, SIGNAL(loadFinished(bool)));
     QTRY_COMPARE(loadSpy.count(), 2);
 
     QVERIFY(action->isEnabled());
