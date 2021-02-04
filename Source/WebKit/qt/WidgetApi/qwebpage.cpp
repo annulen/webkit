@@ -2378,13 +2378,11 @@ QAction *QWebPage::action(WebAction action) const
 
 #ifndef QT_NO_UNDOSTACK
     case Undo: {
-        QAction *a = undoStack()->createUndoAction(d->q);
-        d->actions[action] = a;
+        QAction *a = undoStack()->createUndoAction(d->q, QString(QStringLiteral("Undo %1")).arg(undoStack()->index()));
         return a;
     }
     case Redo: {
-        QAction *a = undoStack()->createRedoAction(d->q);
-        d->actions[action] = a;
+        QAction *a = undoStack()->createRedoAction(d->q, QString(QStringLiteral("Redo %1")).arg(undoStack()->index()));
         return a;
     }
 #endif // QT_NO_UNDOSTACK

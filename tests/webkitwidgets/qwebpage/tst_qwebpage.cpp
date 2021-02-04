@@ -3475,7 +3475,6 @@ void tst_QWebPage::undoActionHaveCustomText()
     m_page->mainFrame()->evaluateJavaScript("document.execCommand('indent', true);");
     QString alignActionText = m_page->action(QWebPage::Undo)->text();
 
-    QEXPECT_FAIL("", "https://github.com/qtwebkit/qtwebkit/issues/913", Continue);
     QVERIFY(typingActionText != alignActionText);
 }
 
