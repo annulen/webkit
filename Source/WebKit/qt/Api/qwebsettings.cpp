@@ -47,6 +47,8 @@
 #include "SharedBuffer.h"
 #include "StorageThread.h"
 #include "WorkerThread.h"
+#include "StorageNamespaceProvider.h"
+#include "WebStorageNamespaceProvider.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QFont>
@@ -57,8 +59,7 @@
 #include <QUrl>
 #include <wtf/FastMalloc.h>
 #include <wtf/text/WTFString.h>
-
-
+#include <wtf/StdLibExtras.h>
 
 QWEBKIT_EXPORT void qt_networkAccessAllowed(bool isAllowed)
 {
@@ -90,11 +91,27 @@ public:
     qint64 offlineStorageDefaultQuota;
     QWebSettings::ThirdPartyCookiePolicy thirdPartyCookiePolicy;
     void apply();
+    void setLocalStoragePath(const QString &);
     WebCore::Page* page;
     WebCore::Settings* settings;
 };
 
 Q_GLOBAL_STATIC(QList<QWebSettingsPrivate*>, allSettings);
+
+void QWebSettingsPrivate::setLocalStoragePath(const QString &storagePath)
+{
+    if (settings->localStorageDatabasePath() == WTF::String(storagePath))
+        return;
+
+    settings->setLocalStorageDatabasePath(storagePath);
+
+    if(!page)
+        return;
+
+    RefPtr<WebCore::StorageNamespaceProvider> storageProvider = WebStorageNamespaceProvider::create(storagePath);
+    page->setStorageNamespaceProvider(*WTFMove(storageProvider));
+}
+
 
 void QWebSettingsPrivate::apply()
 {
@@ -239,7 +256,7 @@ void QWebSettingsPrivate::apply()
         settings->setDefaultTextEncodingName(encoding);
 
         QString storagePath = !localStoragePath.isEmpty() ? localStoragePath : global->localStoragePath;
-        settings->setLocalStorageDatabasePath(storagePath);
+        setLocalStoragePath(storagePath);
 
         if (mediaType.isEmpty())
             mediaType = global->mediaType;

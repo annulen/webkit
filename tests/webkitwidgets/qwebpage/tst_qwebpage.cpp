@@ -1120,7 +1120,7 @@ void tst_QWebPage::multiplePageGroupsAndLocalStorage()
     view1.page()->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     view1.page()->settings()->setLocalStoragePath(QDir::toNativeSeparators(tmpDirPath() + "/path1"));
     DumpRenderTreeSupportQt::webPageSetGroupName(view1.page()->handle(), "group1");
-    view2.page()->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);    
+    view2.page()->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     view2.page()->settings()->setLocalStoragePath(QDir::toNativeSeparators(tmpDirPath() + "/path2"));
     DumpRenderTreeSupportQt::webPageSetGroupName(view2.page()->handle(), "group2");
     QCOMPARE(DumpRenderTreeSupportQt::webPageGroupName(view1.page()->handle()), QString("group1"));
@@ -1137,7 +1137,6 @@ void tst_QWebPage::multiplePageGroupsAndLocalStorage()
     view2.setHtml(QString("<html><body> </body></html>"), QUrl("http://www.myexample.com"));
 
     QVariant s1 = view1.page()->mainFrame()->evaluateJavaScript("localStorage.test");
-    QEXPECT_FAIL("", "https://github.com/qtwebkit/qtwebkit/issues/913", Continue);
     QCOMPARE(s1.toString(), QString("value1"));
 
     QVariant s2 = view2.page()->mainFrame()->evaluateJavaScript("localStorage.test");
