@@ -45,9 +45,9 @@
 #include "RuntimeEnabledFeatures.h"
 #include "Settings.h"
 #include "SharedBuffer.h"
+#include "StorageNamespaceProvider.h"
 #include "StorageThread.h"
 #include "WorkerThread.h"
-#include "StorageNamespaceProvider.h"
 #include "WebStorageNamespaceProvider.h"
 #include <QDir>
 #include <QFileInfo>
@@ -58,8 +58,8 @@
 #include <QStandardPaths>
 #include <QUrl>
 #include <wtf/FastMalloc.h>
-#include <wtf/text/WTFString.h>
 #include <wtf/StdLibExtras.h>
+#include <wtf/text/WTFString.h>
 
 QWEBKIT_EXPORT void qt_networkAccessAllowed(bool isAllowed)
 {
