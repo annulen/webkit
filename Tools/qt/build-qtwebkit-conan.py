@@ -29,6 +29,8 @@ import pathlib
 import platform
 import sys
 import subprocess
+from conans.client.conf.detect import _get_default_compiler
+from conans.client.output import ConanOutput
 
 
 def run_command(command):
@@ -91,7 +93,16 @@ def get_cc_cxx(compiler):
 def create_profile(compiler, arch):
     if not compiler:
         if platform.system() == "Windows":
-            compiler = "msvc"
+            detected_toolchain = _get_default_compiler(ConanOutput(sys.stdout))
+            if not detected_toolchain:
+                sys.exit("Error: No toolchain detected")
+
+            detected_compiler = detected_toolchain[0]
+            if detected_compiler == "Visual Studio":
+                compiler = "msvc"
+            else:
+                compiler = detected_compiler
+
         elif platform.system() == "Darwin":
             compiler = "clang"
         elif platform.system() == "Linux":
