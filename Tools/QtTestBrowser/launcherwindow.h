@@ -128,6 +128,9 @@ protected Q_SLOTS:
 
     void loadURLListFromFile();
 
+    /* Inspector slots */
+    void dockInspectorWindow(QString);
+
     void setDiskCache(bool enable);
     void setTouchMocking(bool on);
     void toggleWebView(bool graphicsBased);
