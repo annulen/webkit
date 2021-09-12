@@ -43,6 +43,7 @@ class Document;
 class EditorClientQt;
 class Element;
 class IntRect;
+// class InspectorFrontendClient;
 class Node;
 class NodeList;
 class Frame;
@@ -127,7 +128,8 @@ public:
     QObject* inspectorHandle() override;
     void setInspectorFrontend(QObject*) override;
     void setInspectorWindowTitle(const QString&) override;
-    void createWebInspector(QObject** inspectorView, QWebPageAdapter** inspectorPage) override;
+    void dockInspectorWindow(WebCore::InspectorFrontendClient::DockSide) override;
+    void createWebInspector(QObject **inspectorView, QWebPageAdapter **inspectorPage) override;
     QStringList menuActionsAsText() override;
     void emitViewportChangeRequested() override;
     bool acceptNavigationRequest(QWebFrameAdapter*, const QNetworkRequest&, int type) override;

@@ -658,6 +658,28 @@ void QWebPagePrivate::setInspectorWindowTitle(const QString& title)
         inspector->setWindowTitle(title);
 }
 
+void QWebPagePrivate::dockInspectorWindow(WebCore::InspectorFrontendClient::DockSide dockSide)
+{
+    setInspectorDockState(dockSide);
+    if(inspector)
+    {
+        QString dockMessage;
+        switch (dockSide)
+        {
+            case WebCore::InspectorFrontendClient::DockSide::Bottom:
+                dockMessage = QStringLiteral("Bottom");
+                break;
+            case WebCore::InspectorFrontendClient::DockSide::Right:
+                dockMessage = QStringLiteral("Right");
+                break;
+            case WebCore::InspectorFrontendClient::DockSide::Undocked:
+                dockMessage = QStringLiteral("Undocked");
+                break;
+        }
+        emit inspector->dockInspectorWindow(dockMessage);
+    }
+}
+
 void QWebPagePrivate::createWebInspector(QObject** inspectorView, QWebPageAdapter** inspectorPage)
 {
     QWebPage* page = new WebKit::InspectorClientWebPage;

@@ -34,6 +34,8 @@
 #include <qurl.h>
 #include <wtf/Forward.h>
 
+#include <WebCore/InspectorFrontendClient.h>
+
 QT_BEGIN_NAMESPACE
 class QBitArray;
 class QKeyEvent;
@@ -237,7 +239,8 @@ public:
     virtual QObject* inspectorHandle() = 0;
     virtual void setInspectorFrontend(QObject*) = 0;
     virtual void setInspectorWindowTitle(const QString&) = 0;
-    virtual void createWebInspector(QObject** inspectorView, QWebPageAdapter** inspectorPage) = 0;
+    virtual void dockInspectorWindow(WebCore::InspectorFrontendClient::DockSide) = 0;
+    virtual void createWebInspector(QObject **inspectorView, QWebPageAdapter **inspectorPage) = 0;
     virtual QStringList menuActionsAsText() = 0;
     virtual void emitViewportChangeRequested() = 0;
     virtual bool acceptNavigationRequest(QWebFrameAdapter*, const QNetworkRequest&, int type) = 0;
@@ -305,6 +308,9 @@ public:
 
     void setNetworkAccessManager(QNetworkAccessManager*);
     QNetworkAccessManager* networkAccessManager();
+
+    void setInspectorDockState(WebCore::InspectorFrontendClient::DockSide);
+    WebCore::InspectorFrontendClient::DockSide getInspectorDockState();
 
     bool hasSelection() const;
     QString selectedText() const;
@@ -416,6 +422,7 @@ public:
     quint64 m_totalBytes;
     quint64 m_bytesReceived;
     QWebHistory history;
+    WebCore::InspectorFrontendClient::DockSide dockState;
 
 private:
     QNetworkAccessManager *networkManager;
