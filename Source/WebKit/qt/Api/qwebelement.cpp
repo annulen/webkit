@@ -22,6 +22,7 @@
 
 #include "APICast.h"
 #include "qwebelement_p.h"
+#include "qwebeventlistener_p.h"
 #include "CSSComputedStyleDeclaration.h"
 #include "CSSParser.h"
 #include "CSSRule.h"
@@ -29,6 +30,7 @@
 #include "CSSStyleRule.h"
 #include "Document.h"
 #include "DocumentFragment.h"
+#include "EventTarget.h"
 #include "FrameView.h"
 #include "GraphicsContext.h"
 #include "HTMLElement.h"
@@ -1502,6 +1504,54 @@ void QWebElement::endExitFullScreen()
     if (m_element)
         m_element->document().webkitDidExitFullScreenForElement(m_element);
 #endif
+}
+
+QVector<QPair<QWebEventListener,bool>> QWebElement::eventListeners(const QString& eventType)
+{
+    QVector<QPair<QWebEventListener,bool>> listeners;
+    for(auto& eventListener : m_element->EventTarget::getEventListeners(eventType))
+    {
+        QWebEventListenerPrivate* priv = reinterpret_cast<QWebEventListenerPrivate*>(eventListener.listener.get());
+        listeners.append(qMakePair(QWebEventListener(priv), eventListener.useCapture));
+    }
+
+    return listeners;
+}
+
+bool QWebElement::addEventListener(const QString& eventType, const QWebEventListener& listener, bool useCapture)
+{
+    if(!m_element)
+        return false;
+    RefPtr<QWebEventListenerPrivate> eventListener = adoptRef(listener.d);
+    bool status = m_element->addEventListener(eventType, eventListener, useCapture);
+    return status;
+}
+
+bool QWebElement::removeEventListener(const QString& eventType, const QWebEventListener& listener, bool useCapture)
+{
+    if(!m_element)
+        return false;
+    RefPtr<QWebEventListenerPrivate> eventListener = adoptRef(listener.d);
+    bool status = m_element->removeEventListener(eventType, eventListener.get(), useCapture);
+
+    return status;
+}
+
+void QWebElement::removeAllEventListeners()
+{
+    if(!m_element)
+        return;
+
+    m_element->EventTarget::removeAllEventListeners();
+}
+
+void QWebElement::removeAllEventListeners(const QString& eventType)
+{
+    if(!m_element)
+        return;
+
+    for(auto& eventListener : m_element->EventTarget::getEventListeners(eventType))
+        m_element->removeEventListener(eventType, eventListener.listener.get(), eventListener.useCapture);
 }
 
 class QWebElementCollectionPrivate : public QSharedData
