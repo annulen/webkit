@@ -665,9 +665,8 @@ void* MachineThreads::Thread::Registers::framePointer() const
 #error Unknown Architecture
 #endif
 
-#elif defined(__GLIBC__)
+#elif OS(LINUX)
 
-// The following sequence depends on glibc's sys/ucontext.h.
 #if CPU(X86)
     return reinterpret_cast<void*>((uintptr_t) regs.machineContext.gregs[REG_EBP]);
 #elif CPU(X86_64)
@@ -747,9 +746,8 @@ void* MachineThreads::Thread::Registers::instructionPointer() const
 #error Unknown Architecture
 #endif
 
-#elif defined(__GLIBC__)
+#elif OS(LINUX)
 
-// The following sequence depends on glibc's sys/ucontext.h.
 #if CPU(X86)
     return reinterpret_cast<void*>((uintptr_t) regs.machineContext.gregs[REG_EIP]);
 #elif CPU(X86_64)
@@ -838,9 +836,8 @@ void* MachineThreads::Thread::Registers::llintPC() const
 #error Unknown Architecture
 #endif
 
-#elif defined(__GLIBC__)
+#elif OS(LINUX)
 
-// The following sequence depends on glibc's sys/ucontext.h.
 #if CPU(X86)
     return reinterpret_cast<void*>((uintptr_t) regs.machineContext.gregs[REG_ESI]);
 #elif CPU(X86_64)
