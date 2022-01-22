@@ -25,20 +25,21 @@
 #pragma once
 
 #include "EventListener.h"
-#include "typedef_utils.h"
 
 #include <QUuid>
 #include <functional>
+#include <QObject>
 
 class WebCore::ScriptExecutionContext;
 class WebCore::Event;
 class QWebElement;
 class QWebEventListener;
+class WebEventSignal;
 
 class QWebEventListenerPrivate : public WebCore::EventListener {
-
 public:
-    QWebEventListenerPrivate(std::function<void(void)> funcPtr);
+    QWebEventListenerPrivate();
+    QWebEventListenerPrivate(std::function<void(void)>);
     ~QWebEventListenerPrivate();
     void handleEvent(WebCore::ScriptExecutionContext*, WebCore::Event*) override;
     bool operator==(const WebCore::EventListener &other);
@@ -46,5 +47,7 @@ public:
 
 private:
     QUuid uuid;
-    std::function<void(void)> userFunc;
+    WebEventSignal *eventSignal;
+    std::function<void(void)> eventHandler;
+    friend class QWebEventListener;
 };

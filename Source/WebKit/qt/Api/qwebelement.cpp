@@ -1509,7 +1509,11 @@ void QWebElement::endExitFullScreen()
 QVector<QPair<QWebEventListener,bool>> QWebElement::eventListeners(const QString& eventType)
 {
     QVector<QPair<QWebEventListener,bool>> listeners;
-    for(auto& eventListener : m_element->EventTarget::getEventListeners(eventType))
+
+    if(!m_element)
+        return listeners;
+
+    for (auto &eventListener : m_element->EventTarget::getEventListeners(eventType))
     {
         QWebEventListenerPrivate* priv = reinterpret_cast<QWebEventListenerPrivate*>(eventListener.listener.get());
         listeners.append(qMakePair(QWebEventListener(priv), eventListener.useCapture));
@@ -1523,8 +1527,7 @@ bool QWebElement::addEventListener(const QString& eventType, const QWebEventList
     if(!m_element)
         return false;
     RefPtr<QWebEventListenerPrivate> eventListener = adoptRef(listener.d);
-    bool status = m_element->addEventListener(eventType, eventListener, useCapture);
-    return status;
+    return m_element->addEventListener(eventType, eventListener, useCapture);
 }
 
 bool QWebElement::removeEventListener(const QString& eventType, const QWebEventListener& listener, bool useCapture)
@@ -1532,9 +1535,7 @@ bool QWebElement::removeEventListener(const QString& eventType, const QWebEventL
     if(!m_element)
         return false;
     RefPtr<QWebEventListenerPrivate> eventListener = adoptRef(listener.d);
-    bool status = m_element->removeEventListener(eventType, eventListener.get(), useCapture);
-
-    return status;
+    return m_element->removeEventListener(eventType, eventListener.get(), useCapture);
 }
 
 void QWebElement::removeAllEventListeners()
@@ -1550,7 +1551,9 @@ void QWebElement::removeAllEventListeners(const QString& eventType)
     if(!m_element)
         return;
 
-    for(auto& eventListener : m_element->EventTarget::getEventListeners(eventType))
+    auto listeners = m_element->EventTarget::getEventListeners(eventType);
+
+    for(auto& eventListener : listeners)
         m_element->removeEventListener(eventType, eventListener.listener.get(), eventListener.useCapture);
 }
 
