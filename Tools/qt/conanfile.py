@@ -90,27 +90,27 @@ class QtWebKitConan(ConanFile):
     def requirements(self):
         # TODO: Handle case when custom ICU is needed (AppStore etc., MACOS_USE_SYSTEM_ICU=OFF in CMake)
         if self.settings.os == 'Windows':
-            self.requires("icu/65.1@qtproject/stable")
-            self.requires("libxml2/2.9.10@qtproject/stable")
-            self.requires("libxslt/1.1.34@qtproject/stable")
+            self.requires("icu/65.1")
+            self.requires("libxml2/2.9.10")
+            self.requires("libxslt/1.1.34")
             self.requires("zlib/1.2.11")
-            self.requires("libtasn1/4.16.0@qtproject/stable")
-            self.requires("libgcrypt/1.8.4@qtproject/stable")
+            self.requires("libtasn1/4.16.0")
+            self.requires("libgcrypt/1.8.4")
 
         if self.settings.os == 'Windows' or self.settings.os == 'Macos':
             # FIXME: Pass Qt version, handle more versions
             qt_version = "5.15.1"
             if qt_version == "5.14.1":
                 self.requires("sqlite3/3.30.1")
-                self.requires("libjpeg-turbo/2.0.3@qtproject/stable")
+                self.requires("libjpeg-turbo/2.0.3")
                 self.requires("libpng/1.6.37")
             if qt_version == "5.15.1":
                 self.requires("sqlite3/3.32.3")
-                self.requires("libjpeg-turbo/2.0.5@qtproject/stable")
+                self.requires("libjpeg-turbo/2.0.5")
                 self.requires("libpng/1.6.37")
 
             self.requires("libwebp/1.1.0")
-            self.requires("woff2/1.0.2@qtproject/stable")
+            self.requires("woff2/1.0.2")
 
     def build(self):
         cmake = CMake(self, set_cmake_flags=True)
