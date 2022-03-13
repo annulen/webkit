@@ -172,6 +172,7 @@ private:
     friend class QWebPageAdapter;
     friend class QWebPagePrivate;
     friend class QtWebElementRuntime;
+    friend class QWebEvent;
 
     QWebElementPrivate* d;
     WebCore::Element* m_element;
