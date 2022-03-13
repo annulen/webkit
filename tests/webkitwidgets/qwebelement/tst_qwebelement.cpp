@@ -24,6 +24,8 @@
 #include <qwebview.h>
 #include <qwebframe.h>
 #include <qwebelement.h>
+#include <qwebevent.h>
+#include <qwebeventlistener.h>
 #include <util.h>
 //TESTED_CLASS=
 //TESTED_FILES=
@@ -72,6 +74,7 @@ private Q_SLOTS:
     void hasSetFocus();
     void render();
     void addElementToHead();
+    void webEventListener();
 
 private:
     QWebView* m_view { nullptr };
@@ -1075,6 +1078,85 @@ void tst_QWebElement::addElementToHead()
     QEXPECT_FAIL("", "https://bugs.webkit.org/show_bug.cgi?id=102234", Continue);
     QCOMPARE(head.toInnerXml(), append);
 }
+
+class TestEvents : public QObject
+{
+    Q_OBJECT
+    public:
+    static inline int m_count = 0;
+    TestEvents(QObject* parent = 0) : QObject(parent) {}
+    static void increase()
+    {
+        m_count++;
+    }
+    public Q_SLOTS:
+    void evHandler(QWebEvent* event)
+    {
+        m_count++;
+    }
+};
+
+void callbackTest(QWebEvent* event)
+{
+    TestEvents::increase();
+    TestEvents::increase();
+}
+
+void
+tst_QWebElement::webEventListener()
+{
+    m_mainFrame->setHtml("<body><button></button><input/></body>");
+    QWebElement button = m_mainFrame->findFirstElement("button");
+
+    TestEvents t;
+    bool result;
+
+    //Add event listeners
+    QWebEventListener ev1, ev2([](QWebEvent* event)
+                               { TestEvents::increase(); });
+
+    QObject::connect(ev1.handleEventObject(), SIGNAL(eventSignal(QWebEvent*)), &t, SLOT(evHandler(QWebEvent*)));
+
+    result = button.addEventListener("click", ev1, false);
+    QVERIFY(result);
+    result = button.addEventListener("click", ev2, false);
+    QVERIFY(result);
+
+    //Simulate events
+    button.evaluateJavaScript("this.click()");
+    QCOMPARE(t.m_count, 2);
+
+    ev2.setCallBack(&callbackTest);
+    button.evaluateJavaScript("this.click()");
+    QCOMPARE(t.m_count, 5);
+
+    //Get and Remove event listeners
+    auto ev = button.eventListeners("click");
+    QCOMPARE(ev.size(), 2);
+    for(auto e : ev)
+        if(e.first.getCallBack())
+            result = button.removeEventListener("click", e.first, e.second);
+    QVERIFY(result);
+    QCOMPARE(button.eventListeners("click").size(), 1);
+    button.evaluateJavaScript("this.click()");
+    QCOMPARE(t.m_count, 6);
+
+    //Add new event listener for different event type
+    button.evaluateJavaScript("this.focus()");
+    QCOMPARE(t.m_count, 7);
+
+    //Remove all event listeners for click
+    button.removeAllEventListeners("click");
+    button.evaluateJavaScript("this.click()");
+    QCOMPARE(t.m_count, 7);
+
+    //Remove all event listeners
+    button.removeAllEventListeners();
+    button.evaluateJavaScript("this.focus()");
+    QCOMPARE(t.m_count, 7);
+}
+
+// Todo: Add tests for KeyboardEvent, MouseEvent and WheelEvent
 
 QTEST_MAIN(tst_QWebElement)
 #include "tst_qwebelement.moc"
