@@ -27,19 +27,25 @@
 #include "EventListener.h"
 
 #include <QUuid>
-#include <functional>
 #include <QObject>
+#include <QPointer>
+#include <functional>
+
+#include <QtWebkit/qwebevent.h>
 
 class WebCore::ScriptExecutionContext;
 class WebCore::Event;
 class QWebElement;
 class QWebEventListener;
 class WebEventSignal;
+class QWebEvent;
+
+typedef std::function<void(QWebEvent*)> CallBackEvent;
 
 class QWebEventListenerPrivate : public WebCore::EventListener {
 public:
     QWebEventListenerPrivate();
-    QWebEventListenerPrivate(std::function<void(void)>);
+    QWebEventListenerPrivate(CallBackEvent);
     ~QWebEventListenerPrivate();
     void handleEvent(WebCore::ScriptExecutionContext*, WebCore::Event*) override;
     bool operator==(const WebCore::EventListener &other);
@@ -47,7 +53,7 @@ public:
 
 private:
     QUuid uuid;
-    WebEventSignal *eventSignal;
-    std::function<void(void)> eventHandler;
+    QPointer<WebEventSignal> eventSignal;
+    CallBackEvent eventHandler;
     friend class QWebEventListener;
 };

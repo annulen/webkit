@@ -23,15 +23,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <QUuid>
 #include <QThread>
 #include <QDebug>
 #include "qwebeventlistener.h"
 #include "qwebeventlistener_p.h"
+#include <Qtwebkit/qwebevent.h>
 
 #include "ScriptExecutionContext.h"
 #include "Event.h"
 #include "EventListener.h"
+#include "KeyboardEvent.h"
+
+using WebCore::Event;
+using WebCore::KeyboardEvent;
+using WebCore::ScriptExecutionContext;
+
 
 WebEventSignal::WebEventSignal(QObject* parent)
     : QObject(parent)
@@ -60,15 +66,43 @@ QWebEventListenerPrivate::QWebEventListenerPrivate(CallBackEvent userCallback)
 
 QWebEventListenerPrivate::~QWebEventListenerPrivate()
 {
-    delete eventSignal;
 }
 
-void QWebEventListenerPrivate::handleEvent(WebCore::ScriptExecutionContext*, WebCore::Event* e)
+void QWebEventListenerPrivate::handleEvent(ScriptExecutionContext*, Event* e)
 {
+    QWebEvent *webEvent = nullptr;
+    switch(e->eventInterface())
+    {
+        case WebCore::KeyboardEventInterfaceType:
+        {
+            QWebKeyboardEvent* keyboardEvent = new QWebKeyboardEvent(e);
+            webEvent = (QWebEvent*)keyboardEvent;
+            break;
+        }
+        case WebCore::MouseEventInterfaceType:
+        {
+            QWebMouseEvent* mouseEvent = new QWebMouseEvent(e);
+            webEvent = (QWebEvent*)mouseEvent;
+            break;
+        }
+        case WebCore::WheelEventInterfaceType:
+        {
+            QWebWheelEvent* wheelEvent = new QWebWheelEvent(e);
+            webEvent = (QWebEvent*)wheelEvent;
+            break;
+        }
+        // Implementing only commonly used events. Other events like Overflow event,
+        // Mutating event etc. can be added later.
+        default:
+        {
+            webEvent = new QWebEvent(e);
+        }
+    }
+
     if(eventSignal)
-        emit eventSignal->eventSignal();
+        emit eventSignal->eventSignal(webEvent);
     if(eventHandler)
-        eventHandler();
+        eventHandler(webEvent);
 }
 
 bool QWebEventListenerPrivate::operator==(const WebCore::EventListener& other)
@@ -123,7 +157,6 @@ bool QWebEventListener::operator==(const QWebEventListener& other)
 WebEventSignal* QWebEventListener::handleEventObject()
 {
     if(d->eventSignal)
-        return d->eventSignal;
+        return d->eventSignal.data();
     return nullptr;
 }
-

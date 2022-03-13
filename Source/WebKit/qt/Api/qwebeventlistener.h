@@ -27,17 +27,13 @@
 #include <QtCore/QObject>
 
 #include "qwebkitglobal.h"
-#include <functional>
 #include <QUuid>
-
-typedef std::function<void(void)> CallBackEvent;
-
-namespace WebCore{
-    class Event;
-}
+#include <functional>
 
 class QWebEventListenerPrivate;
+class QWebEvent;
 
+typedef std::function<void(QWebEvent*)> CallBackEvent;
 class QWEBKIT_EXPORT WebEventSignal : public QObject {
     Q_OBJECT
 public:
@@ -45,7 +41,7 @@ public:
     ~WebEventSignal();
 
 Q_SIGNALS:
-    void eventSignal();
+    void eventSignal(QWebEvent*);
 };
 
 class QWEBKIT_EXPORT QWebEventListener {
@@ -64,4 +60,3 @@ private:
     QWebEventListenerPrivate *d;
     friend class QWebElement;
 };
-
