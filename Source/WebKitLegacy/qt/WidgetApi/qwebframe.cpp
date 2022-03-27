@@ -824,19 +824,19 @@ void QWebFrame::print(QPrinter *printer) const
     const qreal zoomFactorX = (qreal)printer->logicalDpiX() / qt_defaultDpi();
     const qreal zoomFactorY = (qreal)printer->logicalDpiY() / qt_defaultDpi();
 
-    QRect qprinterRect = printer->pageRect();
+    QRectF qprinterRect = printer->pageRect(QPrinter::DevicePixel);
 
-    QRect pageRect(0, 0, int(qprinterRect.width() / zoomFactorX), int(qprinterRect.height() / zoomFactorY));
+    QRectF pageRect(0, 0, qprinterRect.width() / zoomFactorX, qprinterRect.height() / zoomFactorY);
 
-    QtPrintContext printContext(&painter, pageRect, d);
+    QtPrintContext printContext(&painter, pageRect.toRect(), d);
 
     int docCopies;
     int pageCopies;
     if (printer->collateCopies()) {
         docCopies = 1;
-        pageCopies = printer->numCopies();
+        pageCopies = printer->copyCount();
     } else {
-        docCopies = printer->numCopies();
+        docCopies = printer->copyCount();
         pageCopies = 1;
     }
 
