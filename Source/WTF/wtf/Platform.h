@@ -161,8 +161,16 @@
 #define WTF_CPU_BIG_ENDIAN 1
 #endif
 
+/* CPU(SPARC64) - SPARC 64-bit */
+#if (  defined(__sparc__) \
+    && defined(__arch64__))
+#define WTF_CPU_SPARC64 1
+#define WTF_CPU_BIG_ENDIAN 1
+#endif
+
 /* CPU(SPARC) - SPARC 32-bit */
-#if defined(__sparc__)
+#if (  defined(__sparc__) \
+    && !CPU(SPARC64))
 #define WTF_CPU_SPARC 1
 #define WTF_CPU_BIG_ENDIAN 1
 #endif
@@ -722,6 +730,7 @@
     || CPU(ALPHA) \
     || CPU(ARM64) \
     || CPU(S390X) \
+    || CPU(SPARC64) \
     || CPU(MIPS64) \
     || CPU(PPC64) \
     || CPU(PPC64LE) \
