@@ -58,6 +58,8 @@ defined(_MIPS_ARCH_MIPS32R2)
 #else
 #undef DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS
 #endif  // _WIN32
+#elif CPU(M68K)
+#undef DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS
 #else
 #error Target architecture was not detected as supported by Double-Conversion.
 #endif

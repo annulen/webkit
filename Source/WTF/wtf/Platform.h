@@ -80,6 +80,12 @@
 #endif
 #endif
 
+/* CPU(M68K) - Motorola 68000 */
+#if defined(__m68k__)
+#define WTF_CPU_M68K 1
+#define WTF_CPU_BIG_ENDIAN 1
+#endif
+
 /* CPU(MIPS) - MIPS 32-bit and 64-bit */
 #if (defined(mips) || defined(__mips__) || defined(MIPS) || defined(_MIPS_) || defined(__mips64))
 #if defined(_ABI64) && (_MIPS_SIM == _ABI64)
