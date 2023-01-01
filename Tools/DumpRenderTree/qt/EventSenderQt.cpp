@@ -73,7 +73,7 @@ EventSender::EventSender(QWebPage* parent)
     startOfQueue = 0;
     m_eventLoop = 0;
     m_currentButton = 0;
-    m_currentDragActionsAllowed = 0;
+    m_currentDragActionsAllowed = { };
     resetClickCount();
     m_page->view()->installEventFilter(this);
     // This is a hack that works because we normally scroll 60 pixels (3*20) per tick, but Apple scrolls 120.
@@ -83,7 +83,7 @@ EventSender::EventSender(QWebPage* parent)
 
 static Qt::KeyboardModifiers getModifiers(const QStringList& modifiers)
 {
-    Qt::KeyboardModifiers modifs = 0;
+    Qt::KeyboardModifiers modifs = { };
     for (int i = 0; i < modifiers.size(); ++i) {
         const QString& m = modifiers.at(i);
         if (m == "ctrlKey")
@@ -107,14 +107,14 @@ void EventSender::mouseDown(int button, const QStringList& modifiers)
         mouseButton = Qt::LeftButton;
         break;
     case 1:
-        mouseButton = Qt::MidButton;
+        mouseButton = Qt::MiddleButton;
         break;
     case 2:
         mouseButton = Qt::RightButton;
         break;
     case 3:
         // fast/events/mouse-click-events expects the 4th button to be treated as the middle button
-        mouseButton = Qt::MidButton;
+        mouseButton = Qt::MiddleButton;
         break;
     default:
         mouseButton = Qt::LeftButton;
@@ -159,14 +159,14 @@ void EventSender::mouseUp(int button)
         mouseButton = Qt::LeftButton;
         break;
     case 1:
-        mouseButton = Qt::MidButton;
+        mouseButton = Qt::MiddleButton;
         break;
     case 2:
         mouseButton = Qt::RightButton;
         break;
     case 3:
         // fast/events/mouse-click-events expects the 4th button to be treated as the middle button
-        mouseButton = Qt::MidButton;
+        mouseButton = Qt::MiddleButton;
         break;
     default:
         mouseButton = Qt::LeftButton;
@@ -309,7 +309,7 @@ void EventSender::keyDown(const QString& string, const QStringList& modifiers, u
             // position. Allows us to pass emacs-ctrl-o.html
             s = QLatin1String("\n");
             code = '\n';
-            modifs = 0;
+            modifs = { };
             QKeyEvent event(QEvent::KeyPress, code, modifs, s);
             sendEvent(m_page, &event);
             QKeyEvent event2(QEvent::KeyRelease, code, modifs, s);
@@ -325,7 +325,7 @@ void EventSender::keyDown(const QString& string, const QStringList& modifiers, u
         } else if (code == 'a' && modifs == Qt::ControlModifier) {
             s = QString();
             code = Qt::Key_Home;
-            modifs = 0;
+            modifs = { };
         } else if (code == KEYCODE_LEFTARROW) {
             s = QString();
             code = Qt::Key_Left;
@@ -357,7 +357,7 @@ void EventSender::keyDown(const QString& string, const QStringList& modifiers, u
         } else if (code == 'a' && modifs == Qt::ControlModifier) {
             s = QString();
             code = Qt::Key_Home;
-            modifs = 0;
+            modifs = { };
         } else
             code = string.unicode()->toUpper().unicode();
     } else {
