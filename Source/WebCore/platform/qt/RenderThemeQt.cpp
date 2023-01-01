@@ -275,7 +275,7 @@ int RenderThemeQt::minimumMenuListSize(const RenderStyle&) const
 {
     // FIXME: Later we need a way to query the UI process for the dpi
     const QFontMetrics fm(QGuiApplication::font());
-    return fm.width(QLatin1Char('x'));
+    return fm.horizontalAdvance(QLatin1Char('x'));
 }
 
 void RenderThemeQt::setCheckboxSize(RenderStyle& style) const

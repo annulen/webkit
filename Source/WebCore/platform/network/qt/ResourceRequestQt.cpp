@@ -98,7 +98,7 @@ QNetworkRequest ResourceRequest::toNetworkRequest(NetworkingContext *context) co
         static const auto params = createHttp2Configuration();
         request.setHttp2Configuration(params);
 #endif
-        request.setAttribute(QNetworkRequest::HTTP2AllowedAttribute, true);
+        request.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
     }
 #endif // USE(HTTP2)
 
