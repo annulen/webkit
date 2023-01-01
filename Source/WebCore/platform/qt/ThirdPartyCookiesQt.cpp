@@ -28,6 +28,11 @@
 #include <QNetworkAccessManager>
 #include <QNetworkCookie>
 #include <QNetworkCookieJar>
+#include <private/qtldurl_p.h>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+Q_NETWORK_EXPORT QString qTopLevelDomain(QString domain);
+#endif
 
 namespace WebCore {
 
@@ -39,8 +44,8 @@ inline void removeTopLevelDomain(QString* domain, const QString& topLevelDomain)
 
 static bool urlsShareSameDomain(const QUrl& url, const QUrl& firstPartyUrl)
 {
-    QString firstPartyTLD = firstPartyUrl.topLevelDomain();
-    QString requestTLD = url.topLevelDomain();
+    QString firstPartyTLD = qTopLevelDomain(firstPartyUrl.host());
+    QString requestTLD = qTopLevelDomain(url.host());
 
     if (firstPartyTLD != requestTLD)
         return false;
@@ -88,4 +93,3 @@ bool thirdPartyCookiePolicyPermits(const NetworkStorageSession* storageSession, 
 }
 
 }
-// vim: ts=4 sw=4 et

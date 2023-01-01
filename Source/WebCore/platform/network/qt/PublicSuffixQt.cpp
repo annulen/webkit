@@ -73,7 +73,7 @@ String topPrivatelyControlledDomain(const String& domain)
 
     QString tld = qTopLevelDomain(qLowercaseDomain);
     auto privateLabels = qLowercaseDomain.leftRef(qLowercaseDomain.length() - tld.length());
-    auto topPrivateLabel = privateLabels.split(QLatin1Char('.'), QString::SkipEmptyParts).last();
+    auto topPrivateLabel = privateLabels.split(QLatin1Char('.'), Qt::SkipEmptyParts).last();
     return QString(topPrivateLabel + tld);
 }
 
