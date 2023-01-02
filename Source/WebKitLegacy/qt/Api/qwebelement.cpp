@@ -769,7 +769,7 @@ QStringList QWebElement::classes() const
     if (!hasAttribute(QLatin1String("class")))
         return QStringList();
 
-    QStringList classes =  attribute(QLatin1String("class")).simplified().split(QLatin1Char(' '), QString::SkipEmptyParts);
+    QStringList classes = attribute(QLatin1String("class")).simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
     classes.removeDuplicates();
     return classes;
 }

@@ -75,7 +75,7 @@ static void mouseEventTypeAndMouseButtonFromQEvent(const QEvent* event, Platform
         mouseButton = LeftButton;
     else if (mouseButtons & Qt::RightButton)
         mouseButton = RightButton;
-    else if (mouseButtons & Qt::MidButton)
+    else if (mouseButtons & Qt::MiddleButton)
         mouseButton = MiddleButton;
     else
         mouseButton = NoButton;
