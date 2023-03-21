@@ -24,9 +24,9 @@
 
 #pragma once
 
-#if USE(HARFBUZZ)
+#if USE(HARFBUZZ) || PLATFORM(QT)
 
-#include <hb.h>
+#include <harfbuzz/hb.h>
 
 namespace WebCore {
 
@@ -63,4 +63,4 @@ template<> struct HbPtrDeleter<hb_face_t> {
 
 using WebCore::HbUniquePtr;
 
-#endif // USE(HARFBUZZ)
+#endif // USE(HARFBUZZ) || PLATFORM(QT)

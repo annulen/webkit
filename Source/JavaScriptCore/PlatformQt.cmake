@@ -34,3 +34,10 @@ if (WIN32)
         inspector/JSGlobalObjectInspectorController.cpp
     )
 endif ()
+
+
+if (APPLE)
+    list(APPEND JavaScriptCore_PUBLIC_FRAMEWORK_HEADERS
+        runtime/JSExportMacros.h
+    )
+endif ()

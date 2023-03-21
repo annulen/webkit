@@ -566,6 +566,12 @@ set(WebKitWidgets_SYSTEM_INCLUDE_DIRECTORIES
     ${Qt5Widgets_INCLUDE_DIRS}
 )
 
+if (APPLE)
+  list(APPEND WebKitWidgets_PRIVATE_INCLUDE_DIRECTORIES
+      "${ICU_INCLUDE_DIRS}"
+  )
+endif ()
+
 set(WebKitWidgets_LIBRARIES
     PRIVATE
         ${Qt5MultimediaWidgets_LIBRARIES}

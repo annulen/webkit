@@ -25,7 +25,7 @@ namespace WebCore {
 
 class UserAgentQt {
 public:
-    static String standardUserAgent(const String &applicationNameForUserAgent, unsigned int webkitMajorVersion, unsigned int webkitMinorVersion);
+    static String standardUserAgent();
 };
 
 }

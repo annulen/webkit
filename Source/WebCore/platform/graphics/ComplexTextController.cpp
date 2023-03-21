@@ -43,7 +43,7 @@
 
 namespace WebCore {
 
-#if PLATFORM(WIN) || PLATFORM(QT)
+#if PLATFORM(WIN)
 
 class TextLayout {
 };

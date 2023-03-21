@@ -37,7 +37,7 @@ namespace WebCore {
 
     This implementation returns the following value:
 
-    "Mozilla/5.0 (%Platform%%Security%%Subplatform%) AppleWebKit/%WebKitVersion% (KHTML, like Gecko) %AppVersion Version/10.0 Safari/%WebKitVersion%"
+    "Mozilla/5.0 (%Platform%%Security%%Subplatform%) AppleWebKit/%WebKitVersion% (KHTML, like Gecko) %AppVersion Version/13.0 Safari/%WebKitVersion%"
 
     In this string the following values are replaced the first time the function is called:
     \list
@@ -52,13 +52,13 @@ namespace WebCore {
     \li %AppVersion% expands to QCoreApplication::applicationName()/QCoreApplication::applicationVersion() if they're set; otherwise defaulting to Qt and the current Qt version.
     \endlist
 */
-String UserAgentQt::standardUserAgent(const String &applicationNameForUserAgent, unsigned int webkitMajorVersion, unsigned int webkitMinorVersion)
+String UserAgentQt::standardUserAgent()
 {
     static QString ua;
 
     if (ua.isNull()) {
-
-        ua = QStringLiteral("Mozilla/5.0 (%1%2%3) AppleWebKit/%4 (KHTML, like Gecko) %99 Version/10.0 Safari/%5");
+        // WebKit version is fixed at 605.1.15, see https://bugs.webkit.org/show_bug.cgi?id=180365
+        ua = QStringLiteral("Mozilla/5.0 (%1%2%3) AppleWebKit/605.1.15 (KHTML, like Gecko) %99 Version/13.0 Safari/605.1.15");
 
         // Platform.
         ua = ua.arg(
@@ -120,17 +120,9 @@ String UserAgentQt::standardUserAgent(const String &applicationNameForUserAgent,
             "Unknown"
 #endif
         ));
-
-        // WebKit version.
-        QString version = QString::number(webkitMajorVersion) + QLatin1Char('.') + QString::number(webkitMinorVersion);
-        ua = ua.arg(version, version);
     }
 
-    QString appName;
-    if (applicationNameForUserAgent.isEmpty())
-        appName = QCoreApplication::applicationName();
-    else
-        appName = applicationNameForUserAgent;
+    QString appName = QCoreApplication::applicationName();
 
     if (!appName.isEmpty()) {
         QString appVer = QCoreApplication::applicationVersion();

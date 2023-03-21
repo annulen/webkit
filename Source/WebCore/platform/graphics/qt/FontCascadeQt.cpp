@@ -42,6 +42,7 @@
 #include <qalgorithms.h>
 
 #include <limits.h>
+//#include <QDebug>
 
 namespace WebCore {
 
@@ -189,58 +190,6 @@ void FontCascade::drawComplexText(GraphicsContext& ctx, const TextRun& run, cons
         drawQtGlyphRun(ctx, glyphRun, adjustedPoint, line.ascent());
 }
 
-float FontCascade::floatWidthForComplexText(const TextRun& run, HashSet<const Font*>*, GlyphOverflow*) const
-{
-    if (!primaryFont().platformData().size())
-        return 0;
-
-    if (!run.length())
-        return 0;
-
-    if (run.length() == 1 && treatAsSpace(run[0]))
-        return primaryFont().spaceWidth() + run.expansion();
-    QString string = toNormalizedQString(run);
-
-    QTextLayout layout(string);
-    layout.setRawFont(rawFont());
-    initFormatForTextLayout(&layout, run);
-    QTextLine line = setupLayout(&layout, run);
-    float x1 = line.cursorToX(0);
-    float x2 = line.cursorToX(run.length());
-    float width = qAbs(x2 - x1);
-
-    return width + run.expansion();
-}
-
-int FontCascade::offsetForPositionForComplexText(const TextRun& run, float position, bool) const
-{
-    QString string = toNormalizedQString(run);
-
-    QTextLayout layout(string);
-    layout.setRawFont(rawFont());
-    initFormatForTextLayout(&layout, run);
-    QTextLine line = setupLayout(&layout, run);
-    return line.xToCursor(position);
-}
-
-void FontCascade::adjustSelectionRectForComplexText(const TextRun& run, LayoutRect& selectionRect, unsigned from, unsigned to) const
-{
-    QString string = toNormalizedQString(run);
-
-    QTextLayout layout(string);
-    layout.setRawFont(rawFont());
-    initFormatForTextLayout(&layout, run);
-    QTextLine line = setupLayout(&layout, run);
-
-    float x1 = line.cursorToX(from);
-    float x2 = line.cursorToX(to);
-    if (x2 < x1)
-        qSwap(x1, x2);
-
-    selectionRect.move(x1, 0);
-    selectionRect.setWidth(x2 - x1);
-}
-
 void FontCascade::initFormatForTextLayout(QTextLayout* layout, const TextRun& run) const
 {
     QTextLayout::FormatRange range;
@@ -268,18 +217,6 @@ void FontCascade::initFormatForTextLayout(QTextLayout* layout, const TextRun& ru
         layout->setAdditionalFormats(QList<QTextLayout::FormatRange>() << range);
 #endif
     }
-}
-
-bool FontCascade::canReturnFallbackFontsForComplexText()
-{
-    return false;
-}
-
-float FontCascade::getGlyphsAndAdvancesForComplexText(const TextRun&, unsigned, unsigned, GlyphBuffer&, ForTextEmphasisOrNot) const
-{
-    // FIXME
-    notImplemented();
-    return 0.f;
 }
 
 void FontCascade::drawGlyphs(GraphicsContext& context, const Font& font, const GlyphBuffer& glyphBuffer, unsigned from, unsigned numGlyphs, const FloatPoint& point, FontSmoothingMode)
@@ -321,12 +258,6 @@ void FontCascade::drawGlyphs(GraphicsContext& context, const Font& font, const G
     qtGlyphs.setRawFont(rawFont);
 
     drawQtGlyphRun(context, qtGlyphs, point, /* baselineOffset = */0);
-}
-
-
-bool FontCascade::canExpandAroundIdeographsInComplexText()
-{
-    return false;
 }
 
 QFont FontCascade::syntheticFont() const

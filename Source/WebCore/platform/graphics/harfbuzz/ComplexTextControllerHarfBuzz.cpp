@@ -26,30 +26,59 @@
 #include "config.h"
 #include "ComplexTextController.h"
 
+#if USE(CAIRO)
 #include "CairoUtilities.h"
+#endif
+
 #include "FontCascade.h"
 #include "HbUniquePtr.h"
 #include "SurrogatePairAwareTextIterator.h"
-#include <hb-ft.h>
-#include <hb-icu.h>
-#include <hb-ot.h>
+#include <harfbuzz/hb.h>
+
+#if PLATFORM(QT)
+#include <QtGui/private/qharfbuzzng_p.h>
+#include <QtGui/private/qrawfont_p.h>
+#include <wtf/NakedPtr.h>
+#endif
+
+#if USE(FREETYPE)
+#include <harfbuzz/hb-ft.h>
+#endif
+
+#include <harfbuzz/hb-icu.h>
+#include <harfbuzz/hb-ot.h>
 
 #if ENABLE(VARIATION_FONTS)
 #include FT_MULTIPLE_MASTERS_H
+#endif
+
+#if PLATFORM(QT)
+#ifndef HB_VERSION_ATLEAST
+#define HB_VERSION_ATLEAST(...) 0
+#endif
 #endif
 
 namespace WebCore {
 
 static inline float harfBuzzPositionToFloat(hb_position_t value)
 {
+#if PLATFORM(QT)
+    return static_cast<float>(value) / 64;
+#else
     return static_cast<float>(value) / (1 << 16);
+#endif
 }
 
 static inline hb_position_t floatToHarfBuzzPosition(float value)
 {
+#if PLATFORM(QT)
+    return static_cast<hb_position_t>(value * 64);
+#else
     return static_cast<hb_position_t>(value * (1 << 16));
+#endif
 }
 
+#if USE(CAIRO)
 static inline hb_position_t doubleToHarfBuzzPosition(double value)
 {
     return static_cast<hb_position_t>(value * (1 << 16));
@@ -128,6 +157,7 @@ static hb_font_funcs_t* harfBuzzFontFunctions()
     }
     return fontFunctions;
 }
+#endif
 
 ComplexTextController::ComplexTextRun::ComplexTextRun(hb_buffer_t* buffer, const Font& font, const UChar* characters, unsigned stringLocation, unsigned stringLength, unsigned indexBegin, unsigned indexEnd)
     : m_initialAdvance(0, 0)
@@ -309,6 +339,7 @@ void ComplexTextController::collectComplexTextRunsForCharacters(const UChar* cha
         return;
 
     const auto& fontPlatformData = font->platformData();
+#if USE(CAIRO)
     auto* scaledFont = fontPlatformData.scaledFont();
     CairoFtFaceLocker cairoFtFaceLocker(scaledFont);
     FT_Face ftFace = cairoFtFaceLocker.ftFace();
@@ -342,6 +373,14 @@ void ComplexTextController::collectComplexTextRunsForCharacters(const UChar* cha
 #endif
 
     hb_font_make_immutable(harfBuzzFont.get());
+#elif PLATFORM(QT)
+    const QRawFont& rawFont = fontPlatformData.rawFont();
+    QFontEngine* fe = QRawFontPrivate::get(rawFont)->fontEngine;
+    hb_font_t* fnt = hb_qt_font_get_for_engine(fe);
+
+    NakedPtr<hb_face_t> face(hb_qt_face_get_for_engine(fe));
+    NakedPtr<hb_font_t> harfBuzzFont(hb_qt_font_get_for_engine(fe));
+#endif
 
     auto features = fontFeatures(m_font, fontPlatformData.orientation());
     HbUniquePtr<hb_buffer_t> buffer(hb_buffer_create());

@@ -30,12 +30,8 @@
 
 #pragma once
 
-#if PLATFORM(QT)
-#if OS(WINDOWS)
-#include <windows.h>
-#else
+#if PLATFORM(QT) && !OS(WINDOWS)
 #include <QLibrary>
-#endif
 #endif
 
 #if USE(CF)
@@ -43,6 +39,7 @@
 #endif
 
 #if OS(WINDOWS)
+
 typedef HMODULE PlatformModule;
 
 #elif PLATFORM(QT)

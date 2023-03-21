@@ -34,10 +34,9 @@ include(FindPkgConfig)
 pkg_check_modules(PC_HARFBUZZ QUIET harfbuzz)
 
 find_path(HARFBUZZ_INCLUDE_DIRS
-    NAMES hb.h
+    NAMES harfbuzz/hb.h
     HINTS ${PC_HARFBUZZ_INCLUDEDIR}
           ${PC_HARFBUZZ_INCLUDE_DIRS}
-    PATH_SUFFIXES harfbuzz
 )
 
 find_library(HARFBUZZ_LIBRARIES NAMES harfbuzz
@@ -46,8 +45,8 @@ find_library(HARFBUZZ_LIBRARIES NAMES harfbuzz
 )
 
 if (HARFBUZZ_INCLUDE_DIRS)
-    if (EXISTS "${HARFBUZZ_INCLUDE_DIRS}/hb-version.h")
-        file(READ "${HARFBUZZ_INCLUDE_DIRS}/hb-version.h" _harfbuzz_version_content)
+    if (EXISTS "${HARFBUZZ_INCLUDE_DIRS}/harfbuzz/hb-version.h")
+        file(READ "${HARFBUZZ_INCLUDE_DIRS}/harfbuzz/hb-version.h" _harfbuzz_version_content)
 
         string(REGEX MATCH "#define +HB_VERSION_STRING +\"([0-9]+\.[0-9]+\.[0-9]+)\"" _dummy "${_harfbuzz_version_content}")
         set(HARFBUZZ_VERSION "${CMAKE_MATCH_1}")
@@ -55,7 +54,7 @@ if (HARFBUZZ_INCLUDE_DIRS)
 endif ()
 
 if ("${Harfbuzz_FIND_VERSION}" VERSION_GREATER "${HARFBUZZ_VERSION}")
-    message(FATAL_ERROR "Required version (" ${Harfbuzz_FIND_VERSION} ") is higher than found version (" ${CAIRO_VERSION} ")")
+    message(FATAL_ERROR "Required version (" ${Harfbuzz_FIND_VERSION} ") is higher than found version (" ${HARFBUZZ_VERSION} ")")
 endif ()
 
 # HarfBuzz 0.9.18 split ICU support into a separate harfbuzz-icu library.

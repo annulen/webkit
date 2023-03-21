@@ -80,14 +80,20 @@ class FontDescription;
 class SharedBuffer;
 
 #if PLATFORM(QT)
+class FontPlatformData;
+
 class FontPlatformDataPrivate : public RefCounted<FontPlatformDataPrivate> {
-    WTF_MAKE_NONCOPYABLE(FontPlatformDataPrivate); WTF_MAKE_FAST_ALLOCATED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
-    FontPlatformDataPrivate() = default;
+    WTF_MAKE_NONCOPYABLE(FontPlatformDataPrivate);
+
+    static void platformDataInit(FontPlatformData&, float size, const QRawFont& rawFont);
+    QRawFont rawFont;
+
+private:
     FontPlatformDataPrivate(const QRawFont& rawFont)
         : rawFont(rawFont)
     { }
-    QRawFont rawFont;
 };
 #endif
 
@@ -106,9 +112,10 @@ public:
 
 #if PLATFORM(QT)
     FontPlatformData(const FontDescription&, const AtomString& family);
-    FontPlatformData(const QRawFont& rawFont)
-        : m_data(adoptRef(new FontPlatformDataPrivate(rawFont)))
-    { }
+    FontPlatformData(const QRawFont& rawFont);
+    ~FontPlatformData();
+
+    friend class FontPlatformDataPrivate;
 #endif
 
     static FontPlatformData cloneWithOrientation(const FontPlatformData&, FontOrientation);
@@ -197,13 +204,7 @@ public:
 #endif
 
 #if PLATFORM(QT)
-    QRawFont rawFont() const
-    {
-        ASSERT(!isHashTableDeletedValue());
-        if (!m_data)
-            return QRawFont();
-        return m_data->rawFont;
-    }
+    QRawFont rawFont() const;
 #endif
 
     unsigned hash() const;
@@ -252,6 +253,10 @@ private:
 
 #if PLATFORM(WIN)
     void platformDataInit(HFONT, float size, HDC, WCHAR* faceName);
+#endif
+
+#if PLATFORM(QT)
+    void platformDataInit(float size, const QRawFont& rawFont);
 #endif
 
 #if USE(FREETYPE)

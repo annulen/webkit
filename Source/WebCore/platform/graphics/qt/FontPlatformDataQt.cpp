@@ -67,8 +67,14 @@ static inline QFont::Weight toQFontWeight(FontSelectionValue fontWeight)
 }
 #endif
 
+void FontPlatformDataPrivate::platformDataInit(FontPlatformData& q, float size, const QRawFont& rawFont)
+{
+    ASSERT(qFuzzyCompare(static_cast<float>(rawFont.pixelSize()), size));
+    q.m_data = adoptRef(new FontPlatformDataPrivate(rawFont));
+    q.m_size = size;
+}
+
 FontPlatformData::FontPlatformData(const FontDescription& description, const AtomString& familyName)
-    : m_data(adoptRef(new FontPlatformDataPrivate()))
 {
     QFont font;
     int requestedSize = description.computedPixelSize();
@@ -86,19 +92,33 @@ FontPlatformData::FontPlatformData(const FontDescription& description, const Ato
     // WebKit allows font size zero but QFont does not. We will return
     // m_data->size if a font size of zero is requested and pixelSize()
     // otherwise.
-    m_size = (!requestedSize) ? requestedSize : font.pixelSize();
-    m_data->rawFont = QRawFont::fromFont(font, QFontDatabase::Any);
+    auto size = (!requestedSize) ? requestedSize : font.pixelSize();
+    FontPlatformDataPrivate::platformDataInit(*this, size, QRawFont::fromFont(font, QFontDatabase::Any));
 }
+
+FontPlatformData::FontPlatformData(const QRawFont& rawFont)
+{
+    FontPlatformDataPrivate::platformDataInit(*this, rawFont.pixelSize(), rawFont);
+}
+
+FontPlatformData::~FontPlatformData() = default;
 
 FontPlatformData FontPlatformData::cloneWithSize(const FontPlatformData& source, float size)
 {
     FontPlatformData copy(source);
-    copy.m_data = adoptRef(new FontPlatformDataPrivate());
     ASSERT(source.m_data);
-    copy.m_data->rawFont = source.m_data->rawFont;
-    copy.m_data->rawFont.setPixelSize(size);
-    copy.m_size = copy.m_data->rawFont.pixelSize();
+    QRawFont copyFont = source.m_data->rawFont;
+    copyFont.setPixelSize(size); // Detaches
+    FontPlatformDataPrivate::platformDataInit(copy, size, copyFont);
     return copy;
+}
+
+QRawFont FontPlatformData::rawFont() const
+{
+    ASSERT(!isHashTableDeletedValue());
+    if (!m_data)
+        return QRawFont();
+    return m_data->rawFont;
 }
 
 bool FontPlatformData::platformIsEqual(const FontPlatformData& other) const
