@@ -42,7 +42,11 @@
 #include "Timer.h"
 
 #include <QPainter>
+#include <QPaintEngine>
 #include <QPixmap>
+#include <QPixmapCache>
+
+#include <private/qhexstring_p.h>
 
 namespace WebCore {
 
@@ -64,20 +68,73 @@ Color nativeImageSinglePixelSolidColor(const NativeImagePtr& image)
     return QColor::fromRgba(image.pixel(0, 0));
 }
 
+const QImage* prescaleImageIfRequired(QPainter* painter, const QImage* image, QImage* prescaledImage, const QRectF& destRect, QRectF* srcRect)
+{
+    // The quality of down scaling at 0.5x and below in QPainter is not very good
+    // due to using bilinear sampling, so for high quality scaling we need to
+    // perform scaling ourselves.
+    ASSERT(image);
+    ASSERT(painter);
+    if (!(painter->renderHints() & QPainter::SmoothPixmapTransform))
+        return image;
+
+    if (painter->paintEngine()->type() != QPaintEngine::Raster)
+        return image;
+
+    QTransform transform = painter->combinedTransform();
+
+    // Prescaling transforms that does more than scale or translate is not supported.
+    if (transform.type() > QTransform::TxScale)
+        return image;
+
+    QRectF transformedDst = transform.mapRect(destRect);
+    // Only prescale if downscaling to 0.5x or less
+    if (transformedDst.width() * 2 > srcRect->width() && transformedDst.height() * 2 > srcRect->height())
+        return image;
+
+    // This may not work right with subpixel positions, but that can not currently happen.
+    QRect pixelSrc = srcRect->toRect();
+    QSize scaledSize = transformedDst.size().toSize();
+
+    QString key = QStringLiteral("qtwebkit_prescaled_")
+        % HexString<qint64>(image->cacheKey())
+        % HexString<int>(pixelSrc.x()) % HexString<int>(pixelSrc.y())
+        % HexString<int>(pixelSrc.width()) % HexString<int>(pixelSrc.height())
+        % HexString<int>(scaledSize.width()) % HexString<int>(scaledSize.height());
+
+    QPixmap buffer;
+
+    if (!QPixmapCache::find(key, &buffer)) {
+        if (pixelSrc != image->rect())
+            buffer = QPixmap::fromImage(image->copy(pixelSrc).scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        else
+            buffer = QPixmap::fromImage(image->scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        QPixmapCache::insert(key, buffer);
+    }
+
+    *srcRect = QRectF(QPointF(), buffer.size());
+    *prescaledImage = buffer.toImage();
+
+    return prescaledImage;
+}
+
 void drawNativeImage(const NativeImagePtr& image, GraphicsContext& ctxt, const FloatRect& destRect, const FloatRect& srcRect, const IntSize& srcSize, const ImagePaintingOptions& options)
 {
     // QTFIXME: Handle imageSize? See e.g. NativeImageDirect2D
+    ctxt.platformContext()->setRenderHint(QPainter::SmoothPixmapTransform, true);
 
     QRectF normalizedDst = destRect.normalized();
     QRectF normalizedSrc = srcRect.normalized();
+
+    QImage prescaledImage;
+    const NativeImagePtr& maybePrescaledImage = *prescaleImageIfRequired(ctxt.platformContext(), &image, &prescaledImage, normalizedDst, &normalizedSrc);
 
     CompositeOperator previousOperator = ctxt.compositeOperation();
     BlendMode previousBlendMode = ctxt.blendModeOperation();
     ctxt.setCompositeOperation(!image.hasAlphaChannel() && options.compositeOperator() == CompositeSourceOver && options.blendMode() == BlendMode::Normal ? CompositeCopy : options.compositeOperator(), options.blendMode());
 
-    if (ctxt.hasShadow()) {
+    if (ctxt.hasShadow() && ctxt.mustUseShadowBlur()) {
         ShadowBlur shadow(ctxt.state());
-//        const auto& pixmap = *image;
         shadow.drawShadowLayer(ctxt.getCTM(), ctxt.clipBounds(), normalizedDst,
             [normalizedSrc, normalizedDst, &image](GraphicsContext& shadowContext)
             {
@@ -90,7 +147,7 @@ void drawNativeImage(const NativeImagePtr& image, GraphicsContext& ctxt, const F
             });
     }
 
-    ctxt.platformContext()->drawImage(normalizedDst, image, normalizedSrc);
+    ctxt.platformContext()->drawImage(normalizedDst, maybePrescaledImage, normalizedSrc);
 
     ctxt.setCompositeOperation(previousOperator, previousBlendMode);
 }
