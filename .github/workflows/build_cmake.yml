@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - qt6
 
   pull_request:
     branches:
@@ -11,7 +12,7 @@ on:
 
 env:
   QT_VERSION: 5.15.1
-  CCACHE_VERSION: 3.7.7
+  CCACHE_VERSION: 4.7.3
   CACHE_PARTITION: dev
   HOST_N_CORES: 2
   NINJA_STATUS: "[%f/%t %o/sec] "
