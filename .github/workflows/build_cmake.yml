@@ -117,7 +117,7 @@ jobs:
         message("::set-output name=timestamp::${current_date}")
 
     - name: ccache cache files
-      uses: annulen/cache-action@v2.1.1-custom
+      uses: annulen/cache-action@v3.3.1-custom
       with:
         path: .ccache
         key: ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
