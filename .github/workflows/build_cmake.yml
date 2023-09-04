@@ -71,6 +71,11 @@ jobs:
         git -c protocol.version=2 fetch --no-tags --prune --progress --depth=10 origin +${GITHUB_SHA}:refs/remotes/origin/${BRANCH}
         git checkout --progress --force -B $BRANCH refs/remotes/origin/$BRANCH
 
+    - uses: actions/setup-python@v4
+      if: runner.os == 'Windows' || runner.os == 'macOS'
+      with:
+        python-version: '3.10'
+
     - name: Download Qt Windows
       id: qt_win
       if: runner.os == 'Windows'
@@ -125,11 +130,6 @@ jobs:
         key: ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
         restore-keys: |
           ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-
-    # For Conan
-    - uses: actions/setup-python@v1
-      if: runner.os == 'Windows' || runner.os == 'macOS'
-      with:
-        python-version: '3.7'
 
     - name: Install dependencies (Conan)
       if: runner.os == 'Windows' || runner.os == 'macOS'
