@@ -14,7 +14,6 @@ env:
   QT_VERSION: 5.15.2
   CCACHE_VERSION: 4.7.3
   CACHE_PARTITION: dev
-  HOST_N_CORES: 2
   NINJA_STATUS: "[%f/%t %o/sec] "
   CCACHE_COMPRESS: "true"
   CCACHE_COMPRESSLEVEL: "6"
@@ -35,16 +34,19 @@ jobs:
             name: "Ubuntu Release", artifact: "Linux",
             os: ubuntu-latest,
             build_type: Release,
+            host_n_cores: 2,
           }
         - {
             name: "macOS Release", artifact: "macOS",
             os: macos-latest,
+            host_n_cores: 3,
             build_type: Release,
           }
         - {
             name: "Windows MSVC Conan Release", artifact: "Windows-MSVC",
             os: windows-latest,
             build_type: Release,
+            host_n_cores: 2,
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
 
@@ -196,17 +198,17 @@ jobs:
     - name: Build (Linux)
       if: runner.os == 'Linux'
       shell: bash --noprofile --norc -eo pipefail -x {0}
-      run: ninja -C build -j $HOST_N_CORES -v
+      run: ninja -C build -j ${{ matrix.config.host_n_cores }} -v
 
     - name: Build (MSVC/Conan)
       if: runner.os == 'Windows' && matrix.config.environment_script != ''
       shell: cmd
-      run: py Tools\qt\build-qtwebkit-conan.py --build --install --ninjaargs="-j %HOST_N_CORES% -v" || exit /b 1
+      run: py Tools\qt\build-qtwebkit-conan.py --build --install --ninjaargs="-j ${{ matrix.config.host_n_cores }} -v" || exit /b 1
 
     - name: Build (macOS/Conan)
       if: runner.os == 'macOS'
       shell: bash --noprofile --norc -eo pipefail -x {0}
-      run: Tools/qt/build-qtwebkit-conan.py --build --install --ninjaargs="-j $HOST_N_CORES -v"
+      run: Tools/qt/build-qtwebkit-conan.py --build --install --ninjaargs="-j ${{ matrix.config.host_n_cores }} -v"
 
     # - name: Verify (Linux)
     #   if: runner.os == 'Linux'
