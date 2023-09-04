@@ -11,7 +11,7 @@ on:
       - master
 
 env:
-  QT_VERSION: 5.15.1
+  QT_VERSION: 5.15.2
   CCACHE_VERSION: 4.7.3
   CACHE_PARTITION: dev
   HOST_N_CORES: 2
@@ -36,17 +36,17 @@ jobs:
             os: ubuntu-latest,
             build_type: Release,
           }
-        #- {
-        #    name: "macOS Release", artifact: "macOS",
-        #    os: macos-latest,
-        #    build_type: Release,
-        #  }
-        #- {
-        #    name: "Windows MSVC Conan Release", artifact: "Windows-MSVC",
-        #    os: windows-latest,
-        #    build_type: Release,
-        #    environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-        #  }
+        - {
+            name: "macOS Release", artifact: "macOS",
+            os: macos-latest,
+            build_type: Release,
+          }
+        - {
+            name: "Windows MSVC Conan Release", artifact: "Windows-MSVC",
+            os: windows-latest,
+            build_type: Release,
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          }
 
     steps:
     - name: Sparse checkout
