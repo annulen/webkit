@@ -160,10 +160,10 @@ jobs:
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: Tools/qt/build-qtwebkit-conan.py --configure --cmakeargs="$cmake_args" --qt="${{ steps.qt_mac.outputs.qt_dir }}"
 
-#    - uses: actions/upload-artifact@v1
-#      with:
-#        path: build/CMakeCache.txt
-#        name: CMakeCache.txt
+    - uses: actions/upload-artifact@v1
+      with:
+        path: build/CMakeCache.txt
+        name: CMakeCache.txt
 #
 #    - uses: actions/upload-artifact@v1
 #      with:
