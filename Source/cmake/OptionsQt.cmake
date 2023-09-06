@@ -461,11 +461,11 @@ if (APPLE)
 endif ()
 
 if (MACOS_FORCE_SYSTEM_XML_LIBRARIES)
-    set(LIBXML2_INCLUDE_DIR "${CMAKE_OSX_SYSROOT}/usr/include/libxml2")
-    set(LIBXML2_LIBRARIES xml2)
+    find_package(LibXml2 2.8.0 REQUIRED
+        PATHS ${CMAKE_OSX_SYSROOT} NO_DEFAULT_PATH)
     if (ENABLE_XSLT)
-        set(LIBXSLT_INCLUDE_DIR "${CMAKE_OSX_SYSROOT}/usr/include/libxslt")
-        set(LIBXSLT_LIBRARIES xslt)
+        find_package(LibXslt 1.1.7 REQUIRED
+            PATHS ${CMAKE_OSX_SYSROOT} NO_DEFAULT_PATH)
     endif ()
 else ()
     find_package(LibXml2 2.8.0 REQUIRED)
