@@ -76,6 +76,13 @@ jobs:
       with:
         python-version: '3.10'
 
+    - uses: BSFishy/pip-action@v1
+      if: runner.os == 'Windows' || runner.os == 'macOS'
+      with:
+        requirements: Tools/qt/qt-downloader-requirements.txt
+        packages: |
+          conan<2
+
     - name: Download Qt Windows
       id: qt_win
       if: runner.os == 'Windows'
@@ -84,7 +91,6 @@ jobs:
         DIR: "msvc2019_64"
       shell: bash --noprofile --norc -eo pipefail -x {0} 
       run: |
-        py -m pip install -r Tools/qt/qt-downloader-requirements.txt
         QT_INSTALL_DIR="/c/Qt"
         py Tools/qt/qt-downloader windows desktop ${QT_VERSION} ${TOOLCHAIN} --output=${QT_INSTALL_DIR} --qt_modules="${QT_MODULES}"
         export QTDIR="${QT_INSTALL_DIR}/${QT_VERSION}/${DIR}"
@@ -100,7 +106,6 @@ jobs:
       env: 
         TOOLCHAIN: "clang_64"
       run: |
-        pip3 install -r Tools/qt/qt-downloader-requirements.txt
         QT_INSTALL_DIR="${PWD}/Qt"
         Tools/qt/qt-downloader macos desktop ${QT_VERSION} ${TOOLCHAIN} --output=${QT_INSTALL_DIR} --qt_modules="${QT_MODULES}"
         export QTDIR="${QT_INSTALL_DIR}/${QT_VERSION}/${TOOLCHAIN}"
@@ -130,12 +135,6 @@ jobs:
         key: ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
         restore-keys: |
           ${{ matrix.config.name }}-ccache-${{ env.CACHE_PARTITION }}-
-
-    - name: Install dependencies (Conan)
-      if: runner.os == 'Windows' || runner.os == 'macOS'
-      shell: bash --noprofile --norc -eo pipefail -x {0}
-      run: |
-        pip3 install conan
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
