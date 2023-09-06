@@ -51,25 +51,13 @@ jobs:
           }
 
     steps:
-    - name: Sparse checkout
-      shell: bash --noprofile --norc -eo pipefail -x {0}
-      run: |
-        REPO="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-        BRANCH="${GITHUB_REF/#refs\/heads\//}"
-        # Following code is based on logs of actions/checkout@v2, with sparseCheckout stuff inserted in the middle
-        echo "Syncing repository: $GITHUB_REPOSITORY"
-        echo "Working directory is '$(pwd)' GITHUB_WORKSPACE=$GITHUB_WORKSPACE BRANCH=$BRANCH"
-        git version
-        git init $GITHUB_WORKSPACE
-        git remote add origin https://github.com/$GITHUB_REPOSITORY
-        git config --local gc.auto 0
-        # Now interesting part
-        git config core.sparseCheckout true
-        # FIXME: hardcode! Cannot use .travis-sparse-checkout yet
-        echo "/*" >> .git/info/sparse-checkout
-        echo "!LayoutTests" >> .git/info/sparse-checkout
-        git -c protocol.version=2 fetch --no-tags --prune --progress --depth=10 origin +${GITHUB_SHA}:refs/remotes/origin/${BRANCH}
-        git checkout --progress --force -B $BRANCH refs/remotes/origin/$BRANCH
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 10
+        sparse-checkout: |
+          /*
+          !LayoutTests
+        sparse-checkout-cone-mode: false
 
     - uses: actions/setup-python@v4
       if: runner.os == 'Windows' || runner.os == 'macOS'
