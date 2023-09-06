@@ -97,7 +97,7 @@ jobs:
         ls $QTDIR
         Tools/qt/license_writer.sh
         QTWINDIR="C:\\Qt\\${QT_VERSION}\\${DIR}"
-        echo "::set-output name=qt_dir::${QTWINDIR}"
+        echo "qt_dir=${QTWINDIR}" >> $GITHUB_OUTPUT
 
     - name: Download Qt Mac
       id: qt_mac
@@ -111,7 +111,7 @@ jobs:
         export QTDIR="${QT_INSTALL_DIR}/${QT_VERSION}/${TOOLCHAIN}"
         ls $QTDIR
         Tools/qt/license_writer.sh
-        echo "::set-output name=qt_dir::${QTDIR}"
+        echo "qt_dir=${QTDIR}" >> $GITHUB_OUTPUT
 
     - name: Download ccache
       id: ccache
@@ -126,7 +126,7 @@ jobs:
       shell: cmake -P {0}
       run: |
         string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-        message("::set-output name=timestamp::${current_date}")
+        file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}")
 
     - name: ccache cache files
       uses: annulen/cache-action@v3.3.1-custom
