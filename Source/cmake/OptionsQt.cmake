@@ -460,19 +460,19 @@ if (APPLE)
     endif ()
 endif ()
 
-if (MACOS_FORCE_SYSTEM_XML_LIBRARIES)
-    find_package(LibXml2 2.8.0 REQUIRED
-        PATHS ${CMAKE_OSX_SYSROOT} NO_DEFAULT_PATH)
-    if (ENABLE_XSLT)
-        find_package(LibXslt 1.1.7 REQUIRED
-            PATHS ${CMAKE_OSX_SYSROOT} NO_DEFAULT_PATH)
-    endif ()
-else ()
+#if (MACOS_FORCE_SYSTEM_XML_LIBRARIES)
+#    find_package(LibXml2 2.8.0 REQUIRED
+#        PATHS ${CMAKE_OSX_SYSROOT} NO_DEFAULT_PATH)
+#    if (ENABLE_XSLT)
+#        find_package(LibXslt 1.1.7 REQUIRED
+#            PATHS ${CMAKE_OSX_SYSROOT} NO_DEFAULT_PATH)
+#    endif ()
+#else ()
     find_package(LibXml2 2.8.0 REQUIRED)
     if (ENABLE_XSLT)
         find_package(LibXslt 1.1.7 REQUIRED)
     endif ()
-endif ()
+#endif ()
 
 if (UNIX AND NOT APPLE AND CMAKE_OBJCOPY AND NOT SKIP_DWZ)
     find_package(Dwz 0.13)
