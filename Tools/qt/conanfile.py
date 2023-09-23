@@ -44,15 +44,17 @@ class QtWebKitConan(ConanFile):
     default_options = {
         "install_prefix": None,
 
-        "icu:shared": True,
+        "icu:shared": False,
         #"icu:data_packaging": "library",
 
-        "libxml2:shared": True,
+        "libxml2:shared": False,
         "libxml2:iconv": False,
         "libxml2:icu": True,
         "libxml2:zlib": False,
+        "harfbuzz:shared": False,
+        "harfbuzz:with_icu": True,
 
-        "libxslt:shared": True,
+        "libxslt:shared": False,
 
         "libjpeg-turbo:shared": False,
         "zlib:shared": False,
@@ -93,6 +95,14 @@ class QtWebKitConan(ConanFile):
             self.requires("zlib/1.3")
             self.requires("libtasn1/4.16.0")
             self.requires("libgcrypt/1.8.4")
+
+        if self.settings.os == 'Macos':
+            self.requires("libxml2/2.11.4")
+            self.requires("libxslt/1.1.34")
+            self.requires("icu/73.2") # for harfbuzz!
+            self.requires("harfbuzz/8.1.1") # FIXME: Match Qt!
+            self.requires("zlib/1.3")
+
 
         if self.settings.os == 'Windows' or self.settings.os == 'Macos':
             # FIXME: Pass Qt version, handle more versions
