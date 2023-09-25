@@ -171,11 +171,11 @@ jobs:
 #        path: build/build.ninja
 #        name: build.ninja
 #
-#    - uses: actions/upload-artifact@v1
-#      if: runner.os == 'Windows' || runner.os == 'macOS'
-#      with:
-#        path: build/conanbuildinfo.cmake
-#        name: conanbuildinfo.cmake
+    - uses: actions/upload-artifact@v1
+      if: runner.os == 'Windows' || runner.os == 'macOS'
+      with:
+        path: build/conanbuildinfo.cmake
+        name: conanbuildinfo.cmake
 
     - name: ccache configuration
       shell: bash --noprofile --norc -eo pipefail -x {0}
