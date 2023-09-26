@@ -46,6 +46,7 @@
 #include "Page.h"
 #include "PaintInfo.h"
 #include "RenderBox.h"
+#include "RenderBoxInlines.h"
 #include "RenderProgress.h"
 #include "RenderTheme.h"
 #include "RenderThemeQtMobile.h"
