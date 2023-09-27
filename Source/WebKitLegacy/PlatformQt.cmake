@@ -143,7 +143,7 @@ list(APPEND WebKitLegacy_LIBRARIES
 
 list(APPEND WebKitLegacy_LIBRARIES
     PRIVATE
-        ${ICU_LIBRARIES}
+        ICU::uc
         ${Qt5Positioning_LIBRARIES}
         ${X11_X11_LIB}
         ${X11_Xcomposite_LIB}
