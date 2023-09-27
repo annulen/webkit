@@ -337,10 +337,13 @@ macro(WEBKIT_FRAMEWORK _target)
 
 
     if (APPLE AND NOT PORT STREQUAL "GTK" AND NOT ${${_target}_LIBRARY_TYPE} MATCHES STATIC AND (MACOS_BUILD_FRAMEWORKS OR NOT PORT STREQUAL "Qt"))
+        message("framework ${_target} PUBLIC_HEADERS= ${${_target}_PUBLIC_HEADERS}")
         set_target_properties(${_target} PROPERTIES FRAMEWORK TRUE)
         if (${_target}_PUBLIC_HEADERS)
+            message("framework ${_target} PUBLIC_HEADERS")
             set_target_properties(${_target} PROPERTIES PUBLIC_HEADER "${${_target}_PUBLIC_HEADERS}")
             if (${_target}_PRIVATE_HEADERS)
+                message("framework ${_target} PRIVATE_HEADERS")
                 foreach (CURRENT_PRIVATE_HEADER ${${_target}_PRIVATE_HEADERS})
                     set_property(SOURCE ${CURRENT_PRIVATE_HEADER} PROPERTY MACOSX_PACKAGE_LOCATION ${${_target}_PRIVATE_HEADERS_LOCATION})
                 endforeach ()
