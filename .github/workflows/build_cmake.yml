@@ -15,9 +15,7 @@ env:
   CCACHE_VERSION: 4.7.3
   CACHE_PARTITION: dev
   NINJA_STATUS: "[%f/%t %o/sec] "
-  CCACHE_COMPRESS: "true"
-  CCACHE_COMPRESSLEVEL: "6"
-  CCACHE_MAXSIZE: "250M"
+  CCACHE_MAXSIZE: "600M"
   CCACHE_SLOPPINESS: "pch_defines,time_macros"
   CCACHE_HARDLINK: "true"
   QT_MODULES: "qtbase qtdeclarative qtlocation qtmultimedia qtsensors qtwebchannel"
