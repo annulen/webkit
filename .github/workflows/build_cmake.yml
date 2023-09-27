@@ -198,16 +198,16 @@ jobs:
       shell: bash --noprofile --norc -eo pipefail -x {0}
       run: Tools/qt/build-qtwebkit-conan.py --build --install --ninjaargs="-j ${{ matrix.config.host_n_cores }} -v"
 
-    # - name: Verify (Linux)
-    #   if: runner.os == 'Linux'
-    #   shell: bash --noprofile --norc -eo pipefail -x {0}
-    #   run: Tools/qt/installed-files-checker.py --version 5.212.0 --os linux --template=Tools/qt/QtBinaryChecklist.txt --release --verbose
+    - name: Verify (Linux)
+      if: runner.os == 'Linux'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: Tools/qt/installed-files-checker.py --version 5.212.0 --os linux --template=Tools/qt/QtBinaryChecklist.txt --release --verbose --no-wk2 2>&1
 
-    # - name: Verify (Mac)
-    #   if: runner.os == 'macOS'
-    #   shell: bash --noprofile --norc -eo pipefail -x {0}
-    #   run: Tools/qt/installed-files-checker.py --version=5.212.0 --os=macos --install_prefix="${{ steps.qt_mac.outputs.qt_dir }}" --template=Tools/qt/QtBinaryChecklist.txt --release --verbose
-    #
+    - name: Verify (Mac)
+      if: runner.os == 'macOS'
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: Tools/qt/installed-files-checker.py --version=5.212.0 --os macos --install_prefix="${{ steps.qt_mac.outputs.qt_dir }}" --template=Tools/qt/QtBinaryChecklist.txt --release --verbose --no-wk2 2>&1
+
     # - name: Verify (Windows)
     #   if: runner.os == 'Windows'
     #   shell: cmd
