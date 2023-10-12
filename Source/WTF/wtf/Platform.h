@@ -80,6 +80,11 @@
 #endif
 #endif
 
+/* CPU(LOONGARCH64) - LoongArch 64-bit */
+#if defined(__loongarch64)
+#define WTF_CPU_LOONGARCH64 1
+#endif
+
 /* CPU(MIPS) - MIPS 32-bit and 64-bit */
 #if (defined(mips) || defined(__mips__) || defined(MIPS) || defined(_MIPS_) || defined(__mips64))
 #if defined(_ABI64) && (_MIPS_SIM == _ABI64)
@@ -710,6 +715,7 @@
     || CPU(ALPHA) \
     || CPU(ARM64) \
     || CPU(S390X) \
+    || CPU(LOONGARCH64) \
     || CPU(MIPS64) \
     || CPU(PPC64) \
     || CPU(PPC64LE) \
