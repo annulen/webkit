@@ -62,7 +62,7 @@ public:
 
     void reset();
 
-    static void parseErrorFunc(void* userData, xmlError*);
+    static void parseErrorFunc(void* userData, const xmlError*);
     static void genericErrorFunc(void* userData, const char* msg, ...);
     
     // Only for libXSLT callbacks
