@@ -80,6 +80,12 @@
 #endif
 #endif
 
+/* CPU(M68K) - Motorola 68000 */
+#if defined(__m68k__)
+#define WTF_CPU_M68K 1
+#define WTF_CPU_BIG_ENDIAN 1
+#endif
+
 /* CPU(MIPS) - MIPS 32-bit and 64-bit */
 #if (defined(mips) || defined(__mips__) || defined(MIPS) || defined(_MIPS_) || defined(__mips64))
 #if defined(_ABI64) && (_MIPS_SIM == _ABI64)
@@ -152,6 +158,20 @@
 #if (  defined(__s390__)        \
     && !CPU(S390X))
 #define WTF_CPU_S390 1
+#define WTF_CPU_BIG_ENDIAN 1
+#endif
+
+/* CPU(SPARC64) - SPARC 64-bit */
+#if (  defined(__sparc__) \
+    && defined(__arch64__))
+#define WTF_CPU_SPARC64 1
+#define WTF_CPU_BIG_ENDIAN 1
+#endif
+
+/* CPU(SPARC) - SPARC 32-bit */
+#if (  defined(__sparc__) \
+    && !CPU(SPARC64))
+#define WTF_CPU_SPARC 1
 #define WTF_CPU_BIG_ENDIAN 1
 #endif
 
@@ -710,6 +730,7 @@
     || CPU(ALPHA) \
     || CPU(ARM64) \
     || CPU(S390X) \
+    || CPU(SPARC64) \
     || CPU(MIPS64) \
     || CPU(PPC64) \
     || CPU(PPC64LE) \
