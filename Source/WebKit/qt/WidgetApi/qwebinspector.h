@@ -38,6 +38,8 @@ public:
 
     QSize sizeHint() const Q_DECL_OVERRIDE;
     bool event(QEvent*) Q_DECL_OVERRIDE;
+Q_SIGNALS:
+    void dockInspectorWindow(QString);
 
 protected:
     void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;

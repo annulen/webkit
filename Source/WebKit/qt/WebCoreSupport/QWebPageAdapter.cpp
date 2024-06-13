@@ -213,6 +213,7 @@ QWebPageAdapter::QWebPageAdapter()
     , networkManager(0)
     , m_deviceOrientationClient(0)
     , m_deviceMotionClient(0)
+    , dockState(WebCore::InspectorFrontendClient::DockSide::Bottom)
 {
     WebCore::initializeWebCoreQt();
 }
@@ -363,6 +364,16 @@ QNetworkAccessManager* QWebPageAdapter::networkAccessManager()
 #endif
     }
     return networkManager;
+}
+
+void QWebPageAdapter::setInspectorDockState(WebCore::InspectorFrontendClient::DockSide side)
+{
+    dockState = side;
+}
+
+WebCore::InspectorFrontendClient::DockSide QWebPageAdapter::getInspectorDockState()
+{
+    return dockState;
 }
 
 bool QWebPageAdapter::hasSelection() const

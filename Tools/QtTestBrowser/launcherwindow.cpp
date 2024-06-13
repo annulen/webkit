@@ -132,6 +132,7 @@ void LauncherWindow::init()
         m_inspector->setProperty("_q_inspectorUrl", m_windowOptions.inspectorUrl);
 #endif
     connect(this, SIGNAL(destroyed()), m_inspector, SLOT(deleteLater()));
+    connect(m_inspector, &QWebInspector::dockInspectorWindow, this, &LauncherWindow::dockInspectorWindow);
 
     // the zoom values are chosen to be like in Mozilla Firefox 3
     if (!m_zoomLevels.count()) {
@@ -1210,6 +1211,28 @@ void LauncherWindow::loadURLListFromFile()
 
     m_urlLoader = new UrlLoader(this->page()->mainFrame(), selectedFile, 0, 0);
     m_urlLoader->loadNext();
+}
+
+void LauncherWindow::dockInspectorWindow(QString dockSide)
+{
+    QSplitter* splitter = static_cast<QSplitter*>(centralWidget());
+    if(dockSide == QStringLiteral("Bottom"))
+    {
+        splitter->setOrientation(Qt::Vertical);
+        if(splitter->indexOf(m_inspector) == -1)
+            splitter->addWidget(m_inspector);
+    }
+    else if(dockSide == QStringLiteral("Right"))
+    {
+        splitter->setOrientation(Qt::Horizontal);
+        if(splitter->indexOf(m_inspector) == -1)
+            splitter->addWidget(m_inspector);
+    }
+    else if(dockSide == QStringLiteral("Undocked"))
+    {
+        m_inspector->setParent(nullptr);
+        m_inspector->show();
+    }
 }
 
 void LauncherWindow::printURL(const QUrl& url)
