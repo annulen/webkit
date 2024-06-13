@@ -84,6 +84,7 @@ def get_cc_cxx(compiler):
     compiler_preset = {
         "msvc": ["cl", "cl"],
         "clang": ["clang", "clang++"],
+        "apple-clang": ["apple-clang", "apple-clang++"],
         "gcc": ["gcc", "g++"]
     }
 
