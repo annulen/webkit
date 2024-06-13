@@ -36,11 +36,11 @@
 #include <wtf/RefCounted.h>
 #include <wtf/Vector.h>
 
-#if OS(IOS)
+#if OS(DARWIN)
 #include <libkern/OSCacheControl.h>
 #endif
 
-#if OS(IOS)
+#if OS(DARWIN)
 #include <sys/mman.h>
 #endif
 

@@ -2664,7 +2664,7 @@ public:
 
     static void cacheFlush(void* code, size_t size)
     {
-#if OS(IOS)
+#if OS(DARWIN)
         sys_cache_control(kCacheFunctionPrepareForExecution, code, size);
 #elif OS(LINUX)
         size_t page = pageSize();
@@ -3059,13 +3059,13 @@ private:
     static int xOrSp(RegisterID reg)
     {
         ASSERT(!isZr(reg));
-        ASSERT(!isIOS() || reg != ARM64Registers::x18);
+        ASSERT(!isDarwin() || reg != ARM64Registers::x18);
         return reg;
     }
     static int xOrZr(RegisterID reg)
     {
         ASSERT(!isSp(reg));
-        ASSERT(!isIOS() || reg != ARM64Registers::x18);
+        ASSERT(!isDarwin() || reg != ARM64Registers::x18);
         return reg & 31;
     }
     static FPRegisterID xOrZrAsFPR(RegisterID reg) { return static_cast<FPRegisterID>(xOrZr(reg)); }
