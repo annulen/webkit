@@ -702,9 +702,7 @@ void tst_QWebFrame::baseUrl()
     QFETCH(QUrl, baseUrl);
 
     m_page->mainFrame()->setHtml(html, loadUrl);
-    QEXPECT_FAIL("null", "https://github.com/qtwebkit/qtwebkit/issues/913", Continue);
     QCOMPARE(m_page->mainFrame()->url(), url);
-    QEXPECT_FAIL("null", "https://github.com/qtwebkit/qtwebkit/issues/913", Continue);
     QCOMPARE(m_page->mainFrame()->baseUrl(), baseUrl);
 }
 

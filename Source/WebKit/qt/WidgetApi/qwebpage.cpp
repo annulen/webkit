@@ -2315,7 +2315,14 @@ QAction *QWebPage::action(WebAction action) const
     if (action == QWebPage::NoWebAction)
         return 0;
     if (d->actions[action])
+    {
+        if(action == Undo)
+            d->actions[action]->setText(QString(QStringLiteral("Undo %1")).arg(undoStack()->index()));
+        else if(action == Redo)
+            d->actions[action]->setText(QString(QStringLiteral("Redo %1")).arg(undoStack()->index()));
+
         return d->actions[action];
+    }
 
     QString text;
     QIcon icon;
@@ -2383,7 +2390,7 @@ QAction *QWebPage::action(WebAction action) const
         return a;
     }
     case Redo: {
-        QAction *a = undoStack()->createRedoAction(d->q);
+        QAction *a = undoStack()->createUndoAction(d->q);
         d->actions[action] = a;
         return a;
     }

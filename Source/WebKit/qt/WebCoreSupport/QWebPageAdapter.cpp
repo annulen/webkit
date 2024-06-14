@@ -1140,7 +1140,7 @@ void QWebPageAdapter::triggerAction(QWebPageAdapter::MenuAction action, QWebHitT
         page->backForward().goForward();
         break;
     case Stop:
-        mainFrameAdapter().frame->loader().stopForUserCancel();
+        mainFrameAdapter().frame->loader().stop();
         updateNavigationActions();
         break;
     case Reload:

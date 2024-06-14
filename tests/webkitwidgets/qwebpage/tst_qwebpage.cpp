@@ -1120,7 +1120,7 @@ void tst_QWebPage::multiplePageGroupsAndLocalStorage()
     view1.page()->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     view1.page()->settings()->setLocalStoragePath(QDir::toNativeSeparators(tmpDirPath() + "/path1"));
     DumpRenderTreeSupportQt::webPageSetGroupName(view1.page()->handle(), "group1");
-    view2.page()->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);    
+    view2.page()->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     view2.page()->settings()->setLocalStoragePath(QDir::toNativeSeparators(tmpDirPath() + "/path2"));
     DumpRenderTreeSupportQt::webPageSetGroupName(view2.page()->handle(), "group2");
     QCOMPARE(DumpRenderTreeSupportQt::webPageGroupName(view1.page()->handle()), QString("group1"));
@@ -1137,7 +1137,6 @@ void tst_QWebPage::multiplePageGroupsAndLocalStorage()
     view2.setHtml(QString("<html><body> </body></html>"), QUrl("http://www.myexample.com"));
 
     QVariant s1 = view1.page()->mainFrame()->evaluateJavaScript("localStorage.test");
-    QEXPECT_FAIL("", "https://github.com/qtwebkit/qtwebkit/issues/913", Continue);
     QCOMPARE(s1.toString(), QString("value1"));
 
     QVariant s2 = view2.page()->mainFrame()->evaluateJavaScript("localStorage.test");
@@ -1657,10 +1656,13 @@ void tst_QWebPage::backActionUpdate()
     QSignalSpy loadSpy(page, SIGNAL(loadFinished(bool)));
     QUrl url = QUrl("qrc:///resources/framedindex.html");
     page->mainFrame()->load(url);
+
+    waitForSignal(page, SIGNAL(loadFinished(bool)));
     QTRY_COMPARE(loadSpy.count(), 1);
-    QEXPECT_FAIL("", "https://github.com/qtwebkit/qtwebkit/issues/913", Continue);
-    QVERIFY(!action->isEnabled());
+
     QTest::mouseClick(&view, Qt::LeftButton, 0, QPoint(10, 10));
+
+    waitForSignal(page, SIGNAL(loadFinished(bool)));
     QTRY_COMPARE(loadSpy.count(), 2);
 
     QVERIFY(action->isEnabled());
@@ -3473,7 +3475,6 @@ void tst_QWebPage::undoActionHaveCustomText()
     m_page->mainFrame()->evaluateJavaScript("document.execCommand('indent', true);");
     QString alignActionText = m_page->action(QWebPage::Undo)->text();
 
-    QEXPECT_FAIL("", "https://github.com/qtwebkit/qtwebkit/issues/913", Continue);
     QVERIFY(typingActionText != alignActionText);
 }
 
