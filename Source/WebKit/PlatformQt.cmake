@@ -190,6 +190,11 @@ list(APPEND WebKit_SOURCES
     qt/Api/qhttpheader.cpp
     qt/Api/qwebdatabase.cpp
     qt/Api/qwebelement.cpp
+    qt/Api/qwebeventlistener.cpp
+    qt/Api/qwebevents/qwebeventbase.cpp
+    qt/Api/qwebevents/qwebkeyboardevent.cpp
+    qt/Api/qwebevents/qwebmouseevent.cpp
+    qt/Api/qwebevents/qwebwheelevent.cpp
     qt/Api/qwebfullscreenrequest.cpp
     qt/Api/qwebhistory.cpp
     qt/Api/qwebhistoryinterface.cpp

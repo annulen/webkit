@@ -27,6 +27,7 @@
 #include <QtCore/qshareddata.h>
 
 #include "qwebkitglobal.h"
+#include <QtWebkit/qwebeventlistener.h>
 
 namespace WebCore {
 class ChromeClientQt;
@@ -146,6 +147,12 @@ public:
     void render(QPainter* painter);
     void render(QPainter* painter, const QRect& clipRect);
 
+    QVector<QPair<QWebEventListener,bool>> eventListeners(const QString& eventType);
+    bool addEventListener(const QString& eventType, const QWebEventListener& listener, bool useCapture = false);
+    bool removeEventListener(const QString& eventType, const QWebEventListener& listener, bool useCapture = false);
+    void removeAllEventListeners(const QString &eventType);
+    void removeAllEventListeners();
+
 private:
     explicit QWebElement(WebCore::Element*);
 
@@ -165,6 +172,7 @@ private:
     friend class QWebPageAdapter;
     friend class QWebPagePrivate;
     friend class QtWebElementRuntime;
+    friend class QWebEvent;
 
     QWebElementPrivate* d;
     WebCore::Element* m_element;
