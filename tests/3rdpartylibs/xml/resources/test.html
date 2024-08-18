@@ -1,0 +1,15 @@
+<html>
+<body>
+    <script>
+        var doc = `
+        <details>
+            <firstname>FirstName</firstname>
+            <lastname>LastName</lastname>
+        </details>
+        `;
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(doc, "text/xml");
+        document.body.innerText = xmlDoc.getElementsByTagName("firstname")[0].childNodes[0].nodeValue;
+    </script>
+</body>
+</html>

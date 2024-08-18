@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+        var xml = `
+        <parent>
+        <child>
+        <child1>Child1</child1>
+        <child2>Child2</child2>
+        </child>
+        </parent>
+        `;
+
+        var xsl = `<?xml version="1.0" encoding="UTF-8"?>
+        <xsl:stylesheet version="1.0"
+        xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+        <xsl:template match="/">
+        <xsl:for-each select="parent/child">
+        <div id="child1" style="background-color:red"><xsl:value-of select="child1" /></div>
+        <div id="child2" style="background-color:blue"><xsl:value-of select="child2" /></div>
+        </tr>
+        </xsl:for-each>
+        </xsl:template>
+        </xsl:stylesheet>
+        `;
+
+        var parser = new DOMParser();
+        var xsl_doc = parser.parseFromString(xsl, "application/xml");
+        var xml_doc = parser.parseFromString(xml, "application/xml");
+
+        xsltProcessor = new XSLTProcessor();
+        xsltProcessor.importStylesheet(xsl_doc);
+
+        resultDocument = xsltProcessor.transformToFragment(xml_doc, document);
+        document.body.appendChild(resultDocument);
+    </script>
+</body>
+</html>
