@@ -264,6 +264,7 @@ private:
 
     friend struct WidthIterator;
     friend class SVGTextRunRenderingContext;
+    friend class TextLayout;
 
 public:
 #if ENABLE(IOS_TEXT_AUTOSIZING)

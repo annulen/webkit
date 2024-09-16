@@ -328,7 +328,7 @@ inline unsigned WidthIterator::advanceInternal(TextIterator& textIterator, Glyph
         }
 
         auto transformsType = shouldApplyFontTransforms(glyphBuffer, lastGlyphCount, previousCharacter);
-        if (transformsType != TransformsType::None && glyphBuffer && FontCascade::treatAsSpace(character)) {
+        if (transformsType != TransformsType::None && glyphBuffer && (FontCascade::treatAsSpace(character) || FontCascade::treatAsZeroWidthSpace(character))) {
             charactersTreatedAsSpace.append(std::make_pair(glyphBuffer->size(),
                 OriginalAdvancesForCharacterTreatedAsSpace(character == ' ', glyphBuffer->size() ? glyphBuffer->advanceAt(glyphBuffer->size() - 1).width() : 0, width)));
         }
