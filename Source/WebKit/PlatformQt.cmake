@@ -321,6 +321,13 @@ if (ENABLE_NETSCAPE_PLUGIN_API)
         )
     endif ()
 
+    if (APPLE)
+        list(APPEND WebKit_SOURCES
+            qt/Plugins/PluginPackageMac.cpp
+            qt/Plugins/PluginViewMac.mm
+        )
+    endif ()
+
     if (WIN32)
         list(APPEND WebKit_INCLUDE_DIRECTORIES
             ${WEBCORE_DIR}/platform/win

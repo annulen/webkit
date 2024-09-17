@@ -25,6 +25,7 @@
  */
 
 #include "config.h"
+#include "npapi.h"
 #include "PluginDatabase.h"
 
 #include "Frame.h"

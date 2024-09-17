@@ -243,6 +243,10 @@ if (ENABLE_NETSCAPE_PLUGIN_API)
             shlwapi
             version
         )
+    elseif (APPLE)
+        list(APPEND WebCore_SOURCES
+            platform/mac/WebCoreNSStringExtras.mm
+        )
     elseif (PLUGIN_BACKEND_XLIB)
         list(APPEND WebCore_FORWARDING_HEADERS_FILES
            plugins/qt/QtX11ImageConversion.h
